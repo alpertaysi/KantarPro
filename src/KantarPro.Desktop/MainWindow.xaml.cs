@@ -105,6 +105,16 @@ namespace KantarPro.Desktop
                 var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
                 var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, "Giris tarihi");
 
+                if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi))
+                {
+                    PlakaTextBox.Clear();
+                    FirmaTextBox.Clear();
+                    AciklamaTextBox.Clear();
+                    AgirlikTextBox.Text = "0";
+                    ManuelTartimCheckBox.IsChecked = false;
+                    return;
+                }
+
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi);
 
                 LoadDashboardData();
@@ -386,7 +396,6 @@ namespace KantarPro.Desktop
                 {
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
                     SelectGelisTuru(servis.GelisTuruOner(PlakaTextBox.Text));
-                    TryOpenPendingDoluBosForPlate(context, PlakaTextBox.Text);
                 }
             }
             catch
@@ -420,7 +429,54 @@ namespace KantarPro.Desktop
             }
         }
 
+        private bool TryCompletePendingDoluBosFromDashboard(string plaka, decimal scaleWeightKg, DateTime secondWeighingDate)
+        {
+            using (var context = new KantarDbContext())
+            {
+                var pendingRow = FindPendingDoluBosRow(context, plaka);
+                if (pendingRow == null)
+                {
+                    return false;
+                }
+
+                var dialog = new DoluBosSecondWeighingWindow(pendingRow, scaleWeightKg, secondWeighingDate)
+                {
+                    Owner = this
+                };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return true;
+                }
+
+                var gelisTuru = pendingRow.YukDurumu == KantarSabitleri.YukDurumu.Bos
+                    ? KantarSabitleri.GelisTuru.Dolu
+                    : KantarSabitleri.GelisTuru.Bos;
+
+                CreateEntry(pendingRow.Plaka, pendingRow.FirmaAdi, pendingRow.Aciklama, true, dialog.SecondWeightKg, secondWeighingDate, gelisTuru);
+            }
+
+            LoadDashboardData();
+            ShowEntryPage();
+            MessageBox.Show("Ikinci tartim kaydedildi. Arac ust listedeki dolu-bos kaydina alindi.", "Dolu-Bos Tartim");
+            return true;
+        }
+
         private void TryOpenPendingDoluBosForPlate(KantarDbContext context, string plaka)
+        {
+            var pendingRow = FindPendingDoluBosRow(context, plaka);
+            if (pendingRow == null)
+            {
+                return;
+            }
+
+            LoadDashboardData();
+            ShowDoluBosPage();
+            DoluBosPlakaTextBox.Text = pendingRow.Plaka;
+            SelectPendingWeighingRow(pendingRow.Plaka);
+        }
+
+        private static PendingWeighingPrototypeRow FindPendingDoluBosRow(KantarDbContext context, string plaka)
         {
             var normalized = NormalizePlaka(plaka);
             var bekleyen = context.KantarDosyalari
@@ -434,13 +490,19 @@ namespace KantarPro.Desktop
             if (bekleyen == null || bekleyen.IlkTartim == null || bekleyen.IlkTartim.Islem == null ||
                 bekleyen.IlkTartim.Islem.Durum != KantarSabitleri.IslemDurumu.CikisYapti)
             {
-                return;
+                return null;
             }
 
-            LoadDashboardData();
-            ShowDoluBosPage();
-            DoluBosPlakaTextBox.Text = bekleyen.Arac.Plaka;
-            SelectPendingWeighingRow(bekleyen.Arac.Plaka);
+            return new PendingWeighingPrototypeRow
+            {
+                Plaka = bekleyen.Arac.Plaka,
+                FirmaAdi = bekleyen.Arac.FirmaAdi,
+                IlkTartimTarihi = bekleyen.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
+                IlkTartimSaati = bekleyen.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
+                IlkAgirlik = bekleyen.IlkTartim.AgirlikKg.ToString("N0"),
+                YukDurumu = bekleyen.IlkTartim.YukDurumu,
+                Aciklama = GetBeklenenTartimDurumu(bekleyen.IlkTartim)
+            };
         }
 
         private string GetSelectedGelisTuru(SahaZiyaretiServisi servis, string plaka)
@@ -1452,7 +1514,9 @@ namespace KantarPro.Desktop
 
         private void DoluBosKiloAl_Click(object sender, RoutedEventArgs e)
         {
-            DoluBosIkinciKgTextBox.Text = "8200";
+            DoluBosIkinciKgTextBox.Text = AgirlikTextBox != null && !string.IsNullOrWhiteSpace(AgirlikTextBox.Text)
+                ? AgirlikTextBox.Text
+                : "0";
             CalculateDoluBosNet();
         }
 
