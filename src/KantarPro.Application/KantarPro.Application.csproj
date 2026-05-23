@@ -29,6 +29,7 @@
     <Compile Include="Abstractions\IUnitOfWork.cs" />
     <Compile Include="Abstractions\IRepository.cs" />
     <Compile Include="Services\IslemServisi.cs" />
+    <Compile Include="Services\SahaZiyaretiServisi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

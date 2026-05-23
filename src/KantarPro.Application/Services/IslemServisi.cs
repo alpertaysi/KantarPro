@@ -74,6 +74,7 @@ namespace KantarPro.Application.Services
                 Arac = arac,
                 IslemNo = UretIslemNo(islemTarihi),
                 GirisTarihi = islemTarihi,
+                GelisTuru = KantarSabitleri.GelisTuru.Tartimsiz,
                 Durum = KantarSabitleri.IslemDurumu.Iceride,
                 GirisKullaniciId = kullaniciId,
                 Notlar = NormalizeOptional(aciklama)
