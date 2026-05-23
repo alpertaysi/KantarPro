@@ -792,6 +792,11 @@ namespace KantarPro.Desktop
                             continue;
                         }
 
+                        if (islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
+                        {
+                            continue;
+                        }
+
                         EntryVehicles.Add(new VehicleMovementRow
                         {
                             Plaka = dosya.Arac.Plaka,
@@ -824,7 +829,8 @@ namespace KantarPro.Desktop
                     PendingWeighings.Clear();
                     foreach (var dosya in bekleyenKantarDosyalari)
                     {
-                        if (dosya.IlkTartim == null)
+                        var islem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
+                        if (dosya.IlkTartim == null || (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz))
                         {
                             continue;
                         }
@@ -859,6 +865,11 @@ namespace KantarPro.Desktop
                         var dosya = GetKantarDosyasiForIslem(context, islem);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
                         var ikinciTartim = dosya != null ? dosya.KarsiTartim : GetIkinciTartim(islem);
+                        if (!KesinCikisListesindeGoster(islem, dosya, ilkTartim, ikinciTartim))
+                        {
+                            continue;
+                        }
+
                         var cikisSatiri = new VehicleMovementRow
                         {
                             Plaka = islem.Arac.Plaka,
@@ -1113,19 +1124,19 @@ namespace KantarPro.Desktop
                 string.Equals(FormatBosDeger(agirlik), tartimWeight, StringComparison.Ordinal);
         }
 
-        private static bool KesinCikisListesindeGoster(Tartim ilkTartim, Tartim ikinciTartim)
+        private static bool KesinCikisListesindeGoster(Islem islem, KantarDosyasi dosya, Tartim ilkTartim, Tartim ikinciTartim)
         {
-            if (ilkTartim == null)
+            if (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
             {
                 return true;
             }
 
-            if (ikinciTartim != null)
+            if (dosya != null && dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
             {
                 return true;
             }
 
-            return ilkTartim.TartimTarihi.Date <= DateTime.Today.AddDays(-10);
+            return ilkTartim == null && ikinciTartim == null;
         }
 
         private static string FormatSaat(DateTime tarih)

@@ -70,7 +70,7 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
-        public void TartimsizZiyareteSonradanIlkTartimEklenir()
+        public void TartimsizZiyareteSonradanTartimEklenirseDoluBosDosyasiAcilmaz()
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
@@ -79,7 +79,7 @@ namespace KantarPro.Application.Tests
             servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Dolu, 21500m, 1, new DateTime(2026, 5, 12, 10, 20, 0));
 
             Assert.AreEqual(1, ziyaret.Tartimlar.Count);
-            Assert.AreEqual(1, uow.KantarDosyasiListesi.Count);
+            Assert.AreEqual(0, uow.KantarDosyasiListesi.Count);
             Assert.AreEqual(732m, ziyaret.ToplamTahakkuk);
         }
 

@@ -286,8 +286,9 @@
                                              HorizontalContentAlignment="Stretch"
                                              VerticalContentAlignment="Top"
                                              VerticalScrollBarVisibility="Auto"
+                                             HorizontalScrollBarVisibility="Auto"
                                              FontFamily="Consolas"
-                                             FontSize="14"
+                                             FontSize="12"
                                              FontWeight="Normal"
                                              BorderBrush="#9CA3AF"
                                              Background="#F8FAFC" />
