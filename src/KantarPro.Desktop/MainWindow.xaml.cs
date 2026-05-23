@@ -74,12 +74,25 @@ namespace KantarPro.Desktop
 
         private void TartVeKaydet_Click(object sender, RoutedEventArgs e)
         {
-            DashboardGirisKaydiOlustur(true);
+            DashboardGirisKaydiOlustur(GetDashboardGelisTuru() != KantarSabitleri.GelisTuru.Tartimsiz);
         }
 
         private void TartmadanKaydet_Click(object sender, RoutedEventArgs e)
         {
             DashboardGirisKaydiOlustur(false);
+        }
+
+        private string GetDashboardGelisTuru()
+        {
+            if (GelisTuruComboBox == null)
+            {
+                return KantarSabitleri.GelisTuru.Dolu;
+            }
+
+            var item = GelisTuruComboBox.SelectedItem as ComboBoxItem;
+            return item != null && item.Content != null
+                ? item.Content.ToString()
+                : KantarSabitleri.GelisTuru.Dolu;
         }
 
         private void DashboardGirisKaydiOlustur(bool tartimIsteniyor)

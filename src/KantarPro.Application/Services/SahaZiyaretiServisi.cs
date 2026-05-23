@@ -304,9 +304,10 @@ namespace KantarPro.Application.Services
 
         private bool TamamlanmisDosyayaBagliMi(Islem ziyaret)
         {
+            var ziyaretId = ziyaret.IslemId;
             return _unitOfWork.KantarDosyalari.Query()
                 .Any(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi &&
-                    (x.IlkTartim.Islem == ziyaret || (x.KarsiTartim != null && x.KarsiTartim.Islem == ziyaret)));
+                    (x.IlkTartim.IslemId == ziyaretId || (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == ziyaretId)));
         }
 
         private string KarsiYukDurumuGetir(Islem ziyaret)

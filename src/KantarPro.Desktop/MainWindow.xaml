@@ -174,8 +174,7 @@
                                 <TextBlock Text="1.KG:" FontSize="26" Foreground="Black" VerticalAlignment="Center" />
                                 <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
                                 <StackPanel Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
-                                    <Button Content="Tart ve Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
-                                    <Button Content="Tartmadan Kaydet" MinHeight="34" Padding="10,4" FontSize="13" Click="TartmadanKaydet_Click" />
+                                    <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
                                     <CheckBox x:Name="ManuelTartimCheckBox" Content="Cikis tartimi yapilacak" FontSize="13" Margin="0,8,0,0" />
                                 </StackPanel>
                             </Grid>
@@ -261,13 +260,24 @@
                 <Border Grid.Row="2" Grid.Column="1" Background="#EEEEEE" BorderBrush="#9CA3AF" BorderThickness="1" Padding="4">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TabControl Grid.RowSpan="2">
-                            <TabItem Header="Kamera1" />
-                            <TabItem Header="Kamera2" />
+                        <TabControl>
+                            <TabItem Header="Tahsilati Alinan Cikislar">
+                                <DataGrid ItemsSource="{Binding ExitVehiclesView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="11">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="86" />
+                                        <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                        <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="88" />
+                                        <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="78" />
+                                        <DataGridTextColumn Header="Tahsilat" Binding="{Binding Tahsilat}" Width="92" />
+                                        <DataGridTextColumn Header="Giris-Cikis" Binding="{Binding GirisCikisUcreti}" Width="86" />
+                                        <DataGridTextColumn Header="Tartim" Binding="{Binding TartimUcreti}" Width="78" />
+                                        <DataGridTextColumn Header="Bekleme" Binding="{Binding BeklemeUcreti}" Width="78" />
+                                        <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="130" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </TabItem>
                             <TabItem Header="Son Islem">
                                 <TextBox x:Name="SelectedVehicleDetailTextBox"
                                          Text="Listeden bir arac secildiginde tartim ve ucret dokumu burada gorunecek."
@@ -279,11 +289,9 @@
                                          FontSize="14"
                                          FontWeight="Normal"
                                          BorderBrush="#9CA3AF"
-                                         Background="#F8FAFC" />
+                                 Background="#F8FAFC" />
                             </TabItem>
                         </TabControl>
-                        <Border Grid.Row="1" BorderBrush="#9CA3AF" BorderThickness="1,0,1,1" Background="#F8FAFC" />
-                        <CheckBox Grid.Row="2" Content="Baslat ve Durdur" FontSize="16" FontWeight="SemiBold" Margin="2,4,0,0" />
                     </Grid>
                 </Border>
 
