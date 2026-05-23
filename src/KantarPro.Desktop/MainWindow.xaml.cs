@@ -925,7 +925,18 @@ namespace KantarPro.Desktop
                 return;
             }
 
-            SelectedVehicleDetailTextBox.Text =
+            SelectedVehicleDetailTextBox.Text = BuildVehicleMovementDetail(row);
+        }
+
+        private static string BuildVehicleMovementDetail(VehicleMovementRow row)
+        {
+            var detay = TryBuildKantarDosyasiDetail(row);
+            if (!string.IsNullOrWhiteSpace(detay))
+            {
+                return detay;
+            }
+
+            return
                 "Plaka: " + row.Plaka + Environment.NewLine +
                 "Firma: " + (string.IsNullOrWhiteSpace(row.FirmaAdi) ? "-" : row.FirmaAdi) + Environment.NewLine +
                 "Durum: " + row.Durum + Environment.NewLine + Environment.NewLine +
@@ -945,6 +956,52 @@ namespace KantarPro.Desktop
                 "Toplam Tahakkuk: " + FormatBosDeger(row.Ucret) + Environment.NewLine +
                 "Tahsilat: " + FormatBosDeger(row.Tahsilat) +
                 GetPaymentHistoryText(row.Plaka);
+        }
+
+        private static string TryBuildKantarDosyasiDetail(VehicleMovementRow row)
+        {
+            var normalized = NormalizePlaka(row.Plaka);
+            using (var context = new KantarDbContext())
+            {
+                var dosyalar = context.KantarDosyalari
+                    .Include(x => x.Arac)
+                    .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
+                    .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
+                    .Where(x => x.Arac.Plaka == normalized)
+                    .OrderByDescending(x => x.TamamlanmaTarihi ?? x.OlusturmaTarihi)
+                    .Take(20)
+                    .ToList();
+
+                var dosya = dosyalar.FirstOrDefault(x =>
+                    MatchesRowTartim(x.IlkTartim, row.IlkTartimTarihi, row.IlkTartimSaati, row.Tartim) ||
+                    MatchesRowTartim(x.KarsiTartim, row.IkinciTartimTarihi, row.IkinciTartimSaati, row.IkinciTartim) ||
+                    MatchesRowTartim(x.KarsiTartim, row.SonTartimTarihi, row.SonTartimSaati, row.SonTartim));
+
+                if (dosya == null)
+                {
+                    dosya = dosyalar.FirstOrDefault();
+                }
+
+                if (dosya == null)
+                {
+                    return null;
+                }
+
+                var ilkIslem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
+                var ikinciIslem = dosya.KarsiTartim != null ? dosya.KarsiTartim.Islem : null;
+
+                return
+                    "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
+                    "Firma: " + FormatBosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
+                    "Durum: " + GetVisitRowDurum(ikinciIslem ?? ilkIslem, dosya) + Environment.NewLine +
+                    "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
+                    "Ilk Ziyaret" + Environment.NewLine +
+                    FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
+                    "Ikinci Ziyaret" + Environment.NewLine +
+                    FormatVisitBlock(ikinciIslem, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
+                    "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
+                    FormatKantarDosyasiPaymentHistory(ilkIslem, ikinciIslem);
+            }
         }
 
         private static string GetPaymentHistoryText(string plaka)
@@ -979,6 +1036,81 @@ namespace KantarPro.Desktop
                     "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
                     string.Join(Environment.NewLine, satirlar);
             }
+        }
+
+        private static string FormatVisitBlock(Islem islem, Tartim tartim)
+        {
+            if (islem == null && tartim == null)
+            {
+                return "-";
+            }
+
+            return
+                "Gelis: " + FormatBosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "Cikis: " + FormatBosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "Tartim: " + FormatBosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Giris-Cikis: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
+                "Tartim: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
+                "Bekleme: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
+                "Tahakkuk: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahakkuk) : "") + Environment.NewLine +
+                "Tahsilat: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahsilat) : "") + Environment.NewLine +
+                "Fatura ID: " + FormatBosDeger(GetLastInvoiceId(islem));
+        }
+
+        private static string FormatKantarDosyasiPaymentHistory(Islem ilkIslem, Islem ikinciIslem)
+        {
+            var ucretler = new[] { ilkIslem, ikinciIslem }
+                .Where(x => x != null)
+                .SelectMany(x => x.Ucretler)
+                .Where(x => x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
+                .GroupBy(x => new
+                {
+                    FaturaId = string.IsNullOrWhiteSpace(x.FaturaId) ? "Eski kayit" : x.FaturaId,
+                    TahsilTarihi = x.TahsilTarihi.Value
+                })
+                .OrderBy(x => x.Key.TahsilTarihi)
+                .ToList();
+
+            if (ucretler.Count == 0)
+            {
+                return "-";
+            }
+
+            return string.Join(Environment.NewLine, ucretler.Select(x =>
+                x.Key.FaturaId + " | " +
+                x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
+                FormatPara(x.Sum(u => u.Tutar))));
+        }
+
+        private static string GetLastInvoiceId(Islem islem)
+        {
+            if (islem == null)
+            {
+                return "";
+            }
+
+            var fatura = islem.Ucretler
+                .Where(x => x.TahsilEdildiMi && !string.IsNullOrWhiteSpace(x.FaturaId))
+                .OrderByDescending(x => x.TahsilTarihi)
+                .Select(x => x.FaturaId)
+                .FirstOrDefault();
+
+            return fatura ?? "";
+        }
+
+        private static bool MatchesRowTartim(Tartim tartim, string tarih, string saat, string agirlik)
+        {
+            if (tartim == null)
+            {
+                return false;
+            }
+
+            var rowDate = (tarih + " " + saat).Trim();
+            var tartimDate = tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss");
+            var tartimWeight = tartim.AgirlikKg.ToString("N0") + " kg";
+
+            return string.Equals(rowDate, tartimDate, StringComparison.Ordinal) ||
+                string.Equals(FormatBosDeger(agirlik), tartimWeight, StringComparison.Ordinal);
         }
 
         private static bool KesinCikisListesindeGoster(Tartim ilkTartim, Tartim ikinciTartim)
