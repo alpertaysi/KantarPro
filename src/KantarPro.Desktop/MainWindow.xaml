@@ -268,6 +268,9 @@
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="86" />
                                         <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                        <DataGridTextColumn Header="1. Tartim Tarihi" Binding="{Binding IlkTartimTarihi}" Width="96" />
+                                        <DataGridTextColumn Header="1. Tartim Saati" Binding="{Binding IlkTartimSaati}" Width="88" />
+                                        <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="86" />
                                         <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="88" />
                                         <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="78" />
                                         <DataGridTextColumn Header="Tahsilat" Binding="{Binding Tahsilat}" Width="92" />
@@ -279,17 +282,23 @@
                                 </DataGrid>
                             </TabItem>
                             <TabItem Header="Son Islem">
-                                <TextBox x:Name="SelectedVehicleDetailTextBox"
-                                         Text="Listeden bir arac secildiginde tartim ve ucret dokumu burada gorunecek."
-                                         IsReadOnly="True"
-                                         TextWrapping="Wrap"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         FontFamily="Consolas"
-                                         FontSize="14"
-                                         FontWeight="Normal"
-                                         BorderBrush="#9CA3AF"
-                                 Background="#F8FAFC" />
+                                <Grid>
+                                    <TextBox x:Name="SelectedVehicleDetailTextBox"
+                                             Text="Listeden bir arac secildiginde tartim ve ucret dokumu burada gorunecek."
+                                             IsReadOnly="True"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Stretch"
+                                             HorizontalContentAlignment="Stretch"
+                                             VerticalContentAlignment="Top"
+                                             VerticalScrollBarVisibility="Auto"
+                                             FontFamily="Consolas"
+                                             FontSize="14"
+                                             FontWeight="Normal"
+                                             BorderBrush="#9CA3AF"
+                                             Background="#F8FAFC" />
+                                </Grid>
                             </TabItem>
                         </TabControl>
                     </Grid>
@@ -563,7 +572,7 @@
                             <TextBox x:Name="DoluBosFirmaTextBox" Text="Yeni Firma / Nakliye" Margin="0,0,0,12" />
 
                             <TextBlock Text="Aciklama" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
-                            <TextBox x:Name="DoluBosAciklamaTextBox" Height="70" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" AcceptsReturn="True" Text="Sonradan bos tartim prototipi" Margin="0,0,0,16" />
+                            <TextBox x:Name="DoluBosAciklamaTextBox" Height="70" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" AcceptsReturn="True" Text="Sonradan bos tartim" Margin="0,0,0,16" />
 
                             <Border Background="#FFFBEB" BorderBrush="#FCD34D" BorderThickness="1" CornerRadius="6" Padding="14">
                                 <StackPanel>

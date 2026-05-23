@@ -187,7 +187,7 @@ namespace KantarPro.Application.Services
 
             if (bekleyen.IlkTartim.YukDurumu == tartim.YukDurumu)
             {
-                throw new InvalidOperationException("Karsi tartim dolu-bos yonuyle uyusmuyor.");
+                throw new InvalidOperationException("Beklenen dolu-bos tartimi yuk yonuyle uyusmuyor.");
             }
 
             bekleyen.KarsiTartim = tartim;
