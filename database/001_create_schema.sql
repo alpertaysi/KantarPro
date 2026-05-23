@@ -12,6 +12,7 @@ USE KantarPro;
 GO
 
 IF OBJECT_ID(N'dbo.BekleyenTartimlar', N'U') IS NOT NULL DROP TABLE dbo.BekleyenTartimlar;
+IF OBJECT_ID(N'dbo.KantarDosyalari', N'U') IS NOT NULL DROP TABLE dbo.KantarDosyalari;
 IF OBJECT_ID(N'dbo.Loglar', N'U') IS NOT NULL DROP TABLE dbo.Loglar;
 IF OBJECT_ID(N'dbo.IslemUcretleri', N'U') IS NOT NULL DROP TABLE dbo.IslemUcretleri;
 IF OBJECT_ID(N'dbo.Tartimlar', N'U') IS NOT NULL DROP TABLE dbo.Tartimlar;
@@ -75,6 +76,7 @@ CREATE TABLE dbo.Islemler
     AracId INT NOT NULL,
     GirisTarihi DATETIME NOT NULL,
     CikisTarihi DATETIME NULL,
+    GelisTuru NVARCHAR(20) NOT NULL CONSTRAINT DF_Islemler_GelisTuru DEFAULT (N'Tartimsiz'),
     Durum NVARCHAR(30) NOT NULL,
     GirisKullaniciId INT NOT NULL,
     CikisKullaniciId INT NULL,
@@ -98,6 +100,7 @@ CREATE TABLE dbo.Tartimlar
     IslemId INT NULL,
     AracId INT NOT NULL,
     TartimTipi NVARCHAR(30) NOT NULL,
+    YukDurumu NVARCHAR(20) NULL,
     AgirlikKg DECIMAL(18,2) NOT NULL,
     TartimTarihi DATETIME NOT NULL,
     ComPorttanAlindiMi BIT NOT NULL CONSTRAINT DF_Tartimlar_ComPorttanAlindiMi DEFAULT (0),
@@ -126,6 +129,7 @@ CREATE TABLE dbo.IslemUcretleri
     TahsilTarihi DATETIME NULL,
     TahsilEdenKullaniciId INT NULL,
     FaturaId NVARCHAR(40) NULL,
+    TahsilatId NVARCHAR(40) NULL,
     CONSTRAINT FK_IslemUcretleri_Islemler FOREIGN KEY (IslemId) REFERENCES dbo.Islemler(IslemId),
     CONSTRAINT FK_IslemUcretleri_Ucretler FOREIGN KEY (UcretId) REFERENCES dbo.Ucretler(UcretId),
     CONSTRAINT FK_IslemUcretleri_TahsilEden FOREIGN KEY (TahsilEdenKullaniciId) REFERENCES dbo.Kullanicilar(KullaniciId)
@@ -169,6 +173,25 @@ CREATE TABLE dbo.BekleyenTartimlar
 GO
 
 CREATE INDEX IX_BekleyenTartimlar_Arac_Durum ON dbo.BekleyenTartimlar(AracId, Durum);
+GO
+
+CREATE TABLE dbo.KantarDosyalari
+(
+    KantarDosyasiId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_KantarDosyalari PRIMARY KEY,
+    AracId INT NOT NULL,
+    IlkTartimId INT NOT NULL,
+    KarsiTartimId INT NULL,
+    Durum NVARCHAR(30) NOT NULL,
+    NetAgirlikKg DECIMAL(18,2) NULL,
+    OlusturmaTarihi DATETIME NOT NULL,
+    TamamlanmaTarihi DATETIME NULL,
+    CONSTRAINT FK_KantarDosyalari_Araclar FOREIGN KEY (AracId) REFERENCES dbo.Araclar(AracId),
+    CONSTRAINT FK_KantarDosyalari_IlkTartim FOREIGN KEY (IlkTartimId) REFERENCES dbo.Tartimlar(TartimId),
+    CONSTRAINT FK_KantarDosyalari_KarsiTartim FOREIGN KEY (KarsiTartimId) REFERENCES dbo.Tartimlar(TartimId)
+);
+GO
+
+CREATE INDEX IX_KantarDosyalari_Arac_Durum ON dbo.KantarDosyalari(AracId, Durum);
 GO
 
 CREATE TABLE dbo.Ayarlar

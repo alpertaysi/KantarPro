@@ -20,6 +20,7 @@ namespace KantarPro.Infrastructure.Data
         public DbSet<Arac> Araclar { get; set; }
         public DbSet<Islem> Islemler { get; set; }
         public DbSet<Tartim> Tartimlar { get; set; }
+        public DbSet<KantarDosyasi> KantarDosyalari { get; set; }
         public DbSet<Ucret> Ucretler { get; set; }
         public DbSet<IslemUcreti> IslemUcretleri { get; set; }
         public DbSet<Kullanici> Kullanicilar { get; set; }
@@ -52,6 +53,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<Islem>().ToTable("Islemler");
             modelBuilder.Entity<Islem>().HasKey(x => x.IslemId);
             modelBuilder.Entity<Islem>().Property(x => x.IslemNo).HasMaxLength(30).IsRequired();
+            modelBuilder.Entity<Islem>().Property(x => x.GelisTuru).HasMaxLength(20).IsRequired();
             modelBuilder.Entity<Islem>().Property(x => x.Durum).HasMaxLength(30).IsRequired();
             modelBuilder.Entity<Islem>().Property(x => x.ToplamTahakkuk).HasPrecision(18, 2);
             modelBuilder.Entity<Islem>().Property(x => x.ToplamTahsilat).HasPrecision(18, 2);
@@ -63,6 +65,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<Tartim>().ToTable("Tartimlar");
             modelBuilder.Entity<Tartim>().HasKey(x => x.TartimId);
             modelBuilder.Entity<Tartim>().Property(x => x.TartimTipi).HasMaxLength(30).IsRequired();
+            modelBuilder.Entity<Tartim>().Property(x => x.YukDurumu).HasMaxLength(20);
             modelBuilder.Entity<Tartim>().Property(x => x.AgirlikKg).HasPrecision(18, 2);
             modelBuilder.Entity<Tartim>().HasOptional(x => x.Islem).WithMany(x => x.Tartimlar).HasForeignKey(x => x.IslemId);
             modelBuilder.Entity<Tartim>().HasRequired(x => x.Arac).WithMany(x => x.Tartimlar).HasForeignKey(x => x.AracId).WillCascadeOnDelete(false);
@@ -73,6 +76,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<IslemUcreti>().Property(x => x.UcretAdi).HasMaxLength(100).IsRequired();
             modelBuilder.Entity<IslemUcreti>().Property(x => x.Tutar).HasPrecision(18, 2);
             modelBuilder.Entity<IslemUcreti>().Property(x => x.FaturaId).HasMaxLength(40);
+            modelBuilder.Entity<IslemUcreti>().Property(x => x.TahsilatId).HasMaxLength(40);
             modelBuilder.Entity<IslemUcreti>().HasRequired(x => x.Islem).WithMany(x => x.Ucretler).HasForeignKey(x => x.IslemId);
             modelBuilder.Entity<IslemUcreti>().HasRequired(x => x.Ucret).WithMany(x => x.IslemUcretleri).HasForeignKey(x => x.UcretId);
             modelBuilder.Entity<IslemUcreti>().HasOptional(x => x.TahsilEdenKullanici).WithMany().HasForeignKey(x => x.TahsilEdenKullaniciId).WillCascadeOnDelete(false);
@@ -92,6 +96,14 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<BekleyenTartim>().HasRequired(x => x.Arac).WithMany().HasForeignKey(x => x.AracId).WillCascadeOnDelete(false);
             modelBuilder.Entity<BekleyenTartim>().HasRequired(x => x.IlkTartim).WithMany().HasForeignKey(x => x.IlkTartimId).WillCascadeOnDelete(false);
             modelBuilder.Entity<BekleyenTartim>().HasOptional(x => x.TamamlayanTartim).WithMany().HasForeignKey(x => x.TamamlayanTartimId).WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<KantarDosyasi>().ToTable("KantarDosyalari");
+            modelBuilder.Entity<KantarDosyasi>().HasKey(x => x.KantarDosyasiId);
+            modelBuilder.Entity<KantarDosyasi>().Property(x => x.Durum).HasMaxLength(30).IsRequired();
+            modelBuilder.Entity<KantarDosyasi>().Property(x => x.NetAgirlikKg).HasPrecision(18, 2);
+            modelBuilder.Entity<KantarDosyasi>().HasRequired(x => x.Arac).WithMany(x => x.KantarDosyalari).HasForeignKey(x => x.AracId).WillCascadeOnDelete(false);
+            modelBuilder.Entity<KantarDosyasi>().HasRequired(x => x.IlkTartim).WithMany().HasForeignKey(x => x.IlkTartimId).WillCascadeOnDelete(false);
+            modelBuilder.Entity<KantarDosyasi>().HasOptional(x => x.KarsiTartim).WithMany().HasForeignKey(x => x.KarsiTartimId).WillCascadeOnDelete(false);
 
             modelBuilder.Entity<Ayar>().ToTable("Ayarlar");
             modelBuilder.Entity<Ayar>().HasKey(x => x.AyarId);
