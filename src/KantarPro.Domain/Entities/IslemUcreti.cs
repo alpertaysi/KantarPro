@@ -14,6 +14,7 @@ namespace KantarPro.Domain.Entities
         public DateTime? TahsilTarihi { get; set; }
         public int? TahsilEdenKullaniciId { get; set; }
         public string FaturaId { get; set; }
+        public string TahsilatId { get; set; }
 
         public virtual Islem Islem { get; set; }
         public virtual Ucret Ucret { get; set; }

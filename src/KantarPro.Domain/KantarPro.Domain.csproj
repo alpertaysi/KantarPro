@@ -31,6 +31,7 @@
     <Compile Include="Entities\BekleyenTartim.cs" />
     <Compile Include="Entities\Islem.cs" />
     <Compile Include="Entities\IslemUcreti.cs" />
+    <Compile Include="Entities\KantarDosyasi.cs" />
     <Compile Include="Entities\Kullanici.cs" />
     <Compile Include="Entities\LogKaydi.cs" />
     <Compile Include="Entities\Tartim.cs" />

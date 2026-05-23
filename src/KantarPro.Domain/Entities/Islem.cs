@@ -16,6 +16,7 @@ namespace KantarPro.Domain.Entities
         public int AracId { get; set; }
         public DateTime GirisTarihi { get; set; }
         public DateTime? CikisTarihi { get; set; }
+        public string GelisTuru { get; set; }
         public string Durum { get; set; }
         public int GirisKullaniciId { get; set; }
         public int? CikisKullaniciId { get; set; }
@@ -30,4 +31,3 @@ namespace KantarPro.Domain.Entities
         public virtual ICollection<IslemUcreti> Ucretler { get; set; }
     }
 }
-

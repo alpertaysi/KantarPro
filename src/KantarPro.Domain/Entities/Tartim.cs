@@ -8,6 +8,7 @@ namespace KantarPro.Domain.Entities
         public int? IslemId { get; set; }
         public int AracId { get; set; }
         public string TartimTipi { get; set; }
+        public string YukDurumu { get; set; }
         public decimal AgirlikKg { get; set; }
         public DateTime TartimTarihi { get; set; }
         public bool ComPorttanAlindiMi { get; set; }
@@ -20,4 +21,3 @@ namespace KantarPro.Domain.Entities
         public virtual Kullanici Kullanici { get; set; }
     }
 }
-

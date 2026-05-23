@@ -9,6 +9,7 @@ namespace KantarPro.Domain.Entities
         {
             Islemler = new List<Islem>();
             Tartimlar = new List<Tartim>();
+            KantarDosyalari = new List<KantarDosyasi>();
         }
 
         public int AracId { get; set; }
@@ -21,5 +22,6 @@ namespace KantarPro.Domain.Entities
 
         public virtual ICollection<Islem> Islemler { get; set; }
         public virtual ICollection<Tartim> Tartimlar { get; set; }
+        public virtual ICollection<KantarDosyasi> KantarDosyalari { get; set; }
     }
 }
