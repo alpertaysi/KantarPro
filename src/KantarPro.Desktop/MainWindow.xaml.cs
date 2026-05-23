@@ -246,8 +246,8 @@ namespace KantarPro.Desktop
                 using (var context = new KantarDbContext())
                 {
                     var kullaniciId = EnsureAdminUser(context);
-                    var servis = new IslemServisi(new KantarUnitOfWork(context));
-                    servis.SonradanTartimEkle(row.Plaka, agirlik.Value, kullaniciId, tartimTarihi);
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    servis.SonradanTartimEkle(row.Plaka, YukDurumuFromRow(row), agirlik.Value, kullaniciId, tartimTarihi);
                 }
 
                 LoadDashboardData();
@@ -360,28 +360,34 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void PlakaTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(PlakaTextBox.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                using (var context = new KantarDbContext())
+                {
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    SelectGelisTuru(servis.GelisTuruOner(PlakaTextBox.Text));
+                }
+            }
+            catch
+            {
+                // Operator secimi yine elle yapabilir; plaka onerisi ekran akisini durdurmasin.
+            }
+        }
+
         private void CreateEntry(string plaka, string firmaAdi, string aciklama, bool tartimIsteniyor, decimal? agirlik, DateTime islemTarihi)
         {
             using (var context = new KantarDbContext())
             {
                 var kullaniciId = EnsureAdminUser(context);
-                var servis = new IslemServisi(new KantarUnitOfWork(context));
-                var bekleyenTartimId = tartimIsteniyor ? SelectPendingWeighingIfNeeded(context, plaka) : (int?)null;
-                if (bekleyenTartimId.HasValue)
-                {
-                    var normalized = NormalizePlaka(plaka);
-                    var icerideMi = context.Islemler.Any(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
-                    if (icerideMi)
-                    {
-                        servis.IceridekiBekleyenTartimiTamamla(plaka, bekleyenTartimId.Value, agirlik.Value, kullaniciId, islemTarihi);
-                    }
-                    else
-                    {
-                        servis.GirisYapVeBekleyenTartimiTamamla(plaka, firmaAdi, aciklama, bekleyenTartimId.Value, agirlik.Value, kullaniciId, islemTarihi);
-                    }
-
-                    return;
-                }
+                var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                var gelisTuru = GetSelectedGelisTuru(servis, plaka);
 
                 var normalizedPlaka = NormalizePlaka(plaka);
                 var acikIslemVarMi = context.Islemler.Any(x => x.Arac.Plaka == normalizedPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
@@ -392,11 +398,42 @@ namespace KantarPro.Desktop
                         throw new InvalidOperationException("Bu plaka icin iceride acik islem var. Yeni giris yerine cikis yapin veya tartim ekleyin.");
                     }
 
-                    servis.SonradanTartimEkle(plaka, agirlik.Value, kullaniciId, islemTarihi);
+                    servis.SonradanTartimEkle(plaka, YukDurumuFromGelisTuru(gelisTuru), agirlik.Value, kullaniciId, islemTarihi);
                     return;
                 }
 
-                servis.GirisYap(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, kullaniciId, islemTarihi);
+                servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi);
+            }
+        }
+
+        private string GetSelectedGelisTuru(SahaZiyaretiServisi servis, string plaka)
+        {
+            if (GelisTuruComboBox != null)
+            {
+                var item = GelisTuruComboBox.SelectedItem as ComboBoxItem;
+                if (item != null && item.Content != null)
+                {
+                    return item.Content.ToString();
+                }
+            }
+
+            return servis.GelisTuruOner(plaka);
+        }
+
+        private void SelectGelisTuru(string gelisTuru)
+        {
+            if (GelisTuruComboBox == null)
+            {
+                return;
+            }
+
+            foreach (var item in GelisTuruComboBox.Items.OfType<ComboBoxItem>())
+            {
+                if (string.Equals(item.Content as string, gelisTuru, StringComparison.Ordinal))
+                {
+                    GelisTuruComboBox.SelectedItem = item;
+                    return;
+                }
             }
         }
 
@@ -662,8 +699,9 @@ namespace KantarPro.Desktop
                     EntryVehicles.Clear();
                     foreach (var islem in girisler)
                     {
-                        var ilkTartim = GetIlkTartim(islem);
-                        var ikinciTartim = GetIkinciTartim(islem);
+                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
+                        var ikinciTartim = dosya != null ? dosya.KarsiTartim : GetIkinciTartim(islem);
                         var sonTartim = GetSonTartim(islem);
                         var beklemeUcreti = HesaplaBeklemeUcreti(context, islem, listeHesapTarihi);
                         var kayitliBeklemeUcreti = SumTahsilEdilmemisUcret(islem, KantarSabitleri.UcretKodu.Bekleme);
@@ -685,63 +723,61 @@ namespace KantarPro.Desktop
                             SonTartimTarihi = FormatTartimTarihi(sonTartim),
                             SonTartimSaati = FormatTartimSaati(sonTartim),
                             SonTartim = FormatSonTartim(sonTartim),
-                            Tartim = FormatTartim(islem),
-                            IkinciTartim = FormatIkinciTartim(islem),
-                            NetAgirlik = FormatNetAgirlik(islem),
+                            Tartim = FormatTartimDegeri(ilkTartim),
+                            IkinciTartim = FormatTartimDegeri(ikinciTartim),
+                            NetAgirlik = FormatNetAgirlik(ilkTartim, ikinciTartim),
                             Ucret = FormatKalanBorc(islem, beklemeUcreti - kayitliBeklemeUcreti),
                             Tahsilat = FormatPara(islem.ToplamTahsilat),
                             GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis, true),
                             TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim, true),
                             BeklemeUcreti = FormatPara(beklemeUcreti),
-                            Durum = "Cikis bekliyor",
+                            Durum = GetVisitRowDurum(islem, dosya),
                             KesinCikisMi = false
                         });
                     }
 
-                    var ikinciTartimBekleyenler = context.Islemler
+                    var bekleyenKantarDosyalari = context.KantarDosyalari
                         .Include(x => x.Arac)
-                        .Include(x => x.Tartimlar)
-                        .Include(x => x.Ucretler.Select(u => u.Ucret))
-                        .Where(x => x.Durum == KantarSabitleri.IslemDurumu.CikisYapti)
-                        .OrderByDescending(x => x.CikisTarihi)
-                        .Take(300)
-                        .ToList()
-                        .Where(x => !KesinCikisListesindeGoster(GetIlkTartim(x), GetIkinciTartim(x)))
+                        .Include(x => x.IlkTartim)
+                        .Include(x => x.IlkTartim.Islem)
+                        .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                        .OrderByDescending(x => x.OlusturmaTarihi)
                         .Take(100)
                         .ToList();
 
-                    foreach (var islem in ikinciTartimBekleyenler)
+                    foreach (var dosya in bekleyenKantarDosyalari)
                     {
-                        var ilkTartim = GetIlkTartim(islem);
-                        var ikinciTartim = GetIkinciTartim(islem);
-                        var sonTartim = GetSonTartim(islem);
+                        var islem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
+                        if (islem == null || islem.Durum == KantarSabitleri.IslemDurumu.Iceride)
+                        {
+                            continue;
+                        }
+
                         EntryVehicles.Add(new VehicleMovementRow
                         {
-                            Plaka = islem.Arac.Plaka,
-                            FirmaAdi = islem.Arac.FirmaAdi,
-                            GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
-                            GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
+                            Plaka = dosya.Arac.Plaka,
+                            FirmaAdi = dosya.Arac.FirmaAdi,
+                            GirisTarihi = dosya.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
+                            GirisSaati = dosya.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
                             DoluCikisTarihi = FormatDoluCikisTarihi(islem),
                             DoluCikisSaati = FormatDoluCikisSaati(islem),
                             Saat = FormatSaatSaniyeli(islem.GirisTarihi),
                             CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
                             CikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
-                            IlkTartimTarihi = FormatTartimTarihi(ilkTartim),
-                            IlkTartimSaati = FormatTartimSaati(ilkTartim),
-                            IkinciTartimTarihi = FormatTartimTarihi(ikinciTartim),
-                            IkinciTartimSaati = FormatTartimSaati(ikinciTartim),
-                            SonTartimTarihi = FormatTartimTarihi(sonTartim),
-                            SonTartimSaati = FormatTartimSaati(sonTartim),
-                            SonTartim = FormatSonTartim(sonTartim),
-                            Tartim = FormatTartim(islem),
-                            IkinciTartim = FormatIkinciTartim(islem),
-                            NetAgirlik = FormatNetAgirlik(islem),
-                            Ucret = FormatKalanBorc(islem),
+                            IlkTartimTarihi = dosya.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
+                            IlkTartimSaati = dosya.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
+                            SonTartimTarihi = dosya.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
+                            SonTartimSaati = dosya.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
+                            SonTartim = dosya.IlkTartim.AgirlikKg.ToString("N0") + " kg",
+                            Tartim = dosya.IlkTartim.AgirlikKg.ToString("N0") + " kg",
+                            IkinciTartim = "",
+                            NetAgirlik = "",
+                            Ucret = FormatPara(0m),
                             Tahsilat = FormatPara(islem.ToplamTahsilat),
-                            GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis, true),
-                            TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim, true),
-                            BeklemeUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme, true),
-                            Durum = "2. tartim bekliyor",
+                            GirisCikisUcreti = FormatPara(0m),
+                            TartimUcreti = FormatPara(0m),
+                            BeklemeUcreti = FormatPara(0m),
+                            Durum = dosya.IlkTartim.YukDurumu + " - karsi tartim bekliyor",
                             KesinCikisMi = false
                         });
                     }
@@ -761,13 +797,9 @@ namespace KantarPro.Desktop
                     ExitVehicles.Clear();
                     foreach (var islem in cikislar)
                     {
-                        var ilkTartim = GetIlkTartim(islem);
-                        var ikinciTartim = GetIkinciTartim(islem);
-                        if (!KesinCikisListesindeGoster(ilkTartim, ikinciTartim))
-                        {
-                            continue;
-                        }
-
+                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
+                        var ikinciTartim = dosya != null ? dosya.KarsiTartim : GetIkinciTartim(islem);
                         var cikisSatiri = new VehicleMovementRow
                         {
                             Plaka = islem.Arac.Plaka,
@@ -783,15 +815,15 @@ namespace KantarPro.Desktop
                             IlkTartimSaati = FormatTartimSaati(ilkTartim),
                             IkinciTartimTarihi = FormatTartimTarihi(ikinciTartim),
                             IkinciTartimSaati = FormatTartimSaati(ikinciTartim),
-                            Tartim = FormatTartim(islem),
-                            IkinciTartim = FormatIkinciTartim(islem),
-                            NetAgirlik = FormatNetAgirlik(islem),
+                            Tartim = FormatTartimDegeri(ilkTartim),
+                            IkinciTartim = FormatTartimDegeri(ikinciTartim),
+                            NetAgirlik = FormatNetAgirlik(ilkTartim, ikinciTartim),
                             Ucret = FormatPara(islem.ToplamTahakkuk),
                             Tahsilat = FormatPara(islem.ToplamTahsilat),
                             GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis),
                             TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim),
                             BeklemeUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme),
-                            Durum = "Kesin cikis",
+                            Durum = dosya != null ? "Kesin cikis - " + dosya.Durum : "Kesin cikis",
                             KesinCikisMi = true
                         };
                         ExitVehicles.Add(cikisSatiri);
@@ -994,6 +1026,11 @@ namespace KantarPro.Desktop
             return tartim == null ? "Tartim Yok" : tartim.AgirlikKg.ToString("N0") + " kg";
         }
 
+        private static string FormatTartimDegeri(Tartim tartim)
+        {
+            return tartim == null ? "" : tartim.AgirlikKg.ToString("N0") + " kg";
+        }
+
         private static string FormatDoluGelisTarihi(Islem islem, Tartim ilkTartim)
         {
             return (ilkTartim != null ? ilkTartim.TartimTarihi : islem.GirisTarihi).ToString("dd.MM.yyyy");
@@ -1036,12 +1073,44 @@ namespace KantarPro.Desktop
         {
             var ilkTartim = GetIlkTartim(islem);
             var ikinciTartim = GetIkinciTartim(islem);
+            return FormatNetAgirlik(ilkTartim, ikinciTartim);
+        }
+
+        private static string FormatNetAgirlik(Tartim ilkTartim, Tartim ikinciTartim)
+        {
             if (ilkTartim == null || ikinciTartim == null)
             {
                 return "";
             }
 
             return Math.Abs(ilkTartim.AgirlikKg - ikinciTartim.AgirlikKg).ToString("N0") + " kg";
+        }
+
+        private static KantarDosyasi GetKantarDosyasiForIslem(KantarDbContext context, Islem islem)
+        {
+            return context.KantarDosyalari
+                .Include(x => x.IlkTartim)
+                .Include(x => x.KarsiTartim)
+                .FirstOrDefault(x =>
+                    x.IlkTartim.IslemId == islem.IslemId ||
+                    (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == islem.IslemId));
+        }
+
+        private static string GetVisitRowDurum(Islem islem, KantarDosyasi dosya)
+        {
+            if (dosya == null)
+            {
+                return islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz ? "Tartimsiz cikis bekliyor" : "Cikis bekliyor";
+            }
+
+            if (dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
+            {
+                return "Karsi tartim tamamlandi";
+            }
+
+            return dosya.IlkTartim != null && dosya.IlkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
+                ? "Bos - karsi tartim bekliyor"
+                : "Dolu - karsi tartim bekliyor";
         }
 
         private static Tartim GetIlkTartim(Islem islem)
@@ -1113,7 +1182,7 @@ namespace KantarPro.Desktop
         {
             var kayitliBekleme = SumTahsilEdilmemisUcret(islem, KantarSabitleri.UcretKodu.Bekleme);
 
-            var beklemeGunSayisi = IslemServisi.HesaplaBeklemeGunSayisi(islem.GirisTarihi, hesapTarihi);
+            var beklemeGunSayisi = SahaZiyaretiServisi.HesaplaBeklemeGunSayisi(islem.GirisTarihi, hesapTarihi);
             if (beklemeGunSayisi <= 0)
             {
                 return kayitliBekleme;
@@ -1154,6 +1223,23 @@ namespace KantarPro.Desktop
         private static string NormalizePlaka(string plaka)
         {
             return (plaka ?? string.Empty).Trim().ToUpperInvariant().Replace(" ", string.Empty);
+        }
+
+        private static string YukDurumuFromGelisTuru(string gelisTuru)
+        {
+            return gelisTuru == KantarSabitleri.GelisTuru.Bos
+                ? KantarSabitleri.YukDurumu.Bos
+                : KantarSabitleri.YukDurumu.Dolu;
+        }
+
+        private static string YukDurumuFromRow(VehicleMovementRow row)
+        {
+            if (row != null && row.Durum != null && row.Durum.IndexOf("Bos", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return KantarSabitleri.YukDurumu.Bos;
+            }
+
+            return KantarSabitleri.YukDurumu.Dolu;
         }
 
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -1197,6 +1283,24 @@ namespace KantarPro.Desktop
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'FaturaId') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD FaturaId NVARCHAR(40) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'GelisTuru') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD GelisTuru NVARCHAR(20) NOT NULL CONSTRAINT DF_Islemler_GelisTuru DEFAULT (N'Tartimsiz')");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Tartimlar', 'YukDurumu') IS NULL " +
+                    "ALTER TABLE dbo.Tartimlar ADD YukDurumu NVARCHAR(20) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatId') IS NULL " +
+                    "ALTER TABLE dbo.IslemUcretleri ADD TahsilatId NVARCHAR(40) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF OBJECT_ID(N'dbo.KantarDosyalari', N'U') IS NULL " +
+                    "CREATE TABLE dbo.KantarDosyalari (" +
+                    "KantarDosyasiId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_KantarDosyalari PRIMARY KEY, " +
+                    "AracId INT NOT NULL, IlkTartimId INT NOT NULL, KarsiTartimId INT NULL, Durum NVARCHAR(30) NOT NULL, " +
+                    "NetAgirlikKg DECIMAL(18,2) NULL, OlusturmaTarihi DATETIME NOT NULL, TamamlanmaTarihi DATETIME NULL, " +
+                    "CONSTRAINT FK_KantarDosyalari_Araclar FOREIGN KEY (AracId) REFERENCES dbo.Araclar(AracId), " +
+                    "CONSTRAINT FK_KantarDosyalari_IlkTartim FOREIGN KEY (IlkTartimId) REFERENCES dbo.Tartimlar(TartimId), " +
+                    "CONSTRAINT FK_KantarDosyalari_KarsiTartim FOREIGN KEY (KarsiTartimId) REFERENCES dbo.Tartimlar(TartimId))");
                 context.Database.ExecuteSqlCommand(
                     "UPDATE dbo.IslemUcretleri " +
                     "SET FaturaId = 'FATESKI' + CAST(IslemId AS NVARCHAR(12)) + CONVERT(NVARCHAR(8), TahsilTarihi, 112) + REPLACE(CONVERT(NVARCHAR(8), TahsilTarihi, 108), ':', '') " +

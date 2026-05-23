@@ -52,7 +52,7 @@ namespace KantarPro.Desktop
                 var mevcutTartimAdedi = _islem.Ucretler.Count(x => x.Ucret != null && x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.Tartim && !x.TahsilEdildiMi);
                 var toplamTartimAdedi = mevcutTartimAdedi + (_tartimIsteniyor ? 1 : 0);
                 var tartimToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Tartim) + (_tartimIsteniyor ? tartimUcreti : 0m);
-                var beklemeAdedi = IslemServisi.HesaplaBeklemeGunSayisi(_islem.GirisTarihi, _cikisTarihi);
+                var beklemeAdedi = SahaZiyaretiServisi.HesaplaBeklemeGunSayisi(_islem.GirisTarihi, _cikisTarihi);
                 var beklemeToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Bekleme) + (beklemeAdedi * beklemeUcreti);
 
                 _previewToplam = girisCikisToplam + tartimToplam + beklemeToplam;
@@ -79,7 +79,7 @@ namespace KantarPro.Desktop
                 using (var context = new KantarDbContext())
                 {
                     var kullaniciId = EnsureAdminUser(context);
-                    var servis = new IslemServisi(new KantarUnitOfWork(context));
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
                     servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, _cikisTarihi);
                 }
 

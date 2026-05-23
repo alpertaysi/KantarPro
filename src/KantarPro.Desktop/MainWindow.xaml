@@ -131,6 +131,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
@@ -142,7 +143,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Text="Plaka No:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="PlakaTextBox" Grid.Column="1" CharacterCasing="Upper" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBox x:Name="PlakaTextBox" Grid.Column="1" CharacterCasing="Upper" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" LostFocus="PlakaTextBox_LostFocus" />
 
                             <TextBlock Grid.Row="1" Text="Giris Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="GirisTarihiTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
@@ -151,13 +152,20 @@
                                 <TextBlock Text="{Binding Text, ElementName=ClockText}" Foreground="White" FontFamily="Consolas" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
 
-                            <TextBlock Grid.Row="2" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="FirmaTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="2" Text="Gelis Turu:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <ComboBox x:Name="GelisTuruComboBox" Grid.Row="2" Grid.Column="1" Height="26" FontSize="13" SelectedIndex="0" Margin="0,0,0,8">
+                                <ComboBoxItem Content="Dolu" />
+                                <ComboBoxItem Content="Bos" />
+                                <ComboBoxItem Content="Tartimsiz" />
+                            </ComboBox>
 
-                            <TextBlock Grid.Row="3" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="AciklamaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="3" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="FirmaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <Grid Grid.Row="5" Grid.ColumnSpan="4">
+                            <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="AciklamaTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+
+                            <Grid Grid.Row="6" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="150" />
