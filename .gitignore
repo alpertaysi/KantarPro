@@ -1,0 +1,17 @@
+.vs/
+.superpowers/
+TestResults/
+
+bin/
+obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+*.log
+*.tmp
+*.bak
+
+packages/

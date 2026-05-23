@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F6A83897-744D-4321-A3C2-1A7723DA43A1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>KantarPro.Domain</RootNamespace>
+    <AssemblyName>KantarPro.Domain</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entities\Arac.cs" />
+    <Compile Include="Entities\Ayar.cs" />
+    <Compile Include="Entities\BekleyenTartim.cs" />
+    <Compile Include="Entities\Islem.cs" />
+    <Compile Include="Entities\IslemUcreti.cs" />
+    <Compile Include="Entities\Kullanici.cs" />
+    <Compile Include="Entities\LogKaydi.cs" />
+    <Compile Include="Entities\Tartim.cs" />
+    <Compile Include="Entities\Ucret.cs" />
+    <Compile Include="KantarSabitleri.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,45 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KantarPro.Domain", "src\KantarPro.Domain\KantarPro.Domain.csproj", "{F6A83897-744D-4321-A3C2-1A7723DA43A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KantarPro.Application", "src\KantarPro.Application\KantarPro.Application.csproj", "{B13E56A6-D279-4F57-986D-0C392FCF1E32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KantarPro.Infrastructure", "src\KantarPro.Infrastructure\KantarPro.Infrastructure.csproj", "{705D5DE2-E655-4271-BEBD-40823E28BC10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KantarPro.Desktop", "src\KantarPro.Desktop\KantarPro.Desktop.csproj", "{22206464-3F06-42AF-907A-58793E7C2E5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KantarPro.Application.Tests", "tests\KantarPro.Application.Tests\KantarPro.Application.Tests.csproj", "{6D4A8240-4524-4499-A264-A468F7177D95}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6A83897-744D-4321-A3C2-1A7723DA43A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6A83897-744D-4321-A3C2-1A7723DA43A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6A83897-744D-4321-A3C2-1A7723DA43A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A83897-744D-4321-A3C2-1A7723DA43A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B13E56A6-D279-4F57-986D-0C392FCF1E32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B13E56A6-D279-4F57-986D-0C392FCF1E32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B13E56A6-D279-4F57-986D-0C392FCF1E32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B13E56A6-D279-4F57-986D-0C392FCF1E32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{705D5DE2-E655-4271-BEBD-40823E28BC10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{705D5DE2-E655-4271-BEBD-40823E28BC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{705D5DE2-E655-4271-BEBD-40823E28BC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{705D5DE2-E655-4271-BEBD-40823E28BC10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22206464-3F06-42AF-907A-58793E7C2E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22206464-3F06-42AF-907A-58793E7C2E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22206464-3F06-42AF-907A-58793E7C2E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22206464-3F06-42AF-907A-58793E7C2E5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D4A8240-4524-4499-A264-A468F7177D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D4A8240-4524-4499-A264-A468F7177D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D4A8240-4524-4499-A264-A468F7177D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D4A8240-4524-4499-A264-A468F7177D95}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

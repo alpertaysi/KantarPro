@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6D4A8240-4524-4499-A264-A468F7177D95}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>KantarPro.Application.Tests</RootNamespace>
+    <AssemblyName>KantarPro.Application.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fakes\InMemoryRepository.cs" />
+    <Compile Include="Fakes\InMemoryUnitOfWork.cs" />
+    <Compile Include="IslemServisiTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\KantarPro.Application\KantarPro.Application.csproj">
+      <Project>{B13E56A6-D279-4F57-986D-0C392FCF1E32}</Project>
+      <Name>KantarPro.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\KantarPro.Domain\KantarPro.Domain.csproj">
+      <Project>{F6A83897-744D-4321-A3C2-1A7723DA43A1}</Project>
+      <Name>KantarPro.Domain</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
