@@ -74,25 +74,17 @@ namespace KantarPro.Desktop
 
         private void TartVeKaydet_Click(object sender, RoutedEventArgs e)
         {
-            DashboardGirisKaydiOlustur(GetDashboardGelisTuru() != KantarSabitleri.GelisTuru.Tartimsiz);
-        }
-
-        private void TartmadanKaydet_Click(object sender, RoutedEventArgs e)
-        {
-            DashboardGirisKaydiOlustur(false);
-        }
-
-        private string GetDashboardGelisTuru()
-        {
-            if (GelisTuruComboBox == null)
+            var dialog = new EntrySaveChoiceWindow
             {
-                return KantarSabitleri.GelisTuru.Dolu;
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
             }
 
-            var item = GelisTuruComboBox.SelectedItem as ComboBoxItem;
-            return item != null && item.Content != null
-                ? item.Content.ToString()
-                : KantarSabitleri.GelisTuru.Dolu;
+            DashboardGirisKaydiOlustur(dialog.Choice == EntrySaveChoice.WeighAndSave);
         }
 
         private void DashboardGirisKaydiOlustur(bool tartimIsteniyor)
@@ -115,7 +107,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi);
+                CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz);
 
                 LoadDashboardData();
                 MessageBox.Show("Giris kaydi olusturuldu.", "Kantar Pro");
@@ -383,34 +375,13 @@ namespace KantarPro.Desktop
             }
         }
 
-        private void PlakaTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(PlakaTextBox.Text))
-            {
-                return;
-            }
-
-            try
-            {
-                using (var context = new KantarDbContext())
-                {
-                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    SelectGelisTuru(servis.GelisTuruOner(PlakaTextBox.Text));
-                }
-            }
-            catch
-            {
-                // Operator secimi yine elle yapabilir; plaka onerisi ekran akisini durdurmasin.
-            }
-        }
-
         private void CreateEntry(string plaka, string firmaAdi, string aciklama, bool tartimIsteniyor, decimal? agirlik, DateTime islemTarihi, string gelisTuruOverride = null)
         {
             using (var context = new KantarDbContext())
             {
                 var kullaniciId = EnsureAdminUser(context);
                 var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                var gelisTuru = gelisTuruOverride ?? GetSelectedGelisTuru(servis, plaka);
+                var gelisTuru = gelisTuruOverride ?? servis.GelisTuruOner(plaka);
 
                 var normalizedPlaka = NormalizePlaka(plaka);
                 var acikIslemVarMi = context.Islemler.Any(x => x.Arac.Plaka == normalizedPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
@@ -503,37 +474,6 @@ namespace KantarPro.Desktop
                 YukDurumu = bekleyen.IlkTartim.YukDurumu,
                 Aciklama = GetBeklenenTartimDurumu(bekleyen.IlkTartim)
             };
-        }
-
-        private string GetSelectedGelisTuru(SahaZiyaretiServisi servis, string plaka)
-        {
-            if (GelisTuruComboBox != null)
-            {
-                var item = GelisTuruComboBox.SelectedItem as ComboBoxItem;
-                if (item != null && item.Content != null)
-                {
-                    return item.Content.ToString();
-                }
-            }
-
-            return servis.GelisTuruOner(plaka);
-        }
-
-        private void SelectGelisTuru(string gelisTuru)
-        {
-            if (GelisTuruComboBox == null)
-            {
-                return;
-            }
-
-            foreach (var item in GelisTuruComboBox.Items.OfType<ComboBoxItem>())
-            {
-                if (string.Equals(item.Content as string, gelisTuru, StringComparison.Ordinal))
-                {
-                    GelisTuruComboBox.SelectedItem = item;
-                    return;
-                }
-            }
         }
 
         private void ShowEntryPage()

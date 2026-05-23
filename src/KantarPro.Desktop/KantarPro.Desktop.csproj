@@ -50,6 +50,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="EntrySaveChoiceWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DateInputWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -68,6 +72,9 @@
     </Compile>
     <Compile Include="DoluBosSecondWeighingWindow.xaml.cs">
       <DependentUpon>DoluBosSecondWeighingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntrySaveChoiceWindow.xaml.cs">
+      <DependentUpon>EntrySaveChoiceWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DateInputWindow.xaml.cs">
       <DependentUpon>DateInputWindow.xaml</DependentUpon>

@@ -1,0 +1,43 @@
+<Window x:Class="KantarPro.Desktop.EntrySaveChoiceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kayit Secimi"
+        Width="360"
+        Height="190"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F3F4F6"
+        FontFamily="Segoe UI">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Bu araci nasil kaydedelim?"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="#111827"
+                   TextAlignment="Center"
+                   VerticalAlignment="Center"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Tart ve Kaydet"
+                    Width="130"
+                    Height="38"
+                    Margin="0,0,10,0"
+                    Background="#047857"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    Click="WeighAndSave_Click" />
+            <Button Content="Tartmadan Kaydet"
+                    Width="150"
+                    Height="38"
+                    Background="#374151"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    Click="SaveWithoutWeighing_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
