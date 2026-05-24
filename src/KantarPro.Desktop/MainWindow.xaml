@@ -132,6 +132,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
@@ -152,13 +153,16 @@
                                 <TextBlock Text="{Binding Text, ElementName=ClockText}" Foreground="White" FontFamily="Consolas" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
 
-                            <TextBlock Grid.Row="2" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="FirmaTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="2" Text="Cikis Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="3" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="AciklamaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="3" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="FirmaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <Grid Grid.Row="6" Grid.ColumnSpan="4">
+                            <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="AciklamaTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+
+                            <Grid Grid.Row="7" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="150" />
@@ -228,7 +232,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,4">
-                            <TextBlock Text="Kesin Cikis Yapanlar" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="Cikisi Yapilan / 2. Tartim Bekleyenler" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <TextBox x:Name="DashboardExitSearchTextBox" DockPanel.Dock="Right" Width="145" Height="26" Padding="6,2" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="ExitSearchTextBox_TextChanged" />
                         </DockPanel>
                         <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC">
