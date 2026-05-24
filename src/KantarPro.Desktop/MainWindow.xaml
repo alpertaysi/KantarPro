@@ -261,7 +261,7 @@
                         </Grid.RowDefinitions>
                         <TabControl>
                             <TabItem Header="2. Tartim Bekleyenler">
-                                <DataGrid ItemsSource="{Binding PendingWeighings}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="11">
+                                <DataGrid ItemsSource="{Binding PendingWeighings}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
                                         <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="140" />
