@@ -147,16 +147,7 @@ namespace KantarPro.Application.Services
             ziyaret.Tartimlar.Add(tartim);
             ziyaret.Arac.Tartimlar.Add(tartim);
             UcretEkle(ziyaret, KantarSabitleri.UcretKodu.Tartim, tarih);
-            if (!TartimsizZiyaretinSonradanTartimiMi(ziyaret, tartimTipi))
-            {
-                KantarDosyasinaBagla(ziyaret.Arac, tartim, tarih);
-            }
-        }
-
-        private static bool TartimsizZiyaretinSonradanTartimiMi(Islem ziyaret, string tartimTipi)
-        {
-            return ziyaret.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz &&
-                tartimTipi == KantarSabitleri.TartimTipi.Sonradan;
+            KantarDosyasinaBagla(ziyaret.Arac, tartim, tarih);
         }
 
         private void KantarDosyasinaBagla(Arac arac, Tartim tartim, DateTime tarih)
