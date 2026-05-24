@@ -345,9 +345,9 @@ namespace KantarPro.Application.Services
                 throw new ArgumentException("Gun siniri pozitif olmalidir.", nameof(gunSiniri));
             }
 
-            var sonTarih = kontrolTarihi.Date.AddDays(-gunSiniri);
+            var sonTarihBitisi = kontrolTarihi.Date.AddDays(-gunSiniri).AddDays(1);
             var kapanacaklar = _unitOfWork.BekleyenTartimlar.Query()
-                .Where(x => x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor && x.IlkTartimTarihi.Date <= sonTarih)
+                .Where(x => x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor && x.IlkTartimTarihi < sonTarihBitisi)
                 .ToList();
 
             foreach (var bekleyen in kapanacaklar)
