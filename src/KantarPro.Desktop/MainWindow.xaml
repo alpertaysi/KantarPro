@@ -195,7 +195,7 @@
                             <TextBox x:Name="DashboardEntrySearchTextBox" DockPanel.Dock="Right" Width="170" Height="26" Padding="6,2" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="EntrySearchTextBox_TextChanged" />
                         </DockPanel>
                         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                            <DataGrid x:Name="EntryVehiclesGrid" MinWidth="980" ItemsSource="{Binding EntryVehiclesView}" SelectionChanged="EntryVehiclesGrid_SelectionChanged" PreviewTextInput="EntryVehiclesGrid_PreviewTextInput" PreviewKeyDown="EntryVehiclesGrid_PreviewKeyDown" PreviewMouseRightButtonDown="EntryVehiclesGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="11" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="EntryVehiclesGrid" MinWidth="980" ItemsSource="{Binding EntryVehiclesView}" SelectionChanged="EntryVehiclesGrid_SelectionChanged" PreviewTextInput="EntryVehiclesGrid_PreviewTextInput" PreviewKeyDown="EntryVehiclesGrid_PreviewKeyDown" PreviewMouseRightButtonDown="EntryVehiclesGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <DataGrid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
@@ -232,10 +232,10 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,4">
-                            <TextBlock Text="Cikisi Yapilan / 2. Tartim Bekleyenler" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="Kesin Cikis Yapilanlar" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <TextBox x:Name="DashboardExitSearchTextBox" DockPanel.Dock="Right" Width="145" Height="26" Padding="6,2" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="ExitSearchTextBox_TextChanged" />
                         </DockPanel>
-                        <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC">
+                        <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Plaka No:" Binding="{Binding Plaka}" Width="82" />
                                 <DataGridTextColumn Header="D. Gelis Tarihi" Binding="{Binding GirisTarihi}" Width="88" />

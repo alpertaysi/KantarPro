@@ -166,6 +166,7 @@ namespace KantarPro.Desktop
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
+                    ClearVehicleFilters();
                     LoadDashboardData();
                     MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
                     ClearExitPageForm();
@@ -198,6 +199,7 @@ namespace KantarPro.Desktop
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
+                    ClearVehicleFilters();
                     LoadDashboardData();
                     MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
                     PlakaTextBox.Clear();
@@ -1842,6 +1844,14 @@ namespace KantarPro.Desktop
         {
             SetTextBoxText(DashboardExitSearchTextBox, _exitVehicleFilter, source);
             SetTextBoxText(ExitPageExitSearchTextBox, _exitVehicleFilter, source);
+        }
+
+        private void ClearVehicleFilters()
+        {
+            _entryVehicleFilter = string.Empty;
+            _exitVehicleFilter = string.Empty;
+            SyncEntrySearchTextBoxes(null);
+            SyncExitSearchTextBoxes(null);
         }
 
         private static void SetTextBoxText(TextBox textBox, string text, TextBox source)
