@@ -58,6 +58,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PlateCorrectionWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -78,6 +82,9 @@
     </Compile>
     <Compile Include="DateInputWindow.xaml.cs">
       <DependentUpon>DateInputWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PlateCorrectionWindow.xaml.cs">
+      <DependentUpon>PlateCorrectionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

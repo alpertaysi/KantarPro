@@ -418,18 +418,39 @@ namespace KantarPro.Application.Services
             bekleyenTartim.Durum = KantarSabitleri.BekleyenTartimDurumu.Tamamlandi;
         }
 
-        private static void TahsilEt(Islem islem, int kullaniciId, DateTime tahsilTarihi)
+        private void TahsilEt(Islem islem, int kullaniciId, DateTime tahsilTarihi)
         {
             islem.ToplamTahsilat = islem.ToplamTahakkuk;
             var odenecekUcretler = islem.Ucretler.Where(x => !x.TahsilEdildiMi).ToList();
             var faturaId = UretFaturaId(tahsilTarihi);
+            var tahsilatNo = odenecekUcretler.Count > 0 ? UretSiradakiTahsilatNo() : null;
             foreach (var ucret in odenecekUcretler)
             {
                 ucret.TahsilEdildiMi = true;
                 ucret.TahsilTarihi = tahsilTarihi;
                 ucret.TahsilEdenKullaniciId = kullaniciId;
                 ucret.FaturaId = faturaId;
+                ucret.TahsilatNo = tahsilatNo;
             }
+        }
+
+        private string UretSiradakiTahsilatNo()
+        {
+            var sonNo = _unitOfWork.IslemUcretleri.Query()
+                .Where(x => x.TahsilatNo != null && x.TahsilatNo != "")
+                .Select(x => x.TahsilatNo)
+                .ToList()
+                .Select(ParseTahsilatNo)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            return (sonNo + 1).ToString("0000");
+        }
+
+        private static int ParseTahsilatNo(string tahsilatNo)
+        {
+            int value;
+            return int.TryParse(tahsilatNo, out value) ? value : 0;
         }
 
         private void LogEkle(int kullaniciId, Islem islem, string logTipi, string mesaj)

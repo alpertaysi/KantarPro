@@ -224,10 +224,11 @@ namespace KantarPro.Application.Services
             ziyaret.ToplamTahakkuk += ucret.Tutar;
         }
 
-        private static void TahsilEt(Islem ziyaret, int kullaniciId, DateTime tarih)
+        private void TahsilEt(Islem ziyaret, int kullaniciId, DateTime tarih)
         {
             var tahsilatId = "THS" + tarih.ToString("yyyyMMddHHmmssfff") + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpperInvariant();
             var odenecekler = ziyaret.Ucretler.Where(x => !x.TahsilEdildiMi).ToList();
+            var tahsilatNo = odenecekler.Count > 0 ? UretSiradakiTahsilatNo() : null;
             foreach (var ucret in odenecekler)
             {
                 ucret.TahsilEdildiMi = true;
@@ -235,9 +236,29 @@ namespace KantarPro.Application.Services
                 ucret.TahsilEdenKullaniciId = kullaniciId;
                 ucret.TahsilatId = tahsilatId;
                 ucret.FaturaId = tahsilatId;
+                ucret.TahsilatNo = tahsilatNo;
             }
 
             ziyaret.ToplamTahsilat += odenecekler.Sum(x => x.Tutar);
+        }
+
+        private string UretSiradakiTahsilatNo()
+        {
+            var sonNo = _unitOfWork.IslemUcretleri.Query()
+                .Where(x => x.TahsilatNo != null && x.TahsilatNo != "")
+                .Select(x => x.TahsilatNo)
+                .ToList()
+                .Select(ParseTahsilatNo)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            return (sonNo + 1).ToString("0000");
+        }
+
+        private static int ParseTahsilatNo(string tahsilatNo)
+        {
+            int value;
+            return int.TryParse(tahsilatNo, out value) ? value : 0;
         }
 
         private Arac AracBulVeyaOlustur(string plaka, string firmaAdi, DateTime tarih)

@@ -274,6 +274,73 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void EntryGridPlakaDuzeltMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
+            if (row == null)
+            {
+                MessageBox.Show("Plakasi duzeltilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new PlateCorrectionWindow(row.Plaka)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                var eskiPlaka = NormalizePlaka(row.Plaka);
+                var yeniPlaka = NormalizePlaka(dialog.NewPlate);
+                if (eskiPlaka == yeniPlaka)
+                {
+                    return;
+                }
+
+                using (var context = new KantarDbContext())
+                {
+                    var islem = context.Islemler
+                        .Include(x => x.Arac)
+                        .FirstOrDefault(x => x.Arac.Plaka == eskiPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+
+                    if (islem == null)
+                    {
+                        throw new InvalidOperationException("Bu plaka icin acik saha ziyareti bulunamadi.");
+                    }
+
+                    var plakaBaskaAractaVarMi = context.Araclar.Any(x => x.Plaka == yeniPlaka && x.AracId != islem.AracId);
+                    if (plakaBaskaAractaVarMi)
+                    {
+                        throw new InvalidOperationException("Yeni plaka sistemde baska bir arac kaydinda var. Bu duzeltme icin once kayitlari kontrol edin.");
+                    }
+
+                    var acikIslemVarMi = context.Islemler.Any(x =>
+                        x.Arac.Plaka == yeniPlaka &&
+                        x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
+                        x.IslemId != islem.IslemId);
+                    if (acikIslemVarMi)
+                    {
+                        throw new InvalidOperationException("Yeni plaka ile iceride acik kayit var. Plaka duzeltilemez.");
+                    }
+
+                    islem.Arac.Plaka = yeniPlaka;
+                    context.SaveChanges();
+                }
+
+                LoadDashboardData();
+                MessageBox.Show("Plaka duzeltildi.", "Kantar Pro");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Plaka duzeltilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         private void EntryGridGelisTarihiniGuncelleMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
@@ -994,7 +1061,7 @@ namespace KantarPro.Desktop
                         "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                         "Saha Ziyareti" + Environment.NewLine +
                         FormatSingleVisitDoluBosBlock(ilkIslem, dosya.IlkTartim, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
-                        "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
+                        "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
                         FormatKantarDosyasiPaymentHistory(ilkIslem, null);
                 }
 
@@ -1007,7 +1074,7 @@ namespace KantarPro.Desktop
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
                     "Ikinci Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ikinciIslem, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
-                    "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
+                    "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
                     FormatKantarDosyasiPaymentHistory(ilkIslem, ikinciIslem);
             }
         }
@@ -1023,7 +1090,7 @@ namespace KantarPro.Desktop
                     .ToList()
                     .GroupBy(x => new
                     {
-                        FaturaId = string.IsNullOrWhiteSpace(x.FaturaId) ? "Eski kayit" : x.FaturaId,
+                        TahsilatNo = string.IsNullOrWhiteSpace(x.TahsilatNo) ? "Eski kayit" : x.TahsilatNo,
                         TahsilTarihi = x.TahsilTarihi.Value
                     })
                     .OrderByDescending(x => x.Key.TahsilTarihi)
@@ -1036,12 +1103,12 @@ namespace KantarPro.Desktop
                 }
 
                 var satirlar = tahsilatlar.Select(x =>
-                    x.Key.FaturaId + " | " +
+                    x.Key.TahsilatNo + " | " +
                     x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
                     FormatPara(x.Sum(u => u.Tutar)));
 
                 return Environment.NewLine + Environment.NewLine +
-                    "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
+                    "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
                     string.Join(Environment.NewLine, satirlar);
             }
         }
@@ -1062,7 +1129,7 @@ namespace KantarPro.Desktop
                 "Bekleme: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
                 "Tahakkuk: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahakkuk) : "") + Environment.NewLine +
                 "Tahsilat: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahsilat) : "") + Environment.NewLine +
-                "Fatura ID: " + FormatBosDeger(GetLastInvoiceId(islem));
+                "Tahsilat No: " + FormatBosDeger(GetLastTahsilatNo(islem));
         }
 
         private static string FormatSingleVisitDoluBosBlock(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
@@ -1082,7 +1149,7 @@ namespace KantarPro.Desktop
                 "Bekleme: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
                 "Tahakkuk: " + FormatBosDeger(FormatPara(islem.ToplamTahakkuk)) + Environment.NewLine +
                 "Tahsilat: " + FormatBosDeger(FormatPara(islem.ToplamTahsilat)) + Environment.NewLine +
-                "Fatura ID: " + FormatBosDeger(GetLastInvoiceId(islem));
+                "Tahsilat No: " + FormatBosDeger(GetLastTahsilatNo(islem));
         }
 
         private static string FormatKantarDosyasiPaymentHistory(Islem ilkIslem, Islem ikinciIslem)
@@ -1095,7 +1162,7 @@ namespace KantarPro.Desktop
                 .Where(x => x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
                 .GroupBy(x => new
                 {
-                    FaturaId = string.IsNullOrWhiteSpace(x.FaturaId) ? "Eski kayit" : x.FaturaId,
+                    TahsilatNo = string.IsNullOrWhiteSpace(x.TahsilatNo) ? "Eski kayit" : x.TahsilatNo,
                     TahsilTarihi = x.TahsilTarihi.Value
                 })
                 .OrderBy(x => x.Key.TahsilTarihi)
@@ -1107,25 +1174,25 @@ namespace KantarPro.Desktop
             }
 
             return string.Join(Environment.NewLine, ucretler.Select(x =>
-                x.Key.FaturaId + " | " +
+                x.Key.TahsilatNo + " | " +
                 x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
                 FormatPara(x.Sum(u => u.Tutar))));
         }
 
-        private static string GetLastInvoiceId(Islem islem)
+        private static string GetLastTahsilatNo(Islem islem)
         {
             if (islem == null)
             {
                 return "";
             }
 
-            var fatura = islem.Ucretler
-                .Where(x => x.TahsilEdildiMi && !string.IsNullOrWhiteSpace(x.FaturaId))
+            var tahsilatNo = islem.Ucretler
+                .Where(x => x.TahsilEdildiMi && !string.IsNullOrWhiteSpace(x.TahsilatNo))
                 .OrderByDescending(x => x.TahsilTarihi)
-                .Select(x => x.FaturaId)
+                .Select(x => x.TahsilatNo)
                 .FirstOrDefault();
 
-            return fatura ?? "";
+            return tahsilatNo ?? "";
         }
 
         private static bool MatchesRowTartim(Tartim tartim, string tarih, string saat, string agirlik)
@@ -1570,6 +1637,9 @@ namespace KantarPro.Desktop
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatId') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD TahsilatId NVARCHAR(40) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatNo') IS NULL " +
+                    "ALTER TABLE dbo.IslemUcretleri ADD TahsilatNo NVARCHAR(20) NULL");
                 context.Database.ExecuteSqlCommand(
                     "IF OBJECT_ID(N'dbo.KantarDosyalari', N'U') IS NULL " +
                     "CREATE TABLE dbo.KantarDosyalari (" +

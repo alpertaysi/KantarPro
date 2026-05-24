@@ -113,6 +113,21 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void CikisYap_TahsilatlaraSurekliArtanTahsilatNoVerir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ilk = servis.GirisKaydet("16 TNO 001", "Firma T", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+            servis.CikisYap(ilk.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+            var ikinci = servis.GirisKaydet("16 TNO 002", "Firma T", KantarSabitleri.GelisTuru.Dolu, true, 22000m, 1, new DateTime(2026, 5, 13, 9, 0, 0));
+            servis.CikisYap(ikinci.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 13, 10, 0, 0));
+
+            Assert.AreEqual("0001", ilk.Ucretler.Single().TahsilatNo);
+            Assert.IsTrue(ikinci.Ucretler.All(x => x.TahsilatNo == "0002"));
+        }
+
+        [TestMethod]
         public void BekleyenDoluDosyasiBosGelisOnerir()
         {
             var uow = new InMemoryUnitOfWork();

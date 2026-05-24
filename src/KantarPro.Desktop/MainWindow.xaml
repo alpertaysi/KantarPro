@@ -197,6 +197,7 @@
                                 <DataGrid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
+                                        <MenuItem Header="Plaka Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
                                         <MenuItem Header="Geliş Tarihini Güncelle" Click="EntryGridGelisTarihiniGuncelleMenuItem_Click" />
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
