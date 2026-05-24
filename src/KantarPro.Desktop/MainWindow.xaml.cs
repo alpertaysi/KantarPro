@@ -980,6 +980,23 @@ namespace KantarPro.Desktop
 
                 var ilkIslem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
                 var ikinciIslem = dosya.KarsiTartim != null ? dosya.KarsiTartim.Islem : null;
+                var tekZiyaretteTamamlandi =
+                    ilkIslem != null &&
+                    ikinciIslem != null &&
+                    ilkIslem.IslemId == ikinciIslem.IslemId;
+
+                if (tekZiyaretteTamamlandi)
+                {
+                    return
+                        "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
+                        "Firma: " + FormatBosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
+                        "Durum: " + GetVisitRowDurum(ilkIslem, dosya) + Environment.NewLine +
+                        "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
+                        "Saha Ziyareti" + Environment.NewLine +
+                        FormatSingleVisitDoluBosBlock(ilkIslem, dosya.IlkTartim, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
+                        "Odeme Gecmisi (Fatura ID | Tarih | Tutar)" + Environment.NewLine +
+                        FormatKantarDosyasiPaymentHistory(ilkIslem, null);
+                }
 
                 return
                     "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
@@ -1048,10 +1065,32 @@ namespace KantarPro.Desktop
                 "Fatura ID: " + FormatBosDeger(GetLastInvoiceId(islem));
         }
 
+        private static string FormatSingleVisitDoluBosBlock(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            if (islem == null)
+            {
+                return "-";
+            }
+
+            return
+                "Gelis: " + islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") + Environment.NewLine +
+                "Cikis: " + FormatBosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "1. Tartim: " + FormatBosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "2. Tartim: " + FormatBosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Giris-Cikis: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
+                "Tartim: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
+                "Bekleme: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
+                "Tahakkuk: " + FormatBosDeger(FormatPara(islem.ToplamTahakkuk)) + Environment.NewLine +
+                "Tahsilat: " + FormatBosDeger(FormatPara(islem.ToplamTahsilat)) + Environment.NewLine +
+                "Fatura ID: " + FormatBosDeger(GetLastInvoiceId(islem));
+        }
+
         private static string FormatKantarDosyasiPaymentHistory(Islem ilkIslem, Islem ikinciIslem)
         {
             var ucretler = new[] { ilkIslem, ikinciIslem }
                 .Where(x => x != null)
+                .GroupBy(x => x.IslemId)
+                .Select(x => x.First())
                 .SelectMany(x => x.Ucretler)
                 .Where(x => x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
                 .GroupBy(x => new
