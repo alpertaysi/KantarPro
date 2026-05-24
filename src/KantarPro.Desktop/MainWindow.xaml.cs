@@ -1133,7 +1133,7 @@ namespace KantarPro.Desktop
 
             if (dosya != null && dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
             {
-                return true;
+                return dosya.KarsiTartim != null && dosya.KarsiTartim.IslemId == islem.IslemId;
             }
 
             return ilkTartim == null && ikinciTartim == null;
