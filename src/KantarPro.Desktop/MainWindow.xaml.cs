@@ -471,6 +471,10 @@ namespace KantarPro.Desktop
             {
                 Plaka = bekleyen.Arac.Plaka,
                 FirmaAdi = bekleyen.Arac.FirmaAdi,
+                IlkGirisTarihi = bekleyen.IlkTartim.Islem.GirisTarihi.ToString("dd.MM.yyyy"),
+                IlkGirisSaati = bekleyen.IlkTartim.Islem.GirisTarihi.ToString("HH:mm:ss"),
+                IlkCikisTarihi = bekleyen.IlkTartim.Islem.CikisTarihi.HasValue ? bekleyen.IlkTartim.Islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
+                IlkCikisSaati = bekleyen.IlkTartim.Islem.CikisTarihi.HasValue ? bekleyen.IlkTartim.Islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
                 IlkTartimTarihi = bekleyen.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
                 IlkTartimSaati = bekleyen.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
                 IlkAgirlik = bekleyen.IlkTartim.AgirlikKg.ToString("N0"),
@@ -805,6 +809,10 @@ namespace KantarPro.Desktop
                         {
                             Plaka = dosya.Arac.Plaka,
                             FirmaAdi = dosya.Arac.FirmaAdi,
+                            IlkGirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
+                            IlkGirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),
+                            IlkCikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
+                            IlkCikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
                             IlkTartimTarihi = dosya.IlkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
                             IlkTartimSaati = dosya.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
                             IlkAgirlik = dosya.IlkTartim.AgirlikKg.ToString("N0"),
@@ -826,6 +834,7 @@ namespace KantarPro.Desktop
                         .ToList();
 
                     ExitVehicles.Clear();
+                    var finalExitRows = new System.Collections.Generic.List<Tuple<DateTime, VehicleMovementRow>>();
                     foreach (var islem in cikislar)
                     {
                         var dosya = GetKantarDosyasiForIslem(context, islem);
@@ -862,7 +871,12 @@ namespace KantarPro.Desktop
                             Durum = dosya != null ? GetVisitRowDurum(islem, dosya) : "Kesin cikis",
                             KesinCikisMi = true
                         };
-                        ExitVehicles.Add(cikisSatiri);
+                        finalExitRows.Add(Tuple.Create(islem.CikisTarihi ?? islem.GirisTarihi, cikisSatiri));
+                    }
+
+                    foreach (var row in finalExitRows.OrderByDescending(x => x.Item1).Select(x => x.Item2))
+                    {
+                        ExitVehicles.Add(row);
                     }
 
                     EntryVehiclesView.Refresh();
@@ -1918,6 +1932,10 @@ namespace KantarPro.Desktop
     {
         public string Plaka { get; set; }
         public string FirmaAdi { get; set; }
+        public string IlkGirisTarihi { get; set; }
+        public string IlkGirisSaati { get; set; }
+        public string IlkCikisTarihi { get; set; }
+        public string IlkCikisSaati { get; set; }
         public string IlkTartimTarihi { get; set; }
         public string IlkTartimSaati { get; set; }
         public string IlkAgirlik { get; set; }

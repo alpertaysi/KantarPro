@@ -25,15 +25,15 @@ namespace KantarPro.Desktop
         private void LoadData()
         {
             PlateTextBox.Text = _pendingRow.Plaka;
-            EntryDateTextBox.Text = _pendingRow.IlkTartimTarihi;
-            EntryTimeTextBox.Text = _pendingRow.IlkTartimSaati;
-            ExitDateTextBox.Text = _secondWeighingDate.ToString("dd.MM.yyyy");
-            ExitTimeTextBox.Text = _secondWeighingDate.ToString("HH:mm:ss");
+            EntryDateTextBox.Text = string.IsNullOrWhiteSpace(_pendingRow.IlkGirisTarihi) ? _pendingRow.IlkTartimTarihi : _pendingRow.IlkGirisTarihi;
+            EntryTimeTextBox.Text = string.IsNullOrWhiteSpace(_pendingRow.IlkGirisSaati) ? _pendingRow.IlkTartimSaati : _pendingRow.IlkGirisSaati;
+            ExitDateTextBox.Text = _pendingRow.IlkCikisTarihi;
+            ExitTimeTextBox.Text = _pendingRow.IlkCikisSaati;
             CustomerComboBox.Text = _pendingRow.FirmaAdi;
             DescriptionComboBox.Text = _pendingRow.Aciklama;
             FirstWeightTextBox.Text = _pendingRow.IlkAgirlik;
-            SecondWeightTextBox.Text = FormatWeight(_scaleWeightKg);
-            CalculateNet();
+            SecondWeightTextBox.Text = "0";
+            NetWeightTextBox.Text = "0";
         }
 
         private void TakeWeight_Click(object sender, RoutedEventArgs e)
