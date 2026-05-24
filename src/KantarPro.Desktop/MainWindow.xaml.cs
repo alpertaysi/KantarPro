@@ -789,7 +789,10 @@ namespace KantarPro.Desktop
                     foreach (var dosya in bekleyenKantarDosyalari)
                     {
                         var islem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
-                        if (dosya.IlkTartim == null || (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz))
+                        if (dosya.IlkTartim == null ||
+                            islem == null ||
+                            islem.Durum != KantarSabitleri.IslemDurumu.CikisYapti ||
+                            islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
                         {
                             continue;
                         }
