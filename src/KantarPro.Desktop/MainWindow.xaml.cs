@@ -725,6 +725,9 @@ namespace KantarPro.Desktop
             {
                 using (var context = new KantarDbContext())
                 {
+                    var sahaServisi = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    sahaServisi.SuresiDolanKantarDosyalariniKapat(DateTime.Today, 10);
+
                     var bugun = DateTime.Today;
                     var yarin = bugun.AddDays(1);
                     var listeHesapTarihi = GetListeHesapTarihi();
@@ -793,8 +796,7 @@ namespace KantarPro.Desktop
                         var islem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
                         if (dosya.IlkTartim == null ||
                             islem == null ||
-                            islem.Durum != KantarSabitleri.IslemDurumu.CikisYapti ||
-                            islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
+                            islem.Durum != KantarSabitleri.IslemDurumu.CikisYapti)
                         {
                             continue;
                         }
@@ -1090,16 +1092,25 @@ namespace KantarPro.Desktop
 
         private static bool AltCikisListesindeGoster(Islem islem, KantarDosyasi dosya, Tartim ilkTartim, Tartim ikinciTartim)
         {
-            if (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
-            {
-                return true;
-            }
-
             if (islem != null &&
                 dosya != null &&
                 dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
                 dosya.IlkTartim != null &&
                 dosya.IlkTartim.IslemId == islem.IslemId)
+            {
+                return false;
+            }
+
+            if (islem != null &&
+                dosya != null &&
+                dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu &&
+                dosya.IlkTartim != null &&
+                dosya.IlkTartim.IslemId == islem.IslemId)
+            {
+                return true;
+            }
+
+            if (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz && dosya == null)
             {
                 return true;
             }
