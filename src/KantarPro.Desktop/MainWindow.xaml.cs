@@ -756,8 +756,8 @@ namespace KantarPro.Desktop
                             FirmaAdi = islem.Arac.FirmaAdi,
                             GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
                             GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
-                            DoluCikisTarihi = FormatDoluCikisTarihi(islem),
-                            DoluCikisSaati = FormatDoluCikisSaati(islem),
+                            DoluCikisTarihi = FormatDoluCikisTarihi(islem, ilkTartim, ikinciTartim),
+                            DoluCikisSaati = FormatDoluCikisSaati(islem, ilkTartim, ikinciTartim),
                             BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
                             BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
                             Saat = FormatSaatSaniyeli(islem.GirisTarihi),
@@ -849,8 +849,8 @@ namespace KantarPro.Desktop
                             FirmaAdi = islem.Arac.FirmaAdi,
                             GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
                             GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
-                            DoluCikisTarihi = FormatDoluCikisTarihi(islem),
-                            DoluCikisSaati = FormatDoluCikisSaati(islem),
+                            DoluCikisTarihi = FormatDoluCikisTarihi(islem, ilkTartim, ikinciTartim),
+                            DoluCikisSaati = FormatDoluCikisSaati(islem, ilkTartim, ikinciTartim),
                             BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
                             BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
                             CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
@@ -1241,15 +1241,15 @@ namespace KantarPro.Desktop
             return FormatSaatSaniyeli(ilkTartim != null ? ilkTartim.TartimTarihi : islem.GirisTarihi);
         }
 
-        private static string FormatDoluCikisTarihi(Islem islem)
+        private static string FormatDoluCikisTarihi(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
         {
-            var tarih = GetDoluCikisTarihi(islem);
+            var tarih = GetDoluCikisTarihi(islem, ilkTartim, ikinciTartim);
             return tarih.HasValue ? tarih.Value.ToString("dd.MM.yyyy") : "";
         }
 
-        private static string FormatDoluCikisSaati(Islem islem)
+        private static string FormatDoluCikisSaati(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
         {
-            var tarih = GetDoluCikisTarihi(islem);
+            var tarih = GetDoluCikisTarihi(islem, ilkTartim, ikinciTartim);
             return tarih.HasValue ? tarih.Value.ToString("HH:mm:ss") : "";
         }
 
@@ -1275,8 +1275,15 @@ namespace KantarPro.Desktop
             return ilkTartim.IslemId != ikinciTartim.IslemId ? ikinciTartim.Islem : null;
         }
 
-        private static DateTime? GetDoluCikisTarihi(Islem islem)
+        private static DateTime? GetDoluCikisTarihi(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
         {
+            if (ilkTartim != null &&
+                ikinciTartim != null &&
+                ilkTartim.IslemId == ikinciTartim.IslemId)
+            {
+                return null;
+            }
+
             var ilkTahsilat = islem.Ucretler
                 .Where(x => x.TahsilTarihi.HasValue)
                 .Select(x => x.TahsilTarihi)
