@@ -172,7 +172,6 @@
                                 <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
                                 <StackPanel Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
                                     <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
-                                    <CheckBox x:Name="ManuelTartimCheckBox" Content="Cikis tartimi yapilacak" FontSize="13" Margin="0,8,0,0" />
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -192,7 +191,6 @@
                         </Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,4">
                             <TextBlock Text="Dolu-Boş Kantar Hareketleri" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBox x:Name="DashboardEntrySearchTextBox" DockPanel.Dock="Right" Width="170" Height="26" Padding="6,2" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="EntrySearchTextBox_TextChanged" />
                         </DockPanel>
                         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                             <DataGrid x:Name="EntryVehiclesGrid" MinWidth="980" ItemsSource="{Binding EntryVehiclesView}" SelectionChanged="EntryVehiclesGrid_SelectionChanged" PreviewTextInput="EntryVehiclesGrid_PreviewTextInput" PreviewKeyDown="EntryVehiclesGrid_PreviewKeyDown" PreviewMouseRightButtonDown="EntryVehiclesGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -204,8 +202,22 @@
                                 </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="110" />
-                                    <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="88" />
-                                    <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                    <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Plaka" />
+                                                <TextBox Tag="EntryPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="146">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Firma" />
+                                                <TextBox Tag="EntryFirma" Width="118" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="Son Tartim Tarihi" Binding="{Binding SonTartimTarihi}" Width="108" />
                                     <DataGridTextColumn Header="Son Tartim Saati" Binding="{Binding SonTartimSaati}" Width="104" />
                                     <DataGridTextColumn Header="Tartim" Binding="{Binding SonTartim}" Width="96" />
@@ -233,17 +245,33 @@
                         </Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,4">
                             <TextBlock Text="Kesin Cikis Yapilanlar" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBox x:Name="DashboardExitSearchTextBox" DockPanel.Dock="Right" Width="145" Height="26" Padding="6,2" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="ExitSearchTextBox_TextChanged" />
                         </DockPanel>
                         <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Plaka No:" Binding="{Binding Plaka}" Width="82" />
+                                <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                                    <DataGridTextColumn.Header>
+                                        <StackPanel>
+                                            <TextBlock Text="Plaka" />
+                                            <TextBox Tag="ExitPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                        </StackPanel>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="130">
+                                    <DataGridTextColumn.Header>
+                                        <StackPanel>
+                                            <TextBlock Text="Firma" />
+                                            <TextBox Tag="ExitFirma" Width="104" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                        </StackPanel>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="D. Gelis Tarihi" Binding="{Binding GirisTarihi}" Width="88" />
                                 <DataGridTextColumn Header="D. Gelis Saati" Binding="{Binding GirisSaati}" Width="76" />
                                 <DataGridTextColumn Header="D. Cikis Tarihi" Binding="{Binding DoluCikisTarihi}" Width="88" />
                                 <DataGridTextColumn Header="D. Cikis Saati" Binding="{Binding DoluCikisSaati}" Width="76" />
-                                <DataGridTextColumn Header="B. Gelis Tarihi" Binding="{Binding IkinciTartimTarihi}" Width="88" />
-                                <DataGridTextColumn Header="B. Gelis Saati" Binding="{Binding IkinciTartimSaati}" Width="76" />
+                                <DataGridTextColumn Header="B. Gelis Tarihi" Binding="{Binding BosGelisTarihi}" Width="88" />
+                                <DataGridTextColumn Header="B. Gelis Saati" Binding="{Binding BosGelisSaati}" Width="76" />
+                                <DataGridTextColumn Header="2. Tartim Tarihi" Binding="{Binding IkinciTartimTarihi}" Width="98" />
+                                <DataGridTextColumn Header="2. Tartim Saati" Binding="{Binding IkinciTartimSaati}" Width="90" />
                                 <DataGridTextColumn Header="1.KG:" Binding="{Binding Tartim}" Width="78" />
                                 <DataGridTextColumn Header="2.KG:" Binding="{Binding IkinciTartim}" Width="78" />
                                 <DataGridTextColumn Header="Net:" Binding="{Binding NetAgirlik}" Width="78" />
@@ -382,13 +410,26 @@
                                 <TextBlock Text="Liste SQL veritabanindan yenilenir." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
                             </StackPanel>
                             <Button DockPanel.Dock="Right" Content="Yenile" Width="110" Click="RefreshButton_Click" />
-                            <TextBox x:Name="EntryPageEntrySearchTextBox" DockPanel.Dock="Right" Width="170" Height="32" FontSize="13" FontWeight="Normal" Margin="0,0,10,0" ToolTip="Plaka ara" TextChanged="EntrySearchTextBox_TextChanged" />
                         </DockPanel>
 
                         <DataGrid Grid.Row="1" ItemsSource="{Binding EntryVehiclesView}" SelectionChanged="EntryVehiclesGrid_SelectionChanged" PreviewTextInput="EntryVehiclesGrid_PreviewTextInput" PreviewKeyDown="EntryVehiclesGrid_PreviewKeyDown">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
-                                <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                                    <DataGridTextColumn.Header>
+                                        <StackPanel>
+                                            <TextBlock Text="Plaka" />
+                                            <TextBox Tag="EntryPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                        </StackPanel>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="146">
+                                    <DataGridTextColumn.Header>
+                                        <StackPanel>
+                                            <TextBlock Text="Firma" />
+                                            <TextBox Tag="EntryFirma" Width="118" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                        </StackPanel>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
                                 <DataGridTextColumn Header="Giris Saati" Binding="{Binding Saat}" Width="90" />
                                 <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />
@@ -436,8 +477,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="ExitTartimIsteniyorCheckBox" Content="Cikis tartimi yapilacak" FontSize="15" Margin="0,0,12,0" />
-                                <CheckBox x:Name="ExitManuelTartimCheckBox" Grid.Column="1" Content="Manuel tartim" FontSize="15" />
+                                <CheckBox x:Name="ExitManuelTartimCheckBox" Content="Manuel tartim" FontSize="15" />
                             </Grid>
 
                             <Grid Margin="0,0,0,18">
@@ -487,13 +527,26 @@
                                     <TextBlock Text="Cikis yapilacak araci listeden sec." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
                                 </StackPanel>
                                 <Button DockPanel.Dock="Right" Content="Yenile" Width="110" Click="RefreshButton_Click" />
-                                <TextBox x:Name="ExitPageEntrySearchTextBox" DockPanel.Dock="Right" Width="170" Height="32" FontSize="13" FontWeight="Normal" Margin="0,0,10,0" ToolTip="Plaka ara" TextChanged="EntrySearchTextBox_TextChanged" />
                             </DockPanel>
 
                             <DataGrid x:Name="ExitPageEntryVehiclesGrid" Grid.Row="1" ItemsSource="{Binding EntryVehiclesView}" SelectionChanged="ExitPageEntryVehiclesGrid_SelectionChanged" PreviewTextInput="EntryVehiclesGrid_PreviewTextInput" PreviewKeyDown="EntryVehiclesGrid_PreviewKeyDown">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
-                                    <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                    <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Plaka" />
+                                                <TextBox Tag="EntryPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="146">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Firma" />
+                                                <TextBox Tag="EntryFirma" Width="118" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
                                     <DataGridTextColumn Header="Giris Saati" Binding="{Binding Saat}" Width="90" />
                                     <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />
@@ -514,12 +567,25 @@
                             </Grid.RowDefinitions>
                             <DockPanel Margin="0,0,0,12">
                                 <TextBlock Text="Bugun Cikis Yapan Araclar" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
-                                <TextBox x:Name="ExitPageExitSearchTextBox" DockPanel.Dock="Right" Width="170" Height="32" FontSize="13" FontWeight="Normal" ToolTip="Plaka ara" TextChanged="ExitSearchTextBox_TextChanged" />
                             </DockPanel>
                             <DataGrid Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
-                                    <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="130" />
+                                    <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Plaka" />
+                                                <TextBox Tag="ExitPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="146">
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="Firma" />
+                                                <TextBox Tag="ExitFirma" Width="118" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
                                     <DataGridTextColumn Header="Cikis Saati" Binding="{Binding Saat}" Width="90" />
                                     <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />

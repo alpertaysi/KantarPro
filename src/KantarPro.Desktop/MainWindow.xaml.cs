@@ -26,8 +26,10 @@ namespace KantarPro.Desktop
         public ICollectionView EntryVehiclesView { get; private set; }
         public ICollectionView ExitVehiclesView { get; private set; }
 
-        private string _entryVehicleFilter = string.Empty;
-        private string _exitVehicleFilter = string.Empty;
+        private string _entryPlakaFilter = string.Empty;
+        private string _entryFirmaFilter = string.Empty;
+        private string _exitPlakaFilter = string.Empty;
+        private string _exitFirmaFilter = string.Empty;
 
         public MainWindow()
         {
@@ -103,7 +105,6 @@ namespace KantarPro.Desktop
                     FirmaTextBox.Clear();
                     AciklamaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
-                    ManuelTartimCheckBox.IsChecked = false;
                     return;
                 }
 
@@ -115,7 +116,6 @@ namespace KantarPro.Desktop
                 FirmaTextBox.Clear();
                 AciklamaTextBox.Clear();
                 AgirlikTextBox.Text = "0";
-                ManuelTartimCheckBox.IsChecked = false;
             }
             catch (Exception ex)
             {
@@ -160,13 +160,12 @@ namespace KantarPro.Desktop
             try
             {
                 var plaka = ExitPlakaTextBox.Text;
-                var tartimIsteniyor = ExitTartimIsteniyorCheckBox.IsChecked == true || ExitManuelTartimCheckBox.IsChecked == true;
+                var tartimIsteniyor = ExitManuelTartimCheckBox.IsChecked == true;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(ExitAgirlikTextBox.Text) : (decimal?)null;
                 var cikisTarihi = ParseIslemTarihi(ExitCikisTarihiTextBox.Text, "Cikis tarihi");
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
-                    ClearVehicleFilters();
                     LoadDashboardData();
                     MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
                     ClearExitPageForm();
@@ -193,19 +192,17 @@ namespace KantarPro.Desktop
             try
             {
                 var plaka = GetPlakaForOperation();
-                var tartimIsteniyor = ManuelTartimCheckBox.IsChecked == true;
-                var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
+                var tartimIsteniyor = false;
+                var agirlik = (decimal?)null;
                 var cikisTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, "Cikis tarihi");
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
-                    ClearVehicleFilters();
                     LoadDashboardData();
                     MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
                     PlakaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
                     CikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
-                    ManuelTartimCheckBox.IsChecked = false;
                 }
             }
             catch (Exception ex)
@@ -528,7 +525,6 @@ namespace KantarPro.Desktop
             ExitPlakaTextBox.Clear();
             ExitCikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
             ExitAgirlikTextBox.Text = "0";
-            ExitTartimIsteniyorCheckBox.IsChecked = false;
             ExitManuelTartimCheckBox.IsChecked = false;
             ExitOpenEntryInfoText.Text = "Liste secimi yap veya plaka girip acik girisi bul.";
             ExitPlakaTextBox.Focus();
@@ -762,6 +758,8 @@ namespace KantarPro.Desktop
                             GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
                             DoluCikisTarihi = FormatDoluCikisTarihi(islem),
                             DoluCikisSaati = FormatDoluCikisSaati(islem),
+                            BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
+                            BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
                             Saat = FormatSaatSaniyeli(islem.GirisTarihi),
                             CikisTarihi = "",
                             CikisSaati = "",
@@ -853,6 +851,8 @@ namespace KantarPro.Desktop
                             GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
                             DoluCikisTarihi = FormatDoluCikisTarihi(islem),
                             DoluCikisSaati = FormatDoluCikisSaati(islem),
+                            BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
+                            BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
                             CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
                             CikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
                             Saat = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
@@ -1253,6 +1253,28 @@ namespace KantarPro.Desktop
             return tarih.HasValue ? tarih.Value.ToString("HH:mm:ss") : "";
         }
 
+        private static string FormatBosGelisTarihi(Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            var islem = GetIkinciZiyaretIslemi(ilkTartim, ikinciTartim);
+            return islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy") : "";
+        }
+
+        private static string FormatBosGelisSaati(Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            var islem = GetIkinciZiyaretIslemi(ilkTartim, ikinciTartim);
+            return islem != null ? islem.GirisTarihi.ToString("HH:mm:ss") : "";
+        }
+
+        private static Islem GetIkinciZiyaretIslemi(Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            if (ilkTartim == null || ikinciTartim == null || ikinciTartim.Islem == null)
+            {
+                return null;
+            }
+
+            return ilkTartim.IslemId != ikinciTartim.IslemId ? ikinciTartim.Islem : null;
+        }
+
         private static DateTime? GetDoluCikisTarihi(Islem islem)
         {
             var ilkTahsilat = islem.Ucretler
@@ -1428,6 +1450,11 @@ namespace KantarPro.Desktop
         private static string NormalizePlaka(string plaka)
         {
             return (plaka ?? string.Empty).Trim().ToUpperInvariant().Replace(" ", string.Empty);
+        }
+
+        private static string NormalizeText(string text)
+        {
+            return (text ?? string.Empty).Trim().ToUpperInvariant();
         }
 
         private static string YukDurumuFromGelisTuru(string gelisTuru)
@@ -1649,27 +1676,46 @@ namespace KantarPro.Desktop
             DoluBosTahakkukTextBox.Text = FormatPara(732m);
         }
 
-        private void EntrySearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ColumnFilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var textBox = sender as TextBox;
-            _entryVehicleFilter = NormalizePlaka(textBox != null ? textBox.Text : string.Empty);
-            SyncEntrySearchTextBoxes(textBox);
-            EntryVehiclesView.Refresh();
-            SelectFirstVisibleVehicle(EntryVehiclesView, EntryVehiclesGrid);
-            SelectFirstVisibleVehicle(EntryVehiclesView, ExitPageEntryVehiclesGrid);
-        }
+            var tag = textBox != null ? textBox.Tag as string : null;
+            var value = textBox != null ? textBox.Text : string.Empty;
 
-        private void ExitSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var textBox = sender as TextBox;
-            _exitVehicleFilter = NormalizePlaka(textBox != null ? textBox.Text : string.Empty);
-            SyncExitSearchTextBoxes(textBox);
-            ExitVehiclesView.Refresh();
-            SelectFirstVisibleVehicle(ExitVehiclesView, ExitVehiclesGrid);
+            switch (tag)
+            {
+                case "EntryPlaka":
+                    _entryPlakaFilter = NormalizePlaka(value);
+                    EntryVehiclesView.Refresh();
+                    SelectFirstVisibleVehicle(EntryVehiclesView, EntryVehiclesGrid);
+                    SelectFirstVisibleVehicle(EntryVehiclesView, ExitPageEntryVehiclesGrid);
+                    break;
+                case "EntryFirma":
+                    _entryFirmaFilter = NormalizeText(value);
+                    EntryVehiclesView.Refresh();
+                    SelectFirstVisibleVehicle(EntryVehiclesView, EntryVehiclesGrid);
+                    SelectFirstVisibleVehicle(EntryVehiclesView, ExitPageEntryVehiclesGrid);
+                    break;
+                case "ExitPlaka":
+                    _exitPlakaFilter = NormalizePlaka(value);
+                    ExitVehiclesView.Refresh();
+                    SelectFirstVisibleVehicle(ExitVehiclesView, ExitVehiclesGrid);
+                    break;
+                case "ExitFirma":
+                    _exitFirmaFilter = NormalizeText(value);
+                    ExitVehiclesView.Refresh();
+                    SelectFirstVisibleVehicle(ExitVehiclesView, ExitVehiclesGrid);
+                    break;
+            }
         }
 
         private void EntryVehiclesGrid_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
+            if (e.OriginalSource is TextBox)
+            {
+                return;
+            }
+
             if (AppendEntryGridSearch(e.Text, sender as DataGrid))
             {
                 e.Handled = true;
@@ -1678,6 +1724,11 @@ namespace KantarPro.Desktop
 
         private void ExitVehiclesGrid_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
+            if (e.OriginalSource is TextBox)
+            {
+                return;
+            }
+
             if (AppendExitGridSearch(e.Text, sender as DataGrid))
             {
                 e.Handled = true;
@@ -1716,47 +1767,20 @@ namespace KantarPro.Desktop
 
         private bool AppendEntryGridSearch(string text, DataGrid sourceGrid)
         {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return false;
-            }
-
-            _entryVehicleFilter = NormalizePlaka(_entryVehicleFilter + text);
-            SyncEntrySearchTextBoxes(null);
-            EntryVehiclesView.Refresh();
-            SelectFirstVisibleVehicle(EntryVehiclesView, sourceGrid);
-            return true;
+            return false;
         }
 
         private bool AppendExitGridSearch(string text, DataGrid sourceGrid)
         {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return false;
-            }
-
-            _exitVehicleFilter = NormalizePlaka(_exitVehicleFilter + text);
-            SyncExitSearchTextBoxes(null);
-            ExitVehiclesView.Refresh();
-            SelectFirstVisibleVehicle(ExitVehiclesView, sourceGrid);
-            return true;
+            return false;
         }
 
         private bool HandleEntryGridSearchKey(Key key, DataGrid sourceGrid)
         {
-            if (key == Key.Back && _entryVehicleFilter.Length > 0)
-            {
-                _entryVehicleFilter = _entryVehicleFilter.Substring(0, _entryVehicleFilter.Length - 1);
-                SyncEntrySearchTextBoxes(null);
-                EntryVehiclesView.Refresh();
-                SelectFirstVisibleVehicle(EntryVehiclesView, sourceGrid);
-                return true;
-            }
-
             if (key == Key.Escape)
             {
-                _entryVehicleFilter = string.Empty;
-                SyncEntrySearchTextBoxes(null);
+                _entryPlakaFilter = string.Empty;
+                _entryFirmaFilter = string.Empty;
                 EntryVehiclesView.Refresh();
                 SelectFirstVisibleVehicle(EntryVehiclesView, sourceGrid);
                 return true;
@@ -1767,19 +1791,10 @@ namespace KantarPro.Desktop
 
         private bool HandleExitGridSearchKey(Key key, DataGrid sourceGrid)
         {
-            if (key == Key.Back && _exitVehicleFilter.Length > 0)
-            {
-                _exitVehicleFilter = _exitVehicleFilter.Substring(0, _exitVehicleFilter.Length - 1);
-                SyncExitSearchTextBoxes(null);
-                ExitVehiclesView.Refresh();
-                SelectFirstVisibleVehicle(ExitVehiclesView, sourceGrid);
-                return true;
-            }
-
             if (key == Key.Escape)
             {
-                _exitVehicleFilter = string.Empty;
-                SyncExitSearchTextBoxes(null);
+                _exitPlakaFilter = string.Empty;
+                _exitFirmaFilter = string.Empty;
                 ExitVehiclesView.Refresh();
                 SelectFirstVisibleVehicle(ExitVehiclesView, sourceGrid);
                 return true;
@@ -1790,29 +1805,35 @@ namespace KantarPro.Desktop
 
         private bool FilterEntryVehicle(object item)
         {
-            return FilterVehicle(item, _entryVehicleFilter);
+            return FilterVehicle(item, _entryPlakaFilter, _entryFirmaFilter);
         }
 
         private bool FilterExitVehicle(object item)
         {
-            return FilterVehicle(item, _exitVehicleFilter);
+            return FilterVehicle(item, _exitPlakaFilter, _exitFirmaFilter);
         }
 
-        private static bool FilterVehicle(object item, string filter)
+        private static bool FilterVehicle(object item, string plakaFilter, string firmaFilter)
         {
-            if (string.IsNullOrWhiteSpace(filter))
-            {
-                return true;
-            }
-
             var row = item as VehicleMovementRow;
             if (row == null)
             {
                 return false;
             }
 
-            var plaka = NormalizePlaka(row.Plaka);
-            return plaka.StartsWith(filter, StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(plakaFilter) &&
+                !NormalizePlaka(row.Plaka).StartsWith(plakaFilter, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(firmaFilter) &&
+                !NormalizeText(row.FirmaAdi).Contains(firmaFilter))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static string GetSearchTextFromKey(Key key)
@@ -1858,34 +1879,12 @@ namespace KantarPro.Desktop
             grid.Focus();
         }
 
-        private void SyncEntrySearchTextBoxes(TextBox source)
-        {
-            SetTextBoxText(DashboardEntrySearchTextBox, _entryVehicleFilter, source);
-            SetTextBoxText(EntryPageEntrySearchTextBox, _entryVehicleFilter, source);
-            SetTextBoxText(ExitPageEntrySearchTextBox, _entryVehicleFilter, source);
-        }
-
-        private void SyncExitSearchTextBoxes(TextBox source)
-        {
-            SetTextBoxText(DashboardExitSearchTextBox, _exitVehicleFilter, source);
-            SetTextBoxText(ExitPageExitSearchTextBox, _exitVehicleFilter, source);
-        }
-
         private void ClearVehicleFilters()
         {
-            _entryVehicleFilter = string.Empty;
-            _exitVehicleFilter = string.Empty;
-            SyncEntrySearchTextBoxes(null);
-            SyncExitSearchTextBoxes(null);
-        }
-
-        private static void SetTextBoxText(TextBox textBox, string text, TextBox source)
-        {
-            if (textBox != null && !ReferenceEquals(textBox, source) && textBox.Text != text)
-            {
-                textBox.Text = text;
-                textBox.CaretIndex = textBox.Text.Length;
-            }
+            _entryPlakaFilter = string.Empty;
+            _entryFirmaFilter = string.Empty;
+            _exitPlakaFilter = string.Empty;
+            _exitFirmaFilter = string.Empty;
         }
     }
 
@@ -1899,6 +1898,8 @@ namespace KantarPro.Desktop
         public string CikisSaati { get; set; }
         public string DoluCikisTarihi { get; set; }
         public string DoluCikisSaati { get; set; }
+        public string BosGelisTarihi { get; set; }
+        public string BosGelisSaati { get; set; }
         public string IlkTartimTarihi { get; set; }
         public string IlkTartimSaati { get; set; }
         public string IkinciTartimTarihi { get; set; }
