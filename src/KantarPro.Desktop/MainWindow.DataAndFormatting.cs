@@ -113,21 +113,21 @@ namespace KantarPro.Desktop
                             GirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),
                             CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
                             CikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
-                            IlkTartim = FormatTartimDegeri(ilkTartim),
-                            IkinciTartim = FormatTartimDegeri(ikinciTartim),
+                            IlkTartim = DashboardFormat.TartimDegeri(ilkTartim),
+                            IkinciTartim = DashboardFormat.TartimDegeri(ikinciTartim),
                             NetAgirlik = FormatNetAgirlik(ilkTartim, ikinciTartim),
-                            GirisCikisUcreti = FormatPara(girisCikis),
-                            TartimUcreti = FormatPara(tartim),
-                            BeklemeUcreti = FormatPara(bekleme),
-                            ToplamUcret = FormatPara(toplam)
+                            GirisCikisUcreti = DashboardFormat.Para(girisCikis),
+                            TartimUcreti = DashboardFormat.Para(tartim),
+                            BeklemeUcreti = DashboardFormat.Para(bekleme),
+                            ToplamUcret = DashboardFormat.Para(toplam)
                         });
                     }
 
                     RevenueRowCountText.Text = "Kayit: " + DailyRevenueRows.Count;
-                    RevenueEntryExitTotalText.Text = FormatPara(girisToplam);
-                    RevenueWeighingTotalText.Text = FormatPara(tartimToplam);
-                    RevenueWaitingTotalText.Text = FormatPara(beklemeToplam);
-                    RevenueGrandTotalText.Text = FormatPara(genelToplam);
+                    RevenueEntryExitTotalText.Text = DashboardFormat.Para(girisToplam);
+                    RevenueWeighingTotalText.Text = DashboardFormat.Para(tartimToplam);
+                    RevenueWaitingTotalText.Text = DashboardFormat.Para(beklemeToplam);
+                    RevenueGrandTotalText.Text = DashboardFormat.Para(genelToplam);
                     DailyRevenueView.Refresh();
                 }
             }
@@ -160,20 +160,20 @@ namespace KantarPro.Desktop
                 "Firma: " + (string.IsNullOrWhiteSpace(row.FirmaAdi) ? "-" : row.FirmaAdi) + Environment.NewLine +
                 "Durum: " + row.Durum + Environment.NewLine + Environment.NewLine +
                 "Dolu Hareket" + Environment.NewLine +
-                "Gelis: " + FormatBosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + FormatBosDeger(row.Tartim) + Environment.NewLine +
-                "Cikis: " + FormatBosDeger(row.DoluCikisTarihi + " " + row.DoluCikisSaati) + Environment.NewLine + Environment.NewLine +
+                "Gelis: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + DashboardFormat.BosDeger(row.Tartim) + Environment.NewLine +
+                "Cikis: " + DashboardFormat.BosDeger(row.DoluCikisTarihi + " " + row.DoluCikisSaati) + Environment.NewLine + Environment.NewLine +
                 "Bos Hareket" + Environment.NewLine +
-                "Gelis: " + FormatBosDeger(row.IkinciTartimTarihi + " " + row.IkinciTartimSaati) + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(row.IkinciTartim) + Environment.NewLine +
-                "Cikis: " + FormatBosDeger(row.CikisTarihi + " " + row.CikisSaati) + Environment.NewLine +
-                "Net: " + FormatBosDeger(row.NetAgirlik) + Environment.NewLine + Environment.NewLine +
+                "Gelis: " + DashboardFormat.BosDeger(row.IkinciTartimTarihi + " " + row.IkinciTartimSaati) + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(row.IkinciTartim) + Environment.NewLine +
+                "Cikis: " + DashboardFormat.BosDeger(row.CikisTarihi + " " + row.CikisSaati) + Environment.NewLine +
+                "Net: " + DashboardFormat.BosDeger(row.NetAgirlik) + Environment.NewLine + Environment.NewLine +
                 "Ucret Dokumu" + Environment.NewLine +
-                "Giris-Cikis: " + FormatBosDeger(row.GirisCikisUcreti) + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(row.TartimUcreti) + Environment.NewLine +
-                "Bekleme: " + FormatBosDeger(row.BeklemeUcreti) + Environment.NewLine +
-                "Toplam Tahakkuk: " + FormatBosDeger(row.Ucret) + Environment.NewLine +
-                "Tahsilat: " + FormatBosDeger(row.Tahsilat) +
+                "Giris-Cikis: " + DashboardFormat.BosDeger(row.GirisCikisUcreti) + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(row.TartimUcreti) + Environment.NewLine +
+                "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
+                "Toplam Tahakkuk: " + DashboardFormat.BosDeger(row.Ucret) + Environment.NewLine +
+                "Tahsilat: " + DashboardFormat.BosDeger(row.Tahsilat) +
                 GetPaymentHistoryText(row.Plaka);
         }
 
@@ -198,17 +198,17 @@ namespace KantarPro.Desktop
                 {
                     return
                         "Plaka: " + row.Plaka + Environment.NewLine +
-                        "Firma: " + FormatBosDeger(row.FirmaAdi) + Environment.NewLine +
-                        "Durum: " + FormatBosDeger(row.Aciklama) + Environment.NewLine +
-                        "Ilk Tartim: " + FormatBosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + FormatBosDeger(row.IlkAgirlik + " kg");
+                        "Firma: " + DashboardFormat.BosDeger(row.FirmaAdi) + Environment.NewLine +
+                        "Durum: " + DashboardFormat.BosDeger(row.Aciklama) + Environment.NewLine +
+                        "Ilk Tartim: " + DashboardFormat.BosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + DashboardFormat.BosDeger(row.IlkAgirlik + " kg");
                 }
 
                 var ilkIslem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
                 return
                     "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
-                    "Firma: " + FormatBosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
+                    "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
                     "Durum: " + GetBeklenenTartimDurumu(dosya.IlkTartim) + Environment.NewLine +
-                    "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
+                    "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                     "Ilk Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
                     "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
@@ -260,9 +260,9 @@ namespace KantarPro.Desktop
                 {
                     return
                         "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
-                        "Firma: " + FormatBosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
+                        "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
                         "Durum: " + GetVisitRowDurum(ilkIslem, dosya) + Environment.NewLine +
-                        "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
+                        "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                         "Saha Ziyareti" + Environment.NewLine +
                         FormatSingleVisitDoluBosBlock(ilkIslem, dosya.IlkTartim, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
                         "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
@@ -271,9 +271,9 @@ namespace KantarPro.Desktop
 
                 return
                     "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
-                    "Firma: " + FormatBosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
+                    "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
                     "Durum: " + GetVisitRowDurum(ikinciIslem ?? ilkIslem, dosya) + Environment.NewLine +
-                    "Net: " + FormatBosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
+                    "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                     "Ilk Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
                     "Ikinci Ziyaret" + Environment.NewLine +
@@ -309,7 +309,7 @@ namespace KantarPro.Desktop
                 var satirlar = tahsilatlar.Select(x =>
                     x.Key.TahsilatNo + " | " +
                     x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
-                    FormatPara(x.Sum(u => u.Tutar)));
+                    DashboardFormat.Para(x.Sum(u => u.Tutar)));
 
                 return Environment.NewLine + Environment.NewLine +
                     "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
@@ -325,15 +325,15 @@ namespace KantarPro.Desktop
             }
 
             return
-                "Gelis: " + FormatBosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
-                "Cikis: " + FormatBosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "Giris-Cikis: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
-                "Bekleme: " + FormatBosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
-                "Tahakkuk: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahakkuk) : "") + Environment.NewLine +
-                "Tahsilat: " + FormatBosDeger(islem != null ? FormatPara(islem.ToplamTahsilat) : "") + Environment.NewLine +
-                "Tahsilat No: " + FormatBosDeger(GetLastTahsilatNo(islem));
+                "Gelis: " + DashboardFormat.BosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "Cikis: " + DashboardFormat.BosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Giris-Cikis: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
+                "Bekleme: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
+                "Tahakkuk: " + DashboardFormat.BosDeger(islem != null ? DashboardFormat.Para(islem.ToplamTahakkuk) : "") + Environment.NewLine +
+                "Tahsilat: " + DashboardFormat.BosDeger(islem != null ? DashboardFormat.Para(islem.ToplamTahsilat) : "") + Environment.NewLine +
+                "Tahsilat No: " + DashboardFormat.BosDeger(GetLastTahsilatNo(islem));
         }
 
         private static string FormatSingleVisitDoluBosBlock(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
@@ -345,15 +345,15 @@ namespace KantarPro.Desktop
 
             return
                 "Gelis: " + islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") + Environment.NewLine +
-                "Cikis: " + FormatBosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
-                "1. Tartim: " + FormatBosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "2. Tartim: " + FormatBosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "Giris-Cikis: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
-                "Tartim: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
-                "Bekleme: " + FormatBosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
-                "Tahakkuk: " + FormatBosDeger(FormatPara(islem.ToplamTahakkuk)) + Environment.NewLine +
-                "Tahsilat: " + FormatBosDeger(FormatPara(islem.ToplamTahsilat)) + Environment.NewLine +
-                "Tahsilat No: " + FormatBosDeger(GetLastTahsilatNo(islem));
+                "Cikis: " + DashboardFormat.BosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
+                "1. Tartim: " + DashboardFormat.BosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "2. Tartim: " + DashboardFormat.BosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Giris-Cikis: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
+                "Tartim: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
+                "Bekleme: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
+                "Tahakkuk: " + DashboardFormat.BosDeger(DashboardFormat.Para(islem.ToplamTahakkuk)) + Environment.NewLine +
+                "Tahsilat: " + DashboardFormat.BosDeger(DashboardFormat.Para(islem.ToplamTahsilat)) + Environment.NewLine +
+                "Tahsilat No: " + DashboardFormat.BosDeger(GetLastTahsilatNo(islem));
         }
 
         private static string FormatKantarDosyasiPaymentHistory(Islem ilkIslem, Islem ikinciIslem)
@@ -380,7 +380,7 @@ namespace KantarPro.Desktop
             return string.Join(Environment.NewLine, ucretler.Select(x =>
                 x.Key.TahsilatNo + " | " +
                 x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
-                FormatPara(x.Sum(u => u.Tutar))));
+                DashboardFormat.Para(x.Sum(u => u.Tutar))));
         }
 
         private static string GetLastTahsilatNo(Islem islem)
@@ -437,7 +437,7 @@ namespace KantarPro.Desktop
             var tartimWeight = tartim.AgirlikKg.ToString("N0") + " kg";
 
             return string.Equals(rowDate, tartimDate, StringComparison.Ordinal) ||
-                string.Equals(FormatBosDeger(agirlik), tartimWeight, StringComparison.Ordinal);
+                string.Equals(DashboardFormat.BosDeger(agirlik), tartimWeight, StringComparison.Ordinal);
         }
 
         private static bool AltCikisListesindeGoster(Islem islem, KantarDosyasi dosya, Tartim ilkTartim, Tartim ikinciTartim)
@@ -471,21 +471,6 @@ namespace KantarPro.Desktop
             }
 
             return ilkTartim == null && ikinciTartim == null;
-        }
-
-        private static string FormatSaat(DateTime tarih)
-        {
-            if (tarih.Date == DateTime.Today)
-            {
-                return tarih.ToString("HH:mm");
-            }
-
-            return tarih.ToString("dd.MM HH:mm");
-        }
-
-        private static string FormatSaatSaniyeli(DateTime tarih)
-        {
-            return tarih.ToString("HH:mm:ss");
         }
 
         private static string FormatTartim(Islem islem)
@@ -547,26 +532,6 @@ namespace KantarPro.Desktop
             return ikinciTartim.AgirlikKg.ToString("N0") + " kg";
         }
 
-        private static string FormatTartimTarihi(Tartim tartim)
-        {
-            return tartim == null ? "" : tartim.TartimTarihi.ToString("dd.MM.yyyy");
-        }
-
-        private static string FormatTartimSaati(Tartim tartim)
-        {
-            return tartim == null ? "" : tartim.TartimTarihi.ToString("HH:mm:ss");
-        }
-
-        private static string FormatSonTartim(Tartim tartim)
-        {
-            return tartim == null ? "Tartim Yok" : tartim.AgirlikKg.ToString("N0") + " kg";
-        }
-
-        private static string FormatTartimDegeri(Tartim tartim)
-        {
-            return tartim == null ? "" : tartim.AgirlikKg.ToString("N0") + " kg";
-        }
-
         private static string FormatDoluGelisTarihi(Islem islem, Tartim ilkTartim)
         {
             return (ilkTartim != null ? ilkTartim.TartimTarihi : islem.GirisTarihi).ToString("dd.MM.yyyy");
@@ -574,7 +539,7 @@ namespace KantarPro.Desktop
 
         private static string FormatDoluGelisSaati(Islem islem, Tartim ilkTartim)
         {
-            return FormatSaatSaniyeli(ilkTartim != null ? ilkTartim.TartimTarihi : islem.GirisTarihi);
+            return DashboardFormat.SaatSaniyeli(ilkTartim != null ? ilkTartim.TartimTarihi : islem.GirisTarihi);
         }
 
         private static string FormatDoluCikisTarihi(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
@@ -627,11 +592,6 @@ namespace KantarPro.Desktop
                 .FirstOrDefault();
 
             return ilkTahsilat ?? islem.CikisTarihi;
-        }
-
-        private static string FormatBosDeger(string value)
-        {
-            return string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
         }
 
         private static string FormatNetAgirlik(Islem islem)
@@ -768,7 +728,7 @@ namespace KantarPro.Desktop
 
             var toplam = ucretler.Sum(x => x.Tutar);
 
-            return FormatPara(toplam);
+            return DashboardFormat.Para(toplam);
         }
 
         private DateTime GetListeHesapTarihi()
@@ -824,12 +784,7 @@ namespace KantarPro.Desktop
         {
             var kalan = islem.ToplamTahakkuk - islem.ToplamTahsilat;
             kalan += ekBeklemeUcreti;
-            return FormatPara(kalan > 0 ? kalan : 0m);
-        }
-
-        private static string FormatPara(decimal tutar)
-        {
-            return tutar.ToString("N2") + " TL";
+            return DashboardFormat.Para(kalan > 0 ? kalan : 0m);
         }
 
         private static string NormalizePlaka(string plaka)

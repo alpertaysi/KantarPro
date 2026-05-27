@@ -117,7 +117,7 @@ namespace KantarPro.Desktop
             }
 
             DoluBosNetKgTextBox.Text = Math.Abs(ilkKg - ikinciKg).ToString("N0");
-            DoluBosTahakkukTextBox.Text = FormatPara(732m);
+            DoluBosTahakkukTextBox.Text = DashboardFormat.Para(732m);
         }
 
         private void ColumnFilterTextBox_TextChanged(object sender, TextChangedEventArgs e)

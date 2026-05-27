@@ -81,6 +81,7 @@
     <Compile Include="MainWindow.DashboardData.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DashboardFormat.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
