@@ -78,6 +78,7 @@
     <Compile Include="MainWindow.DoluBosAndFilters.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DashboardRows.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
     </Compile>
