@@ -706,7 +706,7 @@ namespace KantarPro.Desktop
                 IlkTartimSaati = bekleyen.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
                 IlkAgirlik = bekleyen.IlkTartim.AgirlikKg.ToString("N0"),
                 YukDurumu = bekleyen.IlkTartim.YukDurumu,
-                Aciklama = GetBeklenenTartimDurumu(bekleyen.IlkTartim)
+                Aciklama = DashboardVisitInfo.GetBeklenenTartimDurumu(bekleyen.IlkTartim)
             };
         }
 

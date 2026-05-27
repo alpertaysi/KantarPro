@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="DashboardFormat.cs" />
     <Compile Include="DashboardRows.cs" />
+    <Compile Include="DashboardVisitInfo.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
     </Compile>

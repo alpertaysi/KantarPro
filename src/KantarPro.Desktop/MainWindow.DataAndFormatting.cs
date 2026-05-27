@@ -91,8 +91,8 @@ namespace KantarPro.Desktop
                     {
                         var islem = tahsilat.First().Islem;
                         var dosya = GetKantarDosyasiForIslem(context, islem);
-                        var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
-                        var ikinciTartim = GetRevenueSecondWeighingForVisit(islem, dosya);
+                        var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
+                        var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
                         var girisCikis = SumFee(tahsilat, KantarSabitleri.UcretKodu.GirisCikis);
                         var tartim = SumFee(tahsilat, KantarSabitleri.UcretKodu.Tartim);
                         var bekleme = SumFee(tahsilat, KantarSabitleri.UcretKodu.Bekleme);
@@ -207,7 +207,7 @@ namespace KantarPro.Desktop
                 return
                     "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
                     "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
-                    "Durum: " + GetBeklenenTartimDurumu(dosya.IlkTartim) + Environment.NewLine +
+                    "Durum: " + DashboardVisitInfo.GetBeklenenTartimDurumu(dosya.IlkTartim) + Environment.NewLine +
                     "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                     "Ilk Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
@@ -261,7 +261,7 @@ namespace KantarPro.Desktop
                     return
                         "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
                         "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
-                        "Durum: " + GetVisitRowDurum(ilkIslem, dosya) + Environment.NewLine +
+                        "Durum: " + DashboardVisitInfo.GetVisitRowDurum(ilkIslem, dosya) + Environment.NewLine +
                         "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                         "Saha Ziyareti" + Environment.NewLine +
                         FormatSingleVisitDoluBosBlock(ilkIslem, dosya.IlkTartim, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
@@ -272,7 +272,7 @@ namespace KantarPro.Desktop
                 return
                     "Plaka: " + dosya.Arac.Plaka + Environment.NewLine +
                     "Firma: " + DashboardFormat.BosDeger(dosya.Arac.FirmaAdi) + Environment.NewLine +
-                    "Durum: " + GetVisitRowDurum(ikinciIslem ?? ilkIslem, dosya) + Environment.NewLine +
+                    "Durum: " + DashboardVisitInfo.GetVisitRowDurum(ikinciIslem ?? ilkIslem, dosya) + Environment.NewLine +
                     "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                     "Ilk Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
@@ -523,7 +523,7 @@ namespace KantarPro.Desktop
 
         private static string FormatIkinciTartim(Islem islem)
         {
-            var ikinciTartim = GetIkinciTartim(islem);
+            var ikinciTartim = DashboardVisitInfo.GetIkinciTartim(islem);
             if (ikinciTartim == null)
             {
                 return "";
@@ -596,8 +596,8 @@ namespace KantarPro.Desktop
 
         private static string FormatNetAgirlik(Islem islem)
         {
-            var ilkTartim = GetIlkTartim(islem);
-            var ikinciTartim = GetIkinciTartim(islem);
+            var ilkTartim = DashboardVisitInfo.GetIlkTartim(islem);
+            var ikinciTartim = DashboardVisitInfo.GetIkinciTartim(islem);
             return FormatNetAgirlik(islem, ilkTartim, ikinciTartim);
         }
 
@@ -623,92 +623,6 @@ namespace KantarPro.Desktop
                 .FirstOrDefault(x =>
                     x.IlkTartim.IslemId == islem.IslemId ||
                     (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == islem.IslemId));
-        }
-
-        private static string GetVisitRowDurum(Islem islem, KantarDosyasi dosya)
-        {
-            if (dosya == null)
-            {
-                return islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz ? "Tartimsiz cikis bekliyor" : "Cikis bekliyor";
-            }
-
-            if (dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
-            {
-                return "Dolu-bos tamamlandi";
-            }
-
-            if (islem != null &&
-                islem.Durum == KantarSabitleri.IslemDurumu.Iceride &&
-                dosya.IlkTartim != null &&
-                dosya.IlkTartim.IslemId == islem.IslemId &&
-                dosya.KarsiTartim == null)
-            {
-                return dosya.IlkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
-                    ? "Bos Tartim Yapildi"
-                    : "Dolu Tartim Yapildi";
-            }
-
-            return GetBeklenenTartimDurumu(dosya.IlkTartim);
-        }
-
-        private static string GetBeklenenTartimDurumu(Tartim ilkTartim)
-        {
-            return ilkTartim != null && ilkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
-                ? "Dolu bekleniyor"
-                : "Bos bekleniyor";
-        }
-
-        private static Tartim GetIlkTartim(Islem islem)
-        {
-            return islem.Tartimlar
-                .Where(x => x.TartimTipi == KantarSabitleri.TartimTipi.Giris)
-                .OrderBy(x => x.TartimTarihi)
-                .FirstOrDefault();
-        }
-
-        private static Tartim GetIkinciTartim(Islem islem)
-        {
-            var sonradanTartim = islem.Tartimlar
-                .Where(x => x.TartimTipi == KantarSabitleri.TartimTipi.Sonradan)
-                .OrderByDescending(x => x.TartimTarihi)
-                .FirstOrDefault();
-
-            if (sonradanTartim != null)
-            {
-                return sonradanTartim;
-            }
-
-            return islem.Tartimlar
-                .Where(x => x.TartimTipi == KantarSabitleri.TartimTipi.Cikis)
-                .OrderByDescending(x => x.TartimTarihi)
-                .FirstOrDefault();
-        }
-
-        private static Tartim GetRevenueSecondWeighingForVisit(Islem islem, KantarDosyasi dosya)
-        {
-            if (islem == null)
-            {
-                return null;
-            }
-
-            if (dosya != null && dosya.KarsiTartim != null && dosya.KarsiTartim.IslemId == islem.IslemId)
-            {
-                return dosya.KarsiTartim;
-            }
-
-            if (dosya != null && dosya.IlkTartim != null && dosya.IlkTartim.IslemId == islem.IslemId)
-            {
-                return null;
-            }
-
-            return GetIkinciTartim(islem);
-        }
-
-        private static Tartim GetSonTartim(Islem islem)
-        {
-            return islem.Tartimlar
-                .OrderByDescending(x => x.TartimTarihi)
-                .FirstOrDefault();
         }
 
         private static string FormatUcretKalemi(Islem islem, string ucretKodu)

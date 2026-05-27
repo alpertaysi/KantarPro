@@ -59,9 +59,9 @@ namespace KantarPro.Desktop
         private VehicleMovementRow BuildEntryVehicleRow(KantarDbContext context, Islem islem, DateTime listeHesapTarihi)
         {
             var dosya = GetKantarDosyasiForIslem(context, islem);
-            var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
-            var ikinciTartim = dosya != null ? dosya.KarsiTartim : GetIkinciTartim(islem);
-            var sonTartim = GetSonTartim(islem);
+            var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
+            var ikinciTartim = dosya != null ? dosya.KarsiTartim : DashboardVisitInfo.GetIkinciTartim(islem);
+            var sonTartim = DashboardVisitInfo.GetSonTartim(islem);
             var beklemeUcreti = HesaplaBeklemeUcreti(context, islem, listeHesapTarihi);
             var kayitliBeklemeUcreti = SumTahsilEdilmemisUcret(islem, KantarSabitleri.UcretKodu.Bekleme);
 
@@ -93,7 +93,7 @@ namespace KantarPro.Desktop
                 GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis, true),
                 TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim, true),
                 BeklemeUcreti = DashboardFormat.Para(beklemeUcreti),
-                Durum = GetVisitRowDurum(islem, dosya),
+                Durum = DashboardVisitInfo.GetVisitRowDurum(islem, dosya),
                 KesinCikisMi = false
             };
         }
@@ -150,7 +150,7 @@ namespace KantarPro.Desktop
                 IlkTartimSaati = dosya.IlkTartim.TartimTarihi.ToString("HH:mm:ss"),
                 IlkAgirlik = dosya.IlkTartim.AgirlikKg.ToString("N0"),
                 YukDurumu = dosya.IlkTartim.YukDurumu,
-                Aciklama = GetBeklenenTartimDurumu(dosya.IlkTartim)
+                Aciklama = DashboardVisitInfo.GetBeklenenTartimDurumu(dosya.IlkTartim)
             };
         }
 
@@ -188,8 +188,8 @@ namespace KantarPro.Desktop
         private VehicleMovementRow TryBuildExitVehicleRow(KantarDbContext context, Islem islem)
         {
             var dosya = GetKantarDosyasiForIslem(context, islem);
-            var ilkTartim = dosya != null ? dosya.IlkTartim : GetIlkTartim(islem);
-            var ikinciTartim = dosya != null ? dosya.KarsiTartim : GetIkinciTartim(islem);
+            var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
+            var ikinciTartim = dosya != null ? dosya.KarsiTartim : DashboardVisitInfo.GetIkinciTartim(islem);
             if (!AltCikisListesindeGoster(islem, dosya, ilkTartim, ikinciTartim))
             {
                 return null;
@@ -220,7 +220,7 @@ namespace KantarPro.Desktop
                 GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis),
                 TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim),
                 BeklemeUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme),
-                Durum = dosya != null ? GetVisitRowDurum(islem, dosya) : "Kesin cikis",
+                Durum = dosya != null ? DashboardVisitInfo.GetVisitRowDurum(islem, dosya) : "Kesin cikis",
                 KesinCikisMi = true
             };
         }
