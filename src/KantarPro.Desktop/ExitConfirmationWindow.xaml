@@ -69,8 +69,8 @@
 
                         <TextBlock Grid.Row="2" Text="Cikis Bilgileri" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text=":" VerticalAlignment="Center" />
-                        <TextBox x:Name="ExitDateText" Grid.Row="2" Grid.Column="2" />
-                        <TextBox x:Name="ExitTimeText" Grid.Row="2" Grid.Column="4" />
+                        <TextBox x:Name="ExitDateText" Grid.Row="2" Grid.Column="2" IsReadOnly="False" />
+                        <TextBox x:Name="ExitTimeText" Grid.Row="2" Grid.Column="4" IsReadOnly="False" />
                     </Grid>
                 </GroupBox>
 

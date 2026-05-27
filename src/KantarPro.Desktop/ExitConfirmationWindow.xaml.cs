@@ -80,7 +80,7 @@ namespace KantarPro.Desktop
                 {
                     var kullaniciId = EnsureAdminUser(context);
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, _cikisTarihi);
+                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, ParseExitDateTime());
                 }
 
                 DialogResult = true;
@@ -127,6 +127,23 @@ namespace KantarPro.Desktop
             }
 
             return fee.Tutar;
+        }
+
+        private DateTime ParseExitDateTime()
+        {
+            DateTime tarih;
+            if (!DateTime.TryParseExact((ExitDateText.Text ?? string.Empty).Trim(), "dd.MM.yyyy", CultureInfo.GetCultureInfo("tr-TR"), DateTimeStyles.None, out tarih))
+            {
+                throw new ArgumentException("Cikis tarihi gg.aa.yyyy formatinda olmalidir.");
+            }
+
+            DateTime saat;
+            if (!DateTime.TryParseExact((ExitTimeText.Text ?? string.Empty).Trim(), new[] { "HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm" }, CultureInfo.GetCultureInfo("tr-TR"), DateTimeStyles.None, out saat))
+            {
+                throw new ArgumentException("Cikis saati sa:dk veya sa:dk:sn formatinda olmalidir.");
+            }
+
+            return tarih.Date.Add(saat.TimeOfDay);
         }
 
         private static int EnsureAdminUser(KantarDbContext context)

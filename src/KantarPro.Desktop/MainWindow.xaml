@@ -53,6 +53,7 @@
 
         <Style TargetType="DataGrid">
             <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="CanUserAddRows" Value="False" />
             <Setter Property="CanUserDeleteRows" Value="False" />
             <Setter Property="CanUserResizeRows" Value="False" />
@@ -64,6 +65,59 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
             <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+        </Style>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="#0F172A" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Border x:Name="MenuItemBorder"
+                                Background="Transparent"
+                                CornerRadius="5"
+                                MinHeight="{TemplateBinding MinHeight}">
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="MenuItemBorder" Property="Background" Value="#E0F2FE" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RevenueCalendarStyle" TargetType="{x:Type Calendar}">
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.22" ScaleY="1.22" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RevenueDatePickerStyle" TargetType="{x:Type DatePicker}">
+            <Setter Property="Width" Value="180" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="CalendarStyle" Value="{StaticResource RevenueCalendarStyle}" />
         </Style>
     </Window.Resources>
 
@@ -87,12 +141,12 @@
                 </Border>
             </DockPanel>
 
-            <Border Grid.Row="1" Background="#16202C" CornerRadius="6" Padding="10" Margin="0" Visibility="Collapsed">
+            <Border Grid.Row="1" Background="#16202C" CornerRadius="0" Padding="4" Margin="0,0,0,6">
                 <DockPanel LastChildFill="False">
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Arac Giris" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" Click="AracGirisButton_Click" />
-                        <Button Content="Arac Cikis" Margin="0,0,8,0" Click="AracCikisButton_Click" />
-                        <Button Content="Raporlar" Margin="0,0,8,0" Click="MenuButton_Click" />
+                        <Button Content="Giriş-Çıkış İşlemleri" Style="{StaticResource PrimaryButton}" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AracGirisButton_Click" />
+                        <Button Content="Günlük Tahsilat" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="GunlukHasilatButton_Click" />
+                        <Button Content="Ayarlar" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AyarlarButton_Click" />
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
@@ -149,12 +203,12 @@
                             <TextBlock Grid.Row="1" Text="Giris Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="GirisTarihiTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
-                            <Border Grid.Row="1" Grid.Column="3" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" Height="26" Margin="0,0,0,8">
-                                <TextBlock Text="{Binding Text, ElementName=ClockText}" Foreground="White" FontFamily="Consolas" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
+                            <TextBox x:Name="GirisSaatiTextBox" Grid.Row="1" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="GirisSaatiTextBox_TextChanged" />
 
                             <TextBlock Grid.Row="2" Text="Cikis Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
+                            <TextBox x:Name="CikisSaatiTextBox" Grid.Row="2" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="CikisSaatiTextBox_TextChanged" />
 
                             <TextBlock Grid.Row="3" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="FirmaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
@@ -171,14 +225,12 @@
                                 <TextBlock Text="1.KG:" FontSize="26" Foreground="Black" VerticalAlignment="Center" />
                                 <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
                                 <StackPanel Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
-                                    <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
+                                    <Button x:Name="EntrySaveButton" Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
                                 </StackPanel>
                             </Grid>
                         </Grid>
 
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                            <Button Content="Vazgec" Style="{StaticResource DangerButton}" Width="92" MinHeight="34" Padding="10,4" FontSize="13" Click="PlakaDuzelt_Click" />
-                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0" />
                     </Grid>
                 </Border>
 
@@ -197,8 +249,10 @@
                                 <DataGrid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
-                                        <MenuItem Header="Plaka Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
-                                        <MenuItem Header="Geliş Tarihini Güncelle" Click="EntryGridGelisTarihiniGuncelleMenuItem_Click" />
+                                        <MenuItem Header="Kayit Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
+                                        <Separator />
+                                        <MenuItem Header="Makbuz Yazdir" Click="EntryGridMakbuzYazdirMenuItem_Click" />
+                                        <MenuItem Header="Makbuz Goster" Click="EntryGridMakbuzGosterMenuItem_Click" />
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
@@ -269,8 +323,6 @@
                                 <DataGridTextColumn Header="D. Gelis Saati" Binding="{Binding GirisSaati}" Width="76" />
                                 <DataGridTextColumn Header="D. Cikis Tarihi" Binding="{Binding DoluCikisTarihi}" Width="88" />
                                 <DataGridTextColumn Header="D. Cikis Saati" Binding="{Binding DoluCikisSaati}" Width="76" />
-                                <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="88" />
-                                <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="76" />
                                 <DataGridTextColumn Header="B. Gelis Tarihi" Binding="{Binding BosGelisTarihi}" Width="88" />
                                 <DataGridTextColumn Header="B. Gelis Saati" Binding="{Binding BosGelisSaati}" Width="76" />
                                 <DataGridTextColumn Header="2. Tartim Tarihi" Binding="{Binding IkinciTartimTarihi}" Width="98" />
@@ -278,7 +330,6 @@
                                 <DataGridTextColumn Header="1.KG:" Binding="{Binding Tartim}" Width="78" />
                                 <DataGridTextColumn Header="2.KG:" Binding="{Binding IkinciTartim}" Width="78" />
                                 <DataGridTextColumn Header="Net:" Binding="{Binding NetAgirlik}" Width="78" />
-                                <DataGridTextColumn Header="Ucret:" Binding="{Binding Ucret}" Width="86" />
                             </DataGrid.Columns>
                         </DataGrid>
                         <TextBlock Grid.Row="2" Text="Makbuz, arastirma ve yedekleme islemleri sonraki adimda bu alana baglanacak." Foreground="{StaticResource Muted}" FontSize="12" Margin="2,4,0,0" />
@@ -292,7 +343,7 @@
                         </Grid.RowDefinitions>
                         <TabControl>
                             <TabItem Header="2. Tartim Bekleyenler">
-                                <DataGrid ItemsSource="{Binding PendingWeighings}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighings}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
                                         <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="140" />
@@ -341,6 +392,127 @@
                             <Button Content="Kapat" Style="{StaticResource DangerButton}" MinHeight="34" Padding="16,4" FontSize="13" Click="MenuButton_Click" />
                         </StackPanel>
                     </DockPanel>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="DailyRevenueContent" Grid.Row="2" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="10">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="Baslangic Tarihi" FontSize="12" Margin="0,0,0,4" />
+                            <DatePicker x:Name="RevenueStartDatePicker" Style="{StaticResource RevenueDatePickerStyle}" SelectedDate="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="Bitis Tarihi" FontSize="12" Margin="0,0,0,4" />
+                            <DatePicker x:Name="RevenueEndDatePicker" Style="{StaticResource RevenueDatePickerStyle}" SelectedDate="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay}" />
+                        </StackPanel>
+                        <Button Content="Listele" Width="120" MinHeight="40" Margin="0,16,8,0" Click="RevenueListButton_Click" />
+                        <Button Content="Rapor Dokumu" Width="140" MinHeight="40" Margin="0,16,8,0" Click="MenuButton_Click" />
+                        <Button Content="Excel'e Gonder" Width="140" MinHeight="40" Margin="0,16,0,0" Click="MenuButton_Click" />
+                    </StackPanel>
+                </Border>
+
+                <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
+                        <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="82" />
+                        <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="150">
+                            <DataGridTextColumn.Header>
+                                <StackPanel>
+                                    <TextBlock Text="Firma" />
+                                    <TextBox Tag="RevenueFirma" Width="120" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                </StackPanel>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                            <DataGridTextColumn.Header>
+                                <StackPanel>
+                                    <TextBlock Text="Plaka" />
+                                    <TextBox Tag="RevenuePlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                </StackPanel>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="92" />
+                        <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="82" />
+                        <DataGridTextColumn Header="1. Tartim" Binding="{Binding IlkTartim}" Width="96" />
+                        <DataGridTextColumn Header="2. Tartim" Binding="{Binding IkinciTartim}" Width="96" />
+                        <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="86" />
+                        <DataGridTextColumn Header="Giris Ucreti" Binding="{Binding GirisCikisUcreti}" Width="94" />
+                        <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="94" />
+                        <DataGridTextColumn Header="Isgaliye Ucreti" Binding="{Binding BeklemeUcreti}" Width="104" />
+                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="104" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Row="2" Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="8" Margin="0,4,0,0">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock x:Name="RevenueRowCountText" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,0" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <TextBlock Text="Giris: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueEntryExitTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            <TextBlock Text="Tartim: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueWeighingTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            <TextBlock Text="Isgaliye: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueWaitingTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            <TextBlock Text="Toplam: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueGrandTotalText" Text="0,00 TL" Width="120" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="SettingsContent" Grid.Row="2" Visibility="Collapsed">
+                <Border Background="#F8FAFC" BorderBrush="#9CA3AF" BorderThickness="1" Padding="22">
+                    <Grid MaxWidth="620" HorizontalAlignment="Left">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Ayarlar" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                            <TextBlock Text="Yeni fiyatlar kaydedildikten sonra sonraki kayit ve tahsilatlarda kullanilir." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
+                        </StackPanel>
+
+                        <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="18" Margin="0,0,0,14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="190" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Giris-Cikis Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsEntryExitFeeTextBox" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
+                                <TextBlock Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
+
+                                <TextBlock Grid.Row="1" Text="Tartim Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsWeighingFeeTextBox" Grid.Row="1" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
+
+                                <TextBlock Grid.Row="2" Text="Bekleme Ucreti" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <TextBox x:Name="SettingsWaitingFeeTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,0" TextAlignment="Right" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" Text="TL" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Width="120" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveButton_Click" />
+                            <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
 

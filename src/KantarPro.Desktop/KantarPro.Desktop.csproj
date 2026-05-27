@@ -54,6 +54,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="ModernMessageBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DateInputWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -68,6 +72,12 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MainWindow.DataAndFormatting.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow.DoluBosAndFilters.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
     </Compile>
@@ -80,6 +90,10 @@
     <Compile Include="EntrySaveChoiceWindow.xaml.cs">
       <DependentUpon>EntrySaveChoiceWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ModernMessageBox.xaml.cs">
+      <DependentUpon>ModernMessageBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MessageBox.cs" />
     <Compile Include="DateInputWindow.xaml.cs">
       <DependentUpon>DateInputWindow.xaml</DependentUpon>
     </Compile>
