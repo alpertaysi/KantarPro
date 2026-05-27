@@ -129,10 +129,12 @@ namespace KantarPro.Desktop
                 .ToList();
 
             ExitVehicles.Clear();
+            var rowBuilder = new DashboardRowBuilder(context);
             var finalExitRows = new System.Collections.Generic.List<Tuple<DateTime, VehicleMovementRow>>();
             foreach (var islem in cikislar)
             {
-                var cikisSatiri = TryBuildExitVehicleRow(context, islem);
+                var dosya = GetKantarDosyasiForIslem(context, islem);
+                var cikisSatiri = rowBuilder.TryBuildExitVehicleRow(islem, dosya);
                 if (cikisSatiri != null)
                 {
                     finalExitRows.Add(Tuple.Create(islem.CikisTarihi ?? islem.GirisTarihi, cikisSatiri));
@@ -143,46 +145,6 @@ namespace KantarPro.Desktop
             {
                 ExitVehicles.Add(row);
             }
-        }
-
-        private VehicleMovementRow TryBuildExitVehicleRow(KantarDbContext context, Islem islem)
-        {
-            var dosya = GetKantarDosyasiForIslem(context, islem);
-            var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
-            var ikinciTartim = dosya != null ? dosya.KarsiTartim : DashboardVisitInfo.GetIkinciTartim(islem);
-            if (!AltCikisListesindeGoster(islem, dosya, ilkTartim, ikinciTartim))
-            {
-                return null;
-            }
-
-            return new VehicleMovementRow
-            {
-                Plaka = islem.Arac.Plaka,
-                FirmaAdi = islem.Arac.FirmaAdi,
-                GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
-                GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
-                DoluCikisTarihi = FormatDoluCikisTarihi(islem, ilkTartim, ikinciTartim),
-                DoluCikisSaati = FormatDoluCikisSaati(islem, ilkTartim, ikinciTartim),
-                BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
-                BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
-                CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
-                CikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
-                Saat = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
-                IlkTartimTarihi = DashboardFormat.TartimTarihi(ilkTartim),
-                IlkTartimSaati = DashboardFormat.TartimSaati(ilkTartim),
-                IkinciTartimTarihi = DashboardFormat.TartimTarihi(ikinciTartim),
-                IkinciTartimSaati = DashboardFormat.TartimSaati(ikinciTartim),
-                Tartim = DashboardFormat.TartimDegeri(ilkTartim),
-                IkinciTartim = DashboardFormat.TartimDegeri(ikinciTartim),
-                NetAgirlik = FormatNetAgirlik(islem, ilkTartim, ikinciTartim),
-                Ucret = DashboardFormat.Para(islem.ToplamTahakkuk),
-                Tahsilat = DashboardFormat.Para(islem.ToplamTahsilat),
-                GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis),
-                TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim),
-                BeklemeUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme),
-                Durum = dosya != null ? DashboardVisitInfo.GetVisitRowDurum(islem, dosya) : "Kesin cikis",
-                KesinCikisMi = true
-            };
         }
 
         private void LoadDailyTransactionRows(KantarDbContext context, DateTime bugun, DateTime yarin)

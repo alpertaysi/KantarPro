@@ -440,39 +440,6 @@ namespace KantarPro.Desktop
                 string.Equals(DashboardFormat.BosDeger(agirlik), tartimWeight, StringComparison.Ordinal);
         }
 
-        private static bool AltCikisListesindeGoster(Islem islem, KantarDosyasi dosya, Tartim ilkTartim, Tartim ikinciTartim)
-        {
-            if (islem != null &&
-                dosya != null &&
-                dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
-                dosya.IlkTartim != null &&
-                dosya.IlkTartim.IslemId == islem.IslemId)
-            {
-                return false;
-            }
-
-            if (islem != null &&
-                dosya != null &&
-                dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu &&
-                dosya.IlkTartim != null &&
-                dosya.IlkTartim.IslemId == islem.IslemId)
-            {
-                return true;
-            }
-
-            if (islem != null && islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz && dosya == null)
-            {
-                return true;
-            }
-
-            if (dosya != null && dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
-            {
-                return dosya.KarsiTartim != null && dosya.KarsiTartim.IslemId == islem.IslemId;
-            }
-
-            return ilkTartim == null && ikinciTartim == null;
-        }
-
         private static string FormatTartim(Islem islem)
         {
             var tartim = islem.Tartimlar
