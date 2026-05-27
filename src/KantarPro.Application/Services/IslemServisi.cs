@@ -230,7 +230,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
-        public Islem CikisYap(string plaka, bool tartimIsteniyor, decimal? agirlikKg, int kullaniciId, DateTime cikisTarihi)
+        public Islem CikisYap(string plaka, bool tartimIsteniyor, decimal? agirlikKg, int kullaniciId, DateTime cikisTarihi, string odemeTuru = KantarSabitleri.OdemeTuru.Nakit)
         {
             var temizPlaka = NormalizePlaka(plaka);
             var islem = _unitOfWork.Islemler.Query()
@@ -275,7 +275,7 @@ namespace KantarPro.Application.Services
                 UcretEkle(islem, KantarSabitleri.UcretKodu.Bekleme, cikisTarihi);
             }
 
-            TahsilEt(islem, kullaniciId, cikisTarihi);
+            TahsilEt(islem, kullaniciId, cikisTarihi, odemeTuru);
             LogEkle(kullaniciId, islem, "Cikis", "Arac cikis islemi tamamlandi.");
             _unitOfWork.SaveChanges();
             return islem;
@@ -418,12 +418,13 @@ namespace KantarPro.Application.Services
             bekleyenTartim.Durum = KantarSabitleri.BekleyenTartimDurumu.Tamamlandi;
         }
 
-        private void TahsilEt(Islem islem, int kullaniciId, DateTime tahsilTarihi)
+        private void TahsilEt(Islem islem, int kullaniciId, DateTime tahsilTarihi, string odemeTuru)
         {
             islem.ToplamTahsilat = islem.ToplamTahakkuk;
             var odenecekUcretler = islem.Ucretler.Where(x => !x.TahsilEdildiMi).ToList();
             var faturaId = UretFaturaId(tahsilTarihi);
             var tahsilatNo = odenecekUcretler.Count > 0 ? UretSiradakiTahsilatNo() : null;
+            var temizOdemeTuru = NormalizeOdemeTuru(odemeTuru);
             foreach (var ucret in odenecekUcretler)
             {
                 ucret.TahsilEdildiMi = true;
@@ -431,7 +432,15 @@ namespace KantarPro.Application.Services
                 ucret.TahsilEdenKullaniciId = kullaniciId;
                 ucret.FaturaId = faturaId;
                 ucret.TahsilatNo = tahsilatNo;
+                ucret.OdemeTuru = temizOdemeTuru;
             }
+        }
+
+        private static string NormalizeOdemeTuru(string odemeTuru)
+        {
+            return odemeTuru == KantarSabitleri.OdemeTuru.KrediKarti
+                ? KantarSabitleri.OdemeTuru.KrediKarti
+                : KantarSabitleri.OdemeTuru.Nakit;
         }
 
         private string UretSiradakiTahsilatNo()

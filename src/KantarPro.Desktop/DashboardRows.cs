@@ -45,6 +45,7 @@ namespace KantarPro.Desktop
     {
         public int SiraNo { get; set; }
         public string IslemNo { get; set; }
+        public string OdemeTuru { get; set; }
         public string FirmaAdi { get; set; }
         public string Plaka { get; set; }
         public string GirisTarihi { get; set; }

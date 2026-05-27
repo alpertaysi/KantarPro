@@ -128,6 +128,19 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void CikisYap_OdemeTuruSecilirseTahsilatlaraYazar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ziyaret = servis.GirisKaydet("16 PAY 001", "Firma P", KantarSabitleri.GelisTuru.Dolu, true, 22000m, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+
+            servis.CikisYap(ziyaret.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0), KantarSabitleri.OdemeTuru.KrediKarti);
+
+            Assert.IsTrue(ziyaret.Ucretler.All(x => x.OdemeTuru == KantarSabitleri.OdemeTuru.KrediKarti));
+        }
+
+        [TestMethod]
         public void BekleyenDoluDosyasiBosGelisOnerir()
         {
             var uow = new InMemoryUnitOfWork();

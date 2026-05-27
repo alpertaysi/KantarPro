@@ -422,6 +422,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
                         <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="82" />
+                        <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="102" />
                         <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="150">
                             <DataGridTextColumn.Header>
                                 <StackPanel>

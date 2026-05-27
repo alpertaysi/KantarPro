@@ -74,7 +74,8 @@ namespace KantarPro.Desktop
                         {
                             x.IslemId,
                             TahsilatNo = string.IsNullOrWhiteSpace(x.TahsilatNo) ? x.FaturaId : x.TahsilatNo,
-                            TahsilTarihi = x.TahsilTarihi.Value
+                            TahsilTarihi = x.TahsilTarihi.Value,
+                            OdemeTuru = string.IsNullOrWhiteSpace(x.OdemeTuru) ? KantarSabitleri.OdemeTuru.Nakit : x.OdemeTuru
                         })
                         .OrderBy(x => x.Key.TahsilTarihi)
                         .ThenBy(x => x.Key.TahsilatNo)
@@ -107,6 +108,7 @@ namespace KantarPro.Desktop
                         {
                             SiraNo = siraNo++,
                             IslemNo = string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo,
+                            OdemeTuru = tahsilat.Key.OdemeTuru,
                             FirmaAdi = islem.Arac.FirmaAdi,
                             Plaka = islem.Arac.Plaka,
                             GirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
@@ -211,7 +213,7 @@ namespace KantarPro.Desktop
                     "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                     "Ilk Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
-                    "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
+                    "Ödeme Geçmişi (Tahsilat No | Tarih | Tutar | Ödeme Türü)" + Environment.NewLine +
                     FormatKantarDosyasiPaymentHistory(ilkIslem, null);
             }
         }
@@ -265,7 +267,7 @@ namespace KantarPro.Desktop
                         "Net: " + DashboardFormat.BosDeger(dosya.NetAgirlikKg.HasValue ? dosya.NetAgirlikKg.Value.ToString("N0") + " kg" : "") + Environment.NewLine + Environment.NewLine +
                         "Saha Ziyareti" + Environment.NewLine +
                         FormatSingleVisitDoluBosBlock(ilkIslem, dosya.IlkTartim, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
-                        "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
+                        "Ödeme Geçmişi (Tahsilat No | Tarih | Tutar | Ödeme Türü)" + Environment.NewLine +
                         FormatKantarDosyasiPaymentHistory(ilkIslem, null);
                 }
 
@@ -278,7 +280,7 @@ namespace KantarPro.Desktop
                     FormatVisitBlock(ilkIslem, dosya.IlkTartim) + Environment.NewLine + Environment.NewLine +
                     "Ikinci Ziyaret" + Environment.NewLine +
                     FormatVisitBlock(ikinciIslem, dosya.KarsiTartim) + Environment.NewLine + Environment.NewLine +
-                    "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
+                    "Ödeme Geçmişi (Tahsilat No | Tarih | Tutar | Ödeme Türü)" + Environment.NewLine +
                     FormatKantarDosyasiPaymentHistory(ilkIslem, ikinciIslem);
             }
         }
@@ -295,7 +297,8 @@ namespace KantarPro.Desktop
                     .GroupBy(x => new
                     {
                         TahsilatNo = GetDisplayTahsilatNo(x),
-                        TahsilTarihi = x.TahsilTarihi.Value
+                        TahsilTarihi = x.TahsilTarihi.Value,
+                        OdemeTuru = string.IsNullOrWhiteSpace(x.OdemeTuru) ? KantarSabitleri.OdemeTuru.Nakit : x.OdemeTuru
                     })
                     .OrderByDescending(x => x.Key.TahsilTarihi)
                     .Take(10)
@@ -303,16 +306,17 @@ namespace KantarPro.Desktop
 
                 if (tahsilatlar.Count == 0)
                 {
-                    return Environment.NewLine + Environment.NewLine + "Odeme Gecmisi" + Environment.NewLine + "-";
+                    return Environment.NewLine + Environment.NewLine + "Ödeme Geçmişi" + Environment.NewLine + "-";
                 }
 
                 var satirlar = tahsilatlar.Select(x =>
                     x.Key.TahsilatNo + " | " +
                     x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
-                    DashboardFormat.Para(x.Sum(u => u.Tutar)));
+                    DashboardFormat.Para(x.Sum(u => u.Tutar)) + " | " +
+                    x.Key.OdemeTuru);
 
                 return Environment.NewLine + Environment.NewLine +
-                    "Odeme Gecmisi (Tahsilat No | Tarih | Tutar)" + Environment.NewLine +
+                    "Ödeme Geçmişi (Tahsilat No | Tarih | Tutar | Ödeme Türü)" + Environment.NewLine +
                     string.Join(Environment.NewLine, satirlar);
             }
         }
@@ -367,7 +371,8 @@ namespace KantarPro.Desktop
                 .GroupBy(x => new
                 {
                     TahsilatNo = GetDisplayTahsilatNo(x),
-                    TahsilTarihi = x.TahsilTarihi.Value
+                    TahsilTarihi = x.TahsilTarihi.Value,
+                    OdemeTuru = string.IsNullOrWhiteSpace(x.OdemeTuru) ? KantarSabitleri.OdemeTuru.Nakit : x.OdemeTuru
                 })
                 .OrderBy(x => x.Key.TahsilTarihi)
                 .ToList();
@@ -380,7 +385,8 @@ namespace KantarPro.Desktop
             return string.Join(Environment.NewLine, ucretler.Select(x =>
                 x.Key.TahsilatNo + " | " +
                 x.Key.TahsilTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " +
-                DashboardFormat.Para(x.Sum(u => u.Tutar))));
+                DashboardFormat.Para(x.Sum(u => u.Tutar)) + " | " +
+                x.Key.OdemeTuru));
         }
 
         private static string GetLastTahsilatNo(Islem islem)
@@ -778,6 +784,9 @@ namespace KantarPro.Desktop
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatNo') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD TahsilatNo NVARCHAR(20) NULL");
                 context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.IslemUcretleri', 'OdemeTuru') IS NULL " +
+                    "ALTER TABLE dbo.IslemUcretleri ADD OdemeTuru NVARCHAR(30) NULL");
+                context.Database.ExecuteSqlCommand(
                     "IF OBJECT_ID(N'dbo.KantarDosyalari', N'U') IS NULL " +
                     "CREATE TABLE dbo.KantarDosyalari (" +
                     "KantarDosyasiId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_KantarDosyalari PRIMARY KEY, " +
@@ -794,6 +803,10 @@ namespace KantarPro.Desktop
                     "UPDATE dbo.IslemUcretleri " +
                     "SET TahsilatNo = RIGHT('0000' + CAST(IslemId AS NVARCHAR(12)), 4) " +
                     "WHERE TahsilEdildiMi = 1 AND TahsilTarihi IS NOT NULL AND (TahsilatNo IS NULL OR TahsilatNo = '')");
+                context.Database.ExecuteSqlCommand(
+                    "UPDATE dbo.IslemUcretleri " +
+                    "SET OdemeTuru = N'Nakit' " +
+                    "WHERE TahsilEdildiMi = 1 AND TahsilTarihi IS NOT NULL AND (OdemeTuru IS NULL OR OdemeTuru = '')");
             }
         }
 

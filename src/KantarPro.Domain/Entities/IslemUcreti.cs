@@ -16,6 +16,7 @@ namespace KantarPro.Domain.Entities
         public string FaturaId { get; set; }
         public string TahsilatId { get; set; }
         public string TahsilatNo { get; set; }
+        public string OdemeTuru { get; set; }
 
         public virtual Islem Islem { get; set; }
         public virtual Ucret Ucret { get; set; }

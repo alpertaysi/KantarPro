@@ -50,5 +50,11 @@ namespace KantarPro.Domain
             public const string Iptal = "Iptal";
             public const string SuresiDoldu = "SuresiDoldu";
         }
+
+        public static class OdemeTuru
+        {
+            public const string Nakit = "Nakit";
+            public const string KrediKarti = "Kredi Kartı";
+        }
     }
 }

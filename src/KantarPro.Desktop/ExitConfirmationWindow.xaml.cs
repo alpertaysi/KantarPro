@@ -76,11 +76,17 @@ namespace KantarPro.Desktop
         {
             try
             {
+                var odemeTuru = SelectPaymentType();
+                if (string.IsNullOrWhiteSpace(odemeTuru))
+                {
+                    return;
+                }
+
                 using (var context = new KantarDbContext())
                 {
                     var kullaniciId = EnsureAdminUser(context);
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, ParseExitDateTime());
+                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, ParseExitDateTime(), odemeTuru);
                 }
 
                 DialogResult = true;
@@ -90,6 +96,16 @@ namespace KantarPro.Desktop
             {
                 MessageBox.Show(ex.Message, "Cikis islemi tamamlanamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private string SelectPaymentType()
+        {
+            var dialog = new PaymentTypeChoiceWindow
+            {
+                Owner = this
+            };
+
+            return dialog.ShowDialog() == true ? dialog.SelectedPaymentType : null;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
