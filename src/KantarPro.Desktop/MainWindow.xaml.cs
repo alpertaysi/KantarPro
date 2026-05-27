@@ -137,6 +137,8 @@ namespace KantarPro.Desktop
                 var plaka = PlakaTextBox.Text;
                 var firmaAdi = FirmaTextBox.Text;
                 var aciklama = AciklamaTextBox.Text;
+                var muafMi = UcrettenMuafCheckBox.IsChecked == true;
+                var muafiyetNedeni = MuafiyetNedeniTextBox.Text;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
                 var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giris tarihi");
 
@@ -152,7 +154,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz);
+                CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz, muafMi, muafiyetNedeni);
 
                 LoadDashboardData();
                 MessageBox.Show("Giris kaydi olusturuldu.", "Kantar Pro");
@@ -581,7 +583,7 @@ namespace KantarPro.Desktop
             }
         }
 
-        private void CreateEntry(string plaka, string firmaAdi, string aciklama, bool tartimIsteniyor, decimal? agirlik, DateTime islemTarihi, string gelisTuruOverride = null)
+        private void CreateEntry(string plaka, string firmaAdi, string aciklama, bool tartimIsteniyor, decimal? agirlik, DateTime islemTarihi, string gelisTuruOverride = null, bool muafMi = false, string muafiyetNedeni = null)
         {
             using (var context = new KantarDbContext())
             {
@@ -602,7 +604,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi);
+                servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi, muafMi, muafiyetNedeni);
             }
         }
 
@@ -783,6 +785,8 @@ namespace KantarPro.Desktop
             PlakaTextBox.Clear();
             FirmaTextBox.Clear();
             AciklamaTextBox.Clear();
+            UcrettenMuafCheckBox.IsChecked = false;
+            MuafiyetNedeniTextBox.Clear();
             AgirlikTextBox.Text = "0";
             _manualGirisSaati = false;
             GirisSaatiTextBox.Text = DateTime.Now.ToString("HH:mm:ss");

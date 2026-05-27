@@ -216,6 +216,11 @@
                             <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="AciklamaTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
+                            <CheckBox x:Name="UcrettenMuafCheckBox" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Content="Ücretten Muaf" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+                            <TextBlock Grid.Row="6" Text="Muafiyet:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBox x:Name="MuafiyetNedeniTextBox" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#F8FAFC" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" ToolTip="Ücretten muaf ise nedeni zorunludur." />
+
                             <Grid Grid.Row="7" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="90" />
@@ -423,6 +428,7 @@
                         <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
                         <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="82" />
                         <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="102" />
+                        <DataGridTextColumn Header="Muafiyet Nedeni" Binding="{Binding MuafiyetNedeni}" Width="160" />
                         <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="150">
                             <DataGridTextColumn.Header>
                                 <StackPanel>

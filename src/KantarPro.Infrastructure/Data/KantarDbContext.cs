@@ -57,6 +57,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<Islem>().Property(x => x.Durum).HasMaxLength(30).IsRequired();
             modelBuilder.Entity<Islem>().Property(x => x.ToplamTahakkuk).HasPrecision(18, 2);
             modelBuilder.Entity<Islem>().Property(x => x.ToplamTahsilat).HasPrecision(18, 2);
+            modelBuilder.Entity<Islem>().Property(x => x.MuafiyetNedeni).HasMaxLength(250);
             modelBuilder.Entity<Islem>().Property(x => x.Notlar).HasMaxLength(500);
             modelBuilder.Entity<Islem>().HasRequired(x => x.Arac).WithMany(x => x.Islemler).HasForeignKey(x => x.AracId);
             modelBuilder.Entity<Islem>().HasRequired(x => x.GirisKullanici).WithMany(x => x.GirisIslemleri).HasForeignKey(x => x.GirisKullaniciId).WillCascadeOnDelete(false);

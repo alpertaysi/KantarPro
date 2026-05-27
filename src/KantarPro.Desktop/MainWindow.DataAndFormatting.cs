@@ -109,6 +109,7 @@ namespace KantarPro.Desktop
                             SiraNo = siraNo++,
                             IslemNo = string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo,
                             OdemeTuru = tahsilat.Key.OdemeTuru,
+                            MuafiyetNedeni = islem.MuafMi ? islem.MuafiyetNedeni : "",
                             FirmaAdi = islem.Arac.FirmaAdi,
                             Plaka = islem.Arac.Plaka,
                             GirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
@@ -122,6 +123,45 @@ namespace KantarPro.Desktop
                             TartimUcreti = DashboardFormat.Para(tartim),
                             BeklemeUcreti = DashboardFormat.Para(bekleme),
                             ToplamUcret = DashboardFormat.Para(toplam)
+                        });
+                    }
+
+                    var muafIslemler = context.Islemler
+                        .Include(x => x.Arac)
+                        .Include(x => x.Tartimlar)
+                        .Where(x =>
+                            x.MuafMi &&
+                            x.CikisTarihi.HasValue &&
+                            x.CikisTarihi.Value >= baslangic &&
+                            x.CikisTarihi.Value < bitisExclusive)
+                        .OrderBy(x => x.CikisTarihi)
+                        .ToList();
+
+                    foreach (var islem in muafIslemler)
+                    {
+                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
+                        var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
+
+                        DailyRevenueRows.Add(new DailyRevenueRow
+                        {
+                            SiraNo = siraNo++,
+                            IslemNo = islem.IslemNo,
+                            OdemeTuru = "Muaf",
+                            MuafiyetNedeni = islem.MuafiyetNedeni,
+                            FirmaAdi = islem.Arac.FirmaAdi,
+                            Plaka = islem.Arac.Plaka,
+                            GirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
+                            GirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),
+                            CikisTarihi = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy") : "",
+                            CikisSaati = islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("HH:mm:ss") : "",
+                            IlkTartim = DashboardFormat.TartimDegeri(ilkTartim),
+                            IkinciTartim = DashboardFormat.TartimDegeri(ikinciTartim),
+                            NetAgirlik = FormatNetAgirlik(ilkTartim, ikinciTartim),
+                            GirisCikisUcreti = DashboardFormat.Para(0m),
+                            TartimUcreti = DashboardFormat.Para(0m),
+                            BeklemeUcreti = DashboardFormat.Para(0m),
+                            ToplamUcret = DashboardFormat.Para(0m)
                         });
                     }
 
@@ -332,6 +372,7 @@ namespace KantarPro.Desktop
                 "Gelis: " + DashboardFormat.BosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Muafiyet: " + DashboardFormat.BosDeger(islem != null && islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
@@ -352,6 +393,7 @@ namespace KantarPro.Desktop
                 "Cikis: " + DashboardFormat.BosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "1. Tartim: " + DashboardFormat.BosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
                 "2. Tartim: " + DashboardFormat.BosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Muafiyet: " + DashboardFormat.BosDeger(islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
@@ -774,6 +816,12 @@ namespace KantarPro.Desktop
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'GelisTuru') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD GelisTuru NVARCHAR(20) NOT NULL CONSTRAINT DF_Islemler_GelisTuru DEFAULT (N'Tartimsiz')");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'MuafMi') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD MuafMi BIT NOT NULL CONSTRAINT DF_Islemler_MuafMi DEFAULT (0)");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'MuafiyetNedeni') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD MuafiyetNedeni NVARCHAR(250) NULL");
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Tartimlar', 'YukDurumu') IS NULL " +
                     "ALTER TABLE dbo.Tartimlar ADD YukDurumu NVARCHAR(20) NULL");

@@ -28,7 +28,7 @@ namespace KantarPro.Application.Services
                 : KantarSabitleri.GelisTuru.Dolu;
         }
 
-        public Islem GirisKaydet(string plaka, string firmaAdi, string gelisTuru, bool tartimYap, decimal? agirlikKg, int kullaniciId, DateTime tarih)
+        public Islem GirisKaydet(string plaka, string firmaAdi, string gelisTuru, bool tartimYap, decimal? agirlikKg, int kullaniciId, DateTime tarih, bool muafMi = false, string muafiyetNedeni = null)
         {
             var arac = AracBulVeyaOlustur(plaka, firmaAdi, tarih);
             if (_unitOfWork.Islemler.Query().Any(x => x.Arac.Plaka == arac.Plaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride))
@@ -36,6 +36,14 @@ namespace KantarPro.Application.Services
                 throw new InvalidOperationException("Bu plaka icin sahada acik ziyaret var.");
             }
 
+            var bekleyenDosya = BekleyenKantarDosyasiBul(arac.Plaka);
+            if (!muafMi && bekleyenDosya != null && bekleyenDosya.IlkTartim != null && bekleyenDosya.IlkTartim.Islem != null && bekleyenDosya.IlkTartim.Islem.MuafMi)
+            {
+                muafMi = true;
+                muafiyetNedeni = bekleyenDosya.IlkTartim.Islem.MuafiyetNedeni;
+            }
+
+            var temizMuafiyetNedeni = NormalizeMuafiyetNedeni(muafMi, muafiyetNedeni);
             var ziyaret = new Islem
             {
                 Arac = arac,
@@ -44,7 +52,9 @@ namespace KantarPro.Application.Services
                 GelisTuru = NormalizeGelisTuru(gelisTuru),
                 GirisTarihi = tarih,
                 Durum = KantarSabitleri.IslemDurumu.Iceride,
-                GirisKullaniciId = kullaniciId
+                GirisKullaniciId = kullaniciId,
+                MuafMi = muafMi,
+                MuafiyetNedeni = temizMuafiyetNedeni
             };
 
             arac.Islemler.Add(ziyaret);
@@ -199,6 +209,11 @@ namespace KantarPro.Application.Services
 
         private void UcretEkle(Islem ziyaret, string ucretKodu, DateTime tarih)
         {
+            if (ziyaret.MuafMi)
+            {
+                return;
+            }
+
             var ucret = _unitOfWork.Ucretler.Query()
                 .Where(x => x.UcretKodu == ucretKodu && x.AktifMi && x.Yil == tarih.Year)
                 .OrderByDescending(x => x.GecerlilikBaslangic)
@@ -401,6 +416,17 @@ namespace KantarPro.Application.Services
         private static string NormalizeOptional(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string NormalizeMuafiyetNedeni(bool muafMi, string muafiyetNedeni)
+        {
+            var temizNeden = NormalizeOptional(muafiyetNedeni);
+            if (muafMi && string.IsNullOrWhiteSpace(temizNeden))
+            {
+                throw new InvalidOperationException("Ucretten muaf islem icin muafiyet nedeni zorunludur.");
+            }
+
+            return muafMi ? temizNeden : null;
         }
 
         private static string UretIslemNo(DateTime tarih)

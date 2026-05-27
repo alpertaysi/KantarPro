@@ -141,6 +141,50 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void MuafGiris_TartimliVeCikisliIslemdeUcretTahakkukEtmez()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ziyaret = servis.GirisKaydet("16 MUF 001", "Resmi Kurum", KantarSabitleri.GelisTuru.Dolu, true, 18000m, 1, new DateTime(2026, 5, 12, 9, 0, 0), true, "Polis kaçak eşya teslimi");
+            servis.CikisYap(ziyaret.Arac.Plaka, true, 9000m, 1, new DateTime(2026, 5, 13, 10, 0, 0));
+
+            Assert.IsTrue(ziyaret.MuafMi);
+            Assert.AreEqual("Polis kaçak eşya teslimi", ziyaret.MuafiyetNedeni);
+            Assert.AreEqual(0, ziyaret.Ucretler.Count);
+            Assert.AreEqual(0m, ziyaret.ToplamTahakkuk);
+            Assert.AreEqual(0m, ziyaret.ToplamTahsilat);
+            Assert.AreEqual(2, ziyaret.Tartimlar.Count);
+        }
+
+        [TestMethod]
+        public void MuafGiris_NedenYoksaReddedilir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            AssertInvalidOperation(() =>
+                servis.GirisKaydet("16 MUF 002", "Resmi Kurum", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 9, 0, 0), true, ""));
+        }
+
+        [TestMethod]
+        public void MuafIlkTartim_IkinciZiyareteMuafiyetiDevreder()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ilk = servis.GirisKaydet("16 MUF 003", "Resmi Kurum", KantarSabitleri.GelisTuru.Dolu, true, 18000m, 1, new DateTime(2026, 5, 12, 9, 0, 0), true, "Polis kaçak eşya teslimi");
+            servis.CikisYap(ilk.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+
+            var ikinci = servis.GirisKaydet(ilk.Arac.Plaka, "Resmi Kurum", KantarSabitleri.GelisTuru.Bos, true, 9000m, 1, new DateTime(2026, 5, 13, 9, 0, 0));
+
+            Assert.IsTrue(ikinci.MuafMi);
+            Assert.AreEqual("Polis kaçak eşya teslimi", ikinci.MuafiyetNedeni);
+            Assert.AreEqual(0, ikinci.Ucretler.Count);
+            Assert.AreEqual(0m, ikinci.ToplamTahakkuk);
+        }
+
+        [TestMethod]
         public void BekleyenDoluDosyasiBosGelisOnerir()
         {
             var uow = new InMemoryUnitOfWork();

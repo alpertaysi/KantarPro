@@ -22,6 +22,8 @@ namespace KantarPro.Domain.Entities
         public int? CikisKullaniciId { get; set; }
         public decimal ToplamTahakkuk { get; set; }
         public decimal ToplamTahsilat { get; set; }
+        public bool MuafMi { get; set; }
+        public string MuafiyetNedeni { get; set; }
         public string Notlar { get; set; }
 
         public virtual Arac Arac { get; set; }
