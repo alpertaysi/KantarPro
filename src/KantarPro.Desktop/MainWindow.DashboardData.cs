@@ -50,52 +50,12 @@ namespace KantarPro.Desktop
                 .ToList();
 
             EntryVehicles.Clear();
+            var rowBuilder = new DashboardRowBuilder(context);
             foreach (var islem in girisler)
             {
-                EntryVehicles.Add(BuildEntryVehicleRow(context, islem, listeHesapTarihi));
+                var dosya = GetKantarDosyasiForIslem(context, islem);
+                EntryVehicles.Add(rowBuilder.BuildEntryVehicleRow(islem, dosya, listeHesapTarihi));
             }
-        }
-
-        private VehicleMovementRow BuildEntryVehicleRow(KantarDbContext context, Islem islem, DateTime listeHesapTarihi)
-        {
-            var dosya = GetKantarDosyasiForIslem(context, islem);
-            var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
-            var ikinciTartim = dosya != null ? dosya.KarsiTartim : DashboardVisitInfo.GetIkinciTartim(islem);
-            var sonTartim = DashboardVisitInfo.GetSonTartim(islem);
-            var beklemeUcreti = HesaplaBeklemeUcreti(context, islem, listeHesapTarihi);
-            var kayitliBeklemeUcreti = SumTahsilEdilmemisUcret(islem, KantarSabitleri.UcretKodu.Bekleme);
-
-            return new VehicleMovementRow
-            {
-                Plaka = islem.Arac.Plaka,
-                FirmaAdi = islem.Arac.FirmaAdi,
-                GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
-                GirisSaati = FormatDoluGelisSaati(islem, ilkTartim),
-                DoluCikisTarihi = FormatDoluCikisTarihi(islem, ilkTartim, ikinciTartim),
-                DoluCikisSaati = FormatDoluCikisSaati(islem, ilkTartim, ikinciTartim),
-                BosGelisTarihi = FormatBosGelisTarihi(ilkTartim, ikinciTartim),
-                BosGelisSaati = FormatBosGelisSaati(ilkTartim, ikinciTartim),
-                Saat = DashboardFormat.SaatSaniyeli(islem.GirisTarihi),
-                CikisTarihi = "",
-                CikisSaati = "",
-                IlkTartimTarihi = DashboardFormat.TartimTarihi(ilkTartim),
-                IlkTartimSaati = DashboardFormat.TartimSaati(ilkTartim),
-                IkinciTartimTarihi = DashboardFormat.TartimTarihi(ikinciTartim),
-                IkinciTartimSaati = DashboardFormat.TartimSaati(ikinciTartim),
-                SonTartimTarihi = DashboardFormat.TartimTarihi(sonTartim),
-                SonTartimSaati = DashboardFormat.TartimSaati(sonTartim),
-                SonTartim = DashboardFormat.SonTartim(sonTartim),
-                Tartim = DashboardFormat.TartimDegeri(ilkTartim),
-                IkinciTartim = DashboardFormat.TartimDegeri(ikinciTartim),
-                NetAgirlik = FormatNetAgirlik(ilkTartim, ikinciTartim),
-                Ucret = FormatKalanBorc(islem, beklemeUcreti - kayitliBeklemeUcreti),
-                Tahsilat = DashboardFormat.Para(islem.ToplamTahsilat),
-                GirisCikisUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis, true),
-                TartimUcreti = FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim, true),
-                BeklemeUcreti = DashboardFormat.Para(beklemeUcreti),
-                Durum = DashboardVisitInfo.GetVisitRowDurum(islem, dosya),
-                KesinCikisMi = false
-            };
         }
 
         private void LoadPendingWeighingRows(KantarDbContext context)
