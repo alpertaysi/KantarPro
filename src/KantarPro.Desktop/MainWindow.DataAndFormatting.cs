@@ -108,9 +108,9 @@ namespace KantarPro.Desktop
                         {
                             SiraNo = siraNo++,
                             IslemNo = string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo,
-                            OdemeTuru = tahsilat.Key.OdemeTuru,
+                            OdemeTuru = islem.MuafMi ? "Muaf" : tahsilat.Key.OdemeTuru,
                             MuafiyetNedeni = islem.MuafMi ? islem.MuafiyetNedeni : "",
-                            FirmaAdi = islem.Arac.FirmaAdi,
+                            FirmaAdi = islem.MuafMi ? islem.MuafiyetNedeni : islem.Arac.FirmaAdi,
                             Plaka = islem.Arac.Plaka,
                             GirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
                             GirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),
@@ -125,7 +125,7 @@ namespace KantarPro.Desktop
                             ToplamUcret = DashboardFormat.Para(toplam)
                         });
                     }
-
+ 
                     var muafIslemler = context.Islemler
                         .Include(x => x.Arac)
                         .Include(x => x.Tartimlar)
@@ -136,20 +136,20 @@ namespace KantarPro.Desktop
                             x.CikisTarihi.Value < bitisExclusive)
                         .OrderBy(x => x.CikisTarihi)
                         .ToList();
-
+ 
                     foreach (var islem in muafIslemler)
                     {
                         var dosya = GetKantarDosyasiForIslem(context, islem);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
                         var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
-
+ 
                         DailyRevenueRows.Add(new DailyRevenueRow
                         {
                             SiraNo = siraNo++,
                             IslemNo = islem.IslemNo,
                             OdemeTuru = "Muaf",
                             MuafiyetNedeni = islem.MuafiyetNedeni,
-                            FirmaAdi = islem.Arac.FirmaAdi,
+                            FirmaAdi = islem.MuafiyetNedeni,
                             Plaka = islem.Arac.Plaka,
                             GirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
                             GirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),

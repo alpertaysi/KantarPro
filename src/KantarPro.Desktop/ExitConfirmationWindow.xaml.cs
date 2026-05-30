@@ -76,8 +76,10 @@ namespace KantarPro.Desktop
         {
             try
             {
-                var odemeTuru = SelectPaymentType();
-                if (string.IsNullOrWhiteSpace(odemeTuru))
+                var odemeTuru = _islem != null && _islem.MuafMi
+                    ? null
+                    : SelectPaymentType();
+                if (_islem != null && !_islem.MuafMi && string.IsNullOrWhiteSpace(odemeTuru))
                 {
                     return;
                 }

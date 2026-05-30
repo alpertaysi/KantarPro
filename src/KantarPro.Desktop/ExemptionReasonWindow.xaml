@@ -1,0 +1,49 @@
+<Window x:Class="KantarPro.Desktop.ExemptionReasonWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ücretten Muafiyet"
+        Width="460"
+        Height="270"
+        MinWidth="460"
+        MinHeight="270"
+        MaxWidth="560"
+        MaxHeight="280"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#EEF2F5"
+        FontFamily="Segoe UI">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Ücretten Muafiyet Tanımla" FontSize="19" FontWeight="SemiBold" Foreground="#1B2430" />
+        <TextBlock Grid.Row="1" Text="Seçili açık kayıt için muafiyet tanımlar. Neden yazılması zorunludur." Foreground="#637083" Margin="0,4,0,14" />
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="105" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Araç Plakası" VerticalAlignment="Center" Margin="0,0,8,8" />
+            <TextBox x:Name="PlateTextBox" Grid.Column="1" IsReadOnly="True" Height="32" Padding="8,3" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+            <TextBlock Grid.Row="1" Text="Muafiyet Nedeni" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox x:Name="ReasonTextBox" Grid.Row="1" Grid.Column="1" Height="32" Padding="8,3" FontSize="15" FontWeight="SemiBold" />
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Muaf Yap" Width="100" MinHeight="34" Margin="0,0,8,0" Click="Save_Click" />
+            <Button Content="Vazgeç" Width="100" MinHeight="34" Click="Cancel_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

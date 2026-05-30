@@ -70,6 +70,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="ExemptionReasonWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="KantarFisPreviewWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -89,6 +97,7 @@
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="DashboardVisitInfo.cs" />
+    <Compile Include="KantarFisFormatter.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
     </Compile>
@@ -113,6 +122,12 @@
     </Compile>
     <Compile Include="PaymentTypeChoiceWindow.xaml.cs">
       <DependentUpon>PaymentTypeChoiceWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ExemptionReasonWindow.xaml.cs">
+      <DependentUpon>ExemptionReasonWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="KantarFisPreviewWindow.xaml.cs">
+      <DependentUpon>KantarFisPreviewWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

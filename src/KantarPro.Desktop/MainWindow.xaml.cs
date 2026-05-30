@@ -117,6 +117,12 @@ namespace KantarPro.Desktop
                 return;
             }
 
+            if (IsMuafPendingDoluBosPlate(PlakaTextBox.Text))
+            {
+                DashboardGirisKaydiOlustur(true);
+                return;
+            }
+
             var dialog = new EntrySaveChoiceWindow
             {
                 Owner = this
@@ -127,28 +133,42 @@ namespace KantarPro.Desktop
                 return;
             }
 
+            if (dialog.Choice == EntrySaveChoice.Exempt)
+            {
+                var exemptionDialog = new ExemptionReasonWindow(PlakaTextBox.Text)
+                {
+                    Owner = this
+                };
+
+                if (exemptionDialog.ShowDialog() != true)
+                {
+                    return;
+                }
+
+                DashboardGirisKaydiOlustur(true, true, exemptionDialog.ExemptionReason);
+                return;
+            }
+
             DashboardGirisKaydiOlustur(dialog.Choice == EntrySaveChoice.WeighAndSave);
         }
 
-        private void DashboardGirisKaydiOlustur(bool tartimIsteniyor)
+        private void DashboardGirisKaydiOlustur(bool tartimIsteniyor, bool muafMi = false, string muafiyetNedeni = null)
         {
             try
             {
                 var plaka = PlakaTextBox.Text;
                 var firmaAdi = FirmaTextBox.Text;
                 var aciklama = AciklamaTextBox.Text;
-                var muafMi = UcrettenMuafCheckBox.IsChecked == true;
-                var muafiyetNedeni = MuafiyetNedeniTextBox.Text;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
                 var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giris tarihi");
 
-                if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi))
+                if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi, muafMi, muafiyetNedeni))
                 {
                     ClearDashboardEntryForm();
                     return;
                 }
 
-                if (!tartimIsteniyor && TryOpenPendingDoluBosWithoutWeighingFromDashboard(plaka, islemTarihi))
+                if (!muafMi && !tartimIsteniyor && TryOpenPendingDoluBosWithoutWeighingFromDashboard(plaka, islemTarihi))
                 {
                     ClearDashboardEntryForm();
                     return;
@@ -258,7 +278,9 @@ namespace KantarPro.Desktop
 
         private void KantarFisiYazdir_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Kantar fisi yazdirma sonraki adimda OKI 5720 ayarlariyla baglanacak.", "Kantar Pro");
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow
+                ?? ExitVehiclesGrid.SelectedItem as VehicleMovementRow;
+            ShowKantarFisiPreview(row);
         }
 
         private void EntryGridMakbuzYazdirMenuItem_Click(object sender, RoutedEventArgs e)
@@ -270,7 +292,7 @@ namespace KantarPro.Desktop
                 return;
             }
 
-            MessageBox.Show(row.Plaka + " plakali arac icin makbuz yazdirma sonraki adimda yaziciya baglanacak.", "Makbuz Yazdir");
+            ShowKantarFisiPreview(row);
         }
 
         private void EntryGridMakbuzGosterMenuItem_Click(object sender, RoutedEventArgs e)
@@ -282,7 +304,29 @@ namespace KantarPro.Desktop
                 return;
             }
 
-            MessageBox.Show(BuildVehicleMovementDetail(row), "Makbuz Goster");
+            ShowKantarFisiPreview(row);
+        }
+
+        private void ShowKantarFisiPreview(VehicleMovementRow row)
+        {
+            if (row == null)
+            {
+                MessageBox.Show("Kantar fisi gosterilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var preview = new KantarFisPreviewWindow(KantarFisFormatter.BuildFromRow(row))
+                {
+                    Owner = this
+                };
+                preview.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kantar fisi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void EntryGridPlakaDuzeltMenuItem_Click(object sender, RoutedEventArgs e)
@@ -300,6 +344,63 @@ namespace KantarPro.Desktop
             EntrySaveButton.Content = "Değiştir";
             PlakaTextBox.Focus();
             PlakaTextBox.SelectAll();
+        }
+
+        private void EntryGridMuafMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
+            if (row == null)
+            {
+                MessageBox.Show("Ücretten muaf yapılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new ExemptionReasonWindow(row.Plaka)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var context = new KantarDbContext())
+                    {
+                        var normalized = NormalizePlaka(row.Plaka);
+                        var islem = context.Islemler
+                            .Include(x => x.Arac)
+                            .Include(x => x.Ucretler)
+                            .FirstOrDefault(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+
+                        if (islem == null)
+                        {
+                            throw new InvalidOperationException("Bu araç için sahada açık ziyaret kaydı bulunamadı.");
+                        }
+
+                        islem.MuafMi = true;
+                        islem.MuafiyetNedeni = dialog.ExemptionReason;
+
+                        // Remove any existing accrued fees for this visit
+                        var ucretler = islem.Ucretler.ToList();
+                        foreach (var ucret in ucretler)
+                        {
+                            context.IslemUcretleri.Remove(ucret);
+                        }
+                        islem.Ucretler.Clear();
+                        islem.ToplamTahakkuk = 0m;
+                        islem.ToplamTahsilat = 0m;
+
+                        context.SaveChanges();
+                    }
+
+                    LoadDashboardData();
+                    MessageBox.Show($"{row.Plaka} plakalı araç ücretten muaf olarak güncellendi.", "Ücretten Muafiyet");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Muafiyet tanımlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
         }
 
         private void EntryVehiclesGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -443,6 +544,12 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void ClearPlateCorrectionMode()
+        {
+            _plateCorrectionOriginalPlate = null;
+            EntrySaveButton.Content = "Kaydet";
+        }
+
         private void EntryGridGelisTarihiniGuncelleMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
@@ -553,6 +660,30 @@ namespace KantarPro.Desktop
             }
         }
 
+        private static bool IsMuafPendingDoluBosPlate(string plaka)
+        {
+            var normalized = NormalizePlaka(plaka);
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return false;
+            }
+
+            using (var context = new KantarDbContext())
+            {
+                return context.KantarDosyalari
+                    .Include(x => x.Arac)
+                    .Include(x => x.IlkTartim)
+                    .Include(x => x.IlkTartim.Islem)
+                    .Any(x =>
+                        x.Arac.Plaka == normalized &&
+                        x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                        x.IlkTartim != null &&
+                        x.IlkTartim.Islem != null &&
+                        x.IlkTartim.Islem.Durum == KantarSabitleri.IslemDurumu.CikisYapti &&
+                        x.IlkTartim.Islem.MuafMi);
+            }
+        }
+
         private void ExitVehiclesGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var grid = sender as DataGrid;
@@ -608,7 +739,7 @@ namespace KantarPro.Desktop
             }
         }
 
-        private bool TryCompletePendingDoluBosFromDashboard(string plaka, decimal scaleWeightKg, DateTime secondWeighingDate)
+        private bool TryCompletePendingDoluBosFromDashboard(string plaka, decimal scaleWeightKg, DateTime secondWeighingDate, bool muafMi = false, string muafiyetNedeni = null)
         {
             using (var context = new KantarDbContext())
             {
@@ -632,7 +763,7 @@ namespace KantarPro.Desktop
                     ? KantarSabitleri.GelisTuru.Dolu
                     : KantarSabitleri.GelisTuru.Bos;
 
-                CreateEntry(pendingRow.Plaka, pendingRow.FirmaAdi, pendingRow.Aciklama, true, dialog.SecondWeightKg, secondWeighingDate, gelisTuru);
+                CreateEntry(pendingRow.Plaka, pendingRow.FirmaAdi, pendingRow.Aciklama, true, dialog.SecondWeightKg, secondWeighingDate, gelisTuru, muafMi, muafiyetNedeni);
             }
 
             LoadDashboardData();
@@ -785,17 +916,7 @@ namespace KantarPro.Desktop
             PlakaTextBox.Clear();
             FirmaTextBox.Clear();
             AciklamaTextBox.Clear();
-            UcrettenMuafCheckBox.IsChecked = false;
-            MuafiyetNedeniTextBox.Clear();
             AgirlikTextBox.Text = "0";
-            _manualGirisSaati = false;
-            GirisSaatiTextBox.Text = DateTime.Now.ToString("HH:mm:ss");
-            PlakaTextBox.Focus();
-        }
-
-        private void ClearPlateCorrectionMode()
-        {
-            _plateCorrectionOriginalPlate = null;
             EntrySaveButton.Content = "Kaydet";
         }
 

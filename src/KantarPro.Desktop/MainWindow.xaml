@@ -188,7 +188,6 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="90" />
@@ -216,12 +215,7 @@
                             <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="AciklamaTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <CheckBox x:Name="UcrettenMuafCheckBox" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Content="Ücretten Muaf" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,0,8" />
-
-                            <TextBlock Grid.Row="6" Text="Muafiyet:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="MuafiyetNedeniTextBox" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#F8FAFC" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" ToolTip="Ücretten muaf ise nedeni zorunludur." />
-
-                            <Grid Grid.Row="7" Grid.ColumnSpan="4">
+                            <Grid Grid.Row="5" Grid.ColumnSpan="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="150" />
@@ -255,6 +249,7 @@
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
                                         <MenuItem Header="Kayit Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
+                                        <MenuItem Header="Ücretten Muaf" Click="EntryGridMuafMenuItem_Click" />
                                         <Separator />
                                         <MenuItem Header="Makbuz Yazdir" Click="EntryGridMakbuzYazdirMenuItem_Click" />
                                         <MenuItem Header="Makbuz Goster" Click="EntryGridMakbuzGosterMenuItem_Click" />
@@ -296,73 +291,65 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="#F3F4F6" BorderBrush="#9CA3AF" BorderThickness="1" Padding="4" Margin="0,0,8,0">
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Background="#EEEEEE" BorderBrush="#9CA3AF" BorderThickness="1" Padding="4">
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <DockPanel Margin="0,0,0,4">
-                            <TextBlock Text="Kesin Cikis Yapilanlar" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </DockPanel>
-                        <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
-                                    <DataGridTextColumn.Header>
-                                        <StackPanel>
-                                            <TextBlock Text="Plaka" />
-                                            <TextBox Tag="ExitPlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
-                                        </StackPanel>
-                                    </DataGridTextColumn.Header>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="130">
-                                    <DataGridTextColumn.Header>
-                                        <StackPanel>
-                                            <TextBlock Text="Firma" />
-                                            <TextBox Tag="ExitFirma" Width="104" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
-                                        </StackPanel>
-                                    </DataGridTextColumn.Header>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="D. Gelis Tarihi" Binding="{Binding GirisTarihi}" Width="88" />
-                                <DataGridTextColumn Header="D. Gelis Saati" Binding="{Binding GirisSaati}" Width="76" />
-                                <DataGridTextColumn Header="D. Cikis Tarihi" Binding="{Binding DoluCikisTarihi}" Width="88" />
-                                <DataGridTextColumn Header="D. Cikis Saati" Binding="{Binding DoluCikisSaati}" Width="76" />
-                                <DataGridTextColumn Header="B. Gelis Tarihi" Binding="{Binding BosGelisTarihi}" Width="88" />
-                                <DataGridTextColumn Header="B. Gelis Saati" Binding="{Binding BosGelisSaati}" Width="76" />
-                                <DataGridTextColumn Header="2. Tartim Tarihi" Binding="{Binding IkinciTartimTarihi}" Width="98" />
-                                <DataGridTextColumn Header="2. Tartim Saati" Binding="{Binding IkinciTartimSaati}" Width="90" />
-                                <DataGridTextColumn Header="1.KG:" Binding="{Binding Tartim}" Width="78" />
-                                <DataGridTextColumn Header="2.KG:" Binding="{Binding IkinciTartim}" Width="78" />
-                                <DataGridTextColumn Header="Net:" Binding="{Binding NetAgirlik}" Width="78" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        <TextBlock Grid.Row="2" Text="Makbuz, arastirma ve yedekleme islemleri sonraki adimda bu alana baglanacak." Foreground="{StaticResource Muted}" FontSize="12" Margin="2,4,0,0" />
-                    </Grid>
-                </Border>
-
-                <Border Grid.Row="2" Grid.Column="1" Background="#EEEEEE" BorderBrush="#9CA3AF" BorderThickness="1" Padding="4">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
                         <TabControl>
-                            <TabItem Header="2. Tartim Bekleyenler">
+                            <TabItem Header="2. Tartım Bekleyenler">
                                 <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighings}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
-                                        <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="140" />
-                                        <DataGridTextColumn Header="Ilk Tartim Tarihi" Binding="{Binding IlkTartimTarihi}" Width="105" />
-                                        <DataGridTextColumn Header="Ilk Tartim Saati" Binding="{Binding IlkTartimSaati}" Width="96" />
-                                        <DataGridTextColumn Header="1.KG" Binding="{Binding IlkAgirlik}" Width="88" />
-                                        <DataGridTextColumn Header="Durum" Binding="{Binding Aciklama}" Width="160" />
+                                        <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="120" />
+                                        <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="250" />
+                                        <DataGridTextColumn Header="İlk Tartım Tarihi" Binding="{Binding IlkTartimTarihi}" Width="150" />
+                                        <DataGridTextColumn Header="İlk Tartım Saati" Binding="{Binding IlkTartimSaati}" Width="120" />
+                                        <DataGridTextColumn Header="1. KG" Binding="{Binding IlkAgirlik}" Width="120" />
+                                        <DataGridTextColumn Header="Durum" Binding="{Binding Aciklama}" Width="*" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </TabItem>
-                            <TabItem Header="Son Islem">
+                            
+                            <TabItem Header="Kesin Çıkış Yapanlar">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="0" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Binding="{Binding Plaka}" Width="120">
+                                                <DataGridTextColumn.Header>
+                                                    <StackPanel>
+                                                        <TextBlock Text="Plaka" />
+                                                        <TextBox Tag="ExitPlaka" Width="100" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                                    </StackPanel>
+                                                </DataGridTextColumn.Header>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="220">
+                                                <DataGridTextColumn.Header>
+                                                    <StackPanel>
+                                                        <TextBlock Text="Firma" />
+                                                        <TextBox Tag="ExitFirma" Width="180" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                                    </StackPanel>
+                                                </DataGridTextColumn.Header>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Header="D. Geliş Tarihi" Binding="{Binding GirisTarihi}" Width="110" />
+                                            <DataGridTextColumn Header="D. Geliş Saati" Binding="{Binding GirisSaati}" Width="95" />
+                                            <DataGridTextColumn Header="D. Çıkış Tarihi" Binding="{Binding DoluCikisTarihi}" Width="110" />
+                                            <DataGridTextColumn Header="D. Çıkış Saati" Binding="{Binding DoluCikisSaati}" Width="95" />
+                                            <DataGridTextColumn Header="B. Geliş Tarihi" Binding="{Binding BosGelisTarihi}" Width="110" />
+                                            <DataGridTextColumn Header="B. Geliş Saati" Binding="{Binding BosGelisSaati}" Width="95" />
+                                            <DataGridTextColumn Header="1. KG" Binding="{Binding Tartim}" Width="90" />
+                                            <DataGridTextColumn Header="2. KG" Binding="{Binding IkinciTartim}" Width="90" />
+                                            <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="100" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <TextBlock Grid.Row="1" Text="Makbuz, araştırma ve yedekleme işlemleri sonraki adımda bu alana bağlanacak." Foreground="{StaticResource Muted}" FontSize="12" Margin="2,6,0,0" />
+                                </Grid>
+                            </TabItem>
+                            
+                            <TabItem Header="Son İşlem">
                                 <Grid>
                                     <TextBox x:Name="SelectedVehicleDetailTextBox"
-                                             Text="Listeden bir arac secildiginde tartim ve ucret dokumu burada gorunecek."
+                                             Text="Listeden bir araç seçildiğinde tartım ve ücret dökümü burada görünecek."
                                              IsReadOnly="True"
                                              TextWrapping="Wrap"
                                              AcceptsReturn="True"
@@ -426,51 +413,87 @@
                 <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
-                        <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="82" />
-                        <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="102" />
-                        <DataGridTextColumn Header="Muafiyet Nedeni" Binding="{Binding MuafiyetNedeni}" Width="160" />
-                        <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="150">
+                        <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="100" />
+                        <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="110" />
+                        <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="200">
                             <DataGridTextColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Firma" />
-                                    <TextBox Tag="RevenueFirma" Width="120" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                    <TextBox Tag="RevenueFirma" Width="170" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
                                 </StackPanel>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding Plaka}" Width="98">
+                        <DataGridTextColumn Binding="{Binding Plaka}" Width="120">
                             <DataGridTextColumn.Header>
                                 <StackPanel>
                                     <TextBlock Text="Plaka" />
-                                    <TextBox Tag="RevenuePlaka" Width="78" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                    <TextBox Tag="RevenuePlaka" Width="90" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
                                 </StackPanel>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="92" />
-                        <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="82" />
-                        <DataGridTextColumn Header="1. Tartim" Binding="{Binding IlkTartim}" Width="96" />
-                        <DataGridTextColumn Header="2. Tartim" Binding="{Binding IkinciTartim}" Width="96" />
-                        <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="86" />
-                        <DataGridTextColumn Header="Giris Ucreti" Binding="{Binding GirisCikisUcreti}" Width="94" />
-                        <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="94" />
-                        <DataGridTextColumn Header="Isgaliye Ucreti" Binding="{Binding BeklemeUcreti}" Width="104" />
-                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="104" />
+                        <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="110" />
+                        <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="95" />
+                        <DataGridTextColumn Header="Giris Ucreti" Binding="{Binding GirisCikisUcreti}" Width="110" />
+                        <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="110" />
+                        <DataGridTextColumn Header="Isgaliye Ucreti" Binding="{Binding BeklemeUcreti}" Width="110" />
+                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="*" />
                     </DataGrid.Columns>
                 </DataGrid>
 
                 <Border Grid.Row="2" Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="8" Margin="0,4,0,0">
-                    <DockPanel LastChildFill="False">
-                        <TextBlock x:Name="RevenueRowCountText" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,0" />
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <TextBlock Text="Giris: " FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueEntryExitTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
-                            <TextBlock Text="Tartim: " FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueWeighingTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
-                            <TextBlock Text="Isgaliye: " FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueWaitingTotalText" Text="0,00 TL" Width="100" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
-                            <TextBlock Text="Toplam: " FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueGrandTotalText" Text="0,00 TL" Width="120" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </DockPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="52" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="95" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="*" MinWidth="140" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="RevenueRowCountText" Grid.Column="0" Grid.ColumnSpan="7" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
+
+                        <Grid Grid.Column="7" Margin="0,0,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Giris:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueEntryExitTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <Grid Grid.Column="8" Margin="0,0,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Tartim:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueWeighingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <Grid Grid.Column="9" Margin="0,0,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Isgaliye:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueWaitingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <Grid Grid.Column="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Toplam:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RevenueGrandTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
 

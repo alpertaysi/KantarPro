@@ -6,7 +6,8 @@ namespace KantarPro.Desktop
     {
         None,
         WeighAndSave,
-        SaveWithoutWeighing
+        SaveWithoutWeighing,
+        Exempt
     }
 
     public partial class EntrySaveChoiceWindow : Window
@@ -29,6 +30,13 @@ namespace KantarPro.Desktop
         private void SaveWithoutWeighing_Click(object sender, RoutedEventArgs e)
         {
             Choice = EntrySaveChoice.SaveWithoutWeighing;
+            DialogResult = true;
+            Close();
+        }
+
+        private void Exempt_Click(object sender, RoutedEventArgs e)
+        {
+            Choice = EntrySaveChoice.Exempt;
             DialogResult = true;
             Close();
         }

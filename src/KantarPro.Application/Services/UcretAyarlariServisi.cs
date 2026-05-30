@@ -56,14 +56,17 @@ namespace KantarPro.Application.Services
 
         private void GuncelleUcret(string kod, string ad, decimal tutar, DateTime tarih)
         {
-            var aktifler = _unitOfWork.Ucretler.Query()
-                .Where(x => x.UcretKodu == kod && x.AktifMi && x.Yil == tarih.Year)
-                .ToList();
+            var mevcutYilUcreti = _unitOfWork.Ucretler.Query()
+                .FirstOrDefault(x => x.UcretKodu == kod && x.Yil == tarih.Year);
 
-            foreach (var aktif in aktifler)
+            if (mevcutYilUcreti != null)
             {
-                aktif.AktifMi = false;
-                aktif.GecerlilikBitis = tarih;
+                mevcutYilUcreti.UcretAdi = ad;
+                mevcutYilUcreti.Tutar = tutar;
+                mevcutYilUcreti.AktifMi = true;
+                mevcutYilUcreti.GecerlilikBaslangic = tarih;
+                mevcutYilUcreti.GecerlilikBitis = null;
+                return;
             }
 
             _unitOfWork.Ucretler.Add(new Ucret
