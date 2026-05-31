@@ -26,6 +26,7 @@ namespace KantarPro.Desktop
 
             return new VehicleMovementRow
             {
+                IslemNo = islem.IslemNo,
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,
                 GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
@@ -68,6 +69,7 @@ namespace KantarPro.Desktop
 
             return new VehicleMovementRow
             {
+                IslemNo = islem.IslemNo,
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,
                 GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
@@ -146,7 +148,7 @@ namespace KantarPro.Desktop
                 ikinciTartim != null &&
                 ilkTartim.IslemId == ikinciTartim.IslemId)
             {
-                return null;
+                return islem.CikisTarihi;
             }
 
             var ilkTahsilat = islem.Ucretler

@@ -30,6 +30,7 @@
     <Compile Include="Fakes\InMemoryRepository.cs" />
     <Compile Include="Fakes\InMemoryUnitOfWork.cs" />
     <Compile Include="IslemServisiTests.cs" />
+    <Compile Include="KantarFisFormatterTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />
     <Compile Include="UcretAyarlariServisiTests.cs" />
@@ -43,6 +44,10 @@
     <ProjectReference Include="..\..\src\KantarPro.Domain\KantarPro.Domain.csproj">
       <Project>{F6A83897-744D-4321-A3C2-1A7723DA43A1}</Project>
       <Name>KantarPro.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\KantarPro.Desktop\KantarPro.Desktop.csproj">
+      <Project>{22206464-3F06-42AF-907A-58793E7C2E5B}</Project>
+      <Name>KantarPro.Desktop</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

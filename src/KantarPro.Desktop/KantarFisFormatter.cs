@@ -21,46 +21,94 @@ namespace KantarPro.Desktop
 
             var ikinciTartim = CleanWeight(row.IkinciTartim);
             var net = CleanWeight(row.NetAgirlik);
-            var cikisTarihi = FirstNonEmpty(row.CikisTarihi, row.DoluCikisTarihi);
-            var cikisSaati = FirstNonEmpty(row.CikisSaati, row.DoluCikisSaati);
+            var doluBosFisi = !string.IsNullOrWhiteSpace(ikinciTartim) &&
+                !IsNoWeighingText(ikinciTartim) &&
+                !string.IsNullOrWhiteSpace(net) &&
+                !IsNoWeighingText(net);
 
             var builder = new StringBuilder();
-            builder.AppendLine(Center("TICARET BAKANLIGI", 72));
-            builder.AppendLine(Center("ULUDAG GUMRUK VE TICARET BOLGE MUDURLUGU", 72));
-            builder.AppendLine(Center("BURSATASFIYE ISLETME MUDURLUGU", 72));
+            AppendHeader(builder);
             builder.AppendLine();
             builder.AppendLine();
             builder.AppendLine();
-            builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "BILET NO.:", "-"));
-            builder.AppendLine();
-            builder.AppendLine("   " + Pair("GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
-            builder.AppendLine("   " + Pair("CIKIS TARIHI:", cikisTarihi, "SAATI....:", cikisSaati));
-            builder.AppendLine();
-            builder.AppendLine("   " + Field("MUSTERI ADI", row.FirmaAdi));
-            builder.AppendLine("   " + Field("MAL CINSI", ""));
-            builder.AppendLine("   " + Field("ACIKLAMA", row.Durum));
-            builder.AppendLine("   " + Field("GITTIGI YER", ""));
-            builder.AppendLine("   " + Field("GELDIGI YER", ""));
-            builder.AppendLine();
-            builder.AppendLine("   " + Field("1.TARTI", FormatKg(birinciTartim)));
 
-            if (!string.IsNullOrWhiteSpace(ikinciTartim) && !IsNoWeighingText(ikinciTartim))
+            if (doluBosFisi)
             {
-                builder.AppendLine("   " + Field("2.TARTI", FormatKg(ikinciTartim)));
+                AppendDoluBosFis(builder, row, birinciTartim, ikinciTartim, net);
             }
             else
             {
-                builder.AppendLine("   " + Field("2.TARTI", ""));
+                AppendTekTartimFis(builder, row, birinciTartim);
             }
 
-            builder.AppendLine();
-            builder.AppendLine("   " + Field("NET", string.IsNullOrWhiteSpace(net) || IsNoWeighingText(net) ? "" : FormatKg(net)));
             builder.AppendLine();
             builder.AppendLine();
             builder.AppendLine();
             builder.AppendLine("   MEMUR IMZA: ____________________");
 
             return builder.ToString();
+        }
+
+        public static string BuildFromPendingRow(PendingWeighingPrototypeRow row)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            var birinciTartim = CleanWeight(row.IlkAgirlik);
+            if (string.IsNullOrWhiteSpace(birinciTartim) || IsNoWeighingText(birinciTartim))
+            {
+                throw new InvalidOperationException("Bu kayitta kantar tartimi yok. Tartimsiz girisler icin kantar fisi olusturulmaz.");
+            }
+
+            var fisRow = new VehicleMovementRow
+            {
+                IslemNo = row.IslemNo,
+                Plaka = row.Plaka,
+                GirisTarihi = FirstNonEmpty(row.IlkTartimTarihi, row.IlkGirisTarihi),
+                GirisSaati = FirstNonEmpty(row.IlkTartimSaati, row.IlkGirisSaati),
+                Tartim = birinciTartim
+            };
+
+            return BuildFromRow(fisRow);
+        }
+
+        private static void AppendHeader(StringBuilder builder)
+        {
+            builder.AppendLine(Center("TICARET BAKANLIGI", 72));
+            builder.AppendLine(Center("ULUDAG GUMRUK VE TICARET BOLGE MUDURLUGU", 72));
+            builder.AppendLine(Center("BURSATASFIYE ISLETME MUDURLUGU", 72));
+        }
+
+        private static void AppendTekTartimFis(StringBuilder builder, VehicleMovementRow row, string birinciTartim)
+        {
+            builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            builder.AppendLine();
+            builder.AppendLine("   " + Pair("GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
+            builder.AppendLine();
+            builder.AppendLine("   " + Field("1.TARTI", FormatKg(birinciTartim)));
+        }
+
+        private static void AppendDoluBosFis(StringBuilder builder, VehicleMovementRow row, string birinciTartim, string ikinciTartim, string net)
+        {
+            var ikinciGirisTarihi = FirstNonEmpty(row.BosGelisTarihi, row.IkinciTartimTarihi);
+            var ikinciGirisSaati = FirstNonEmpty(row.BosGelisSaati, row.IkinciTartimSaati);
+
+            builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            builder.AppendLine();
+            builder.AppendLine("   " + Pair("1.GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
+            builder.AppendLine("   " + Pair("2.GIRIS TARIHI:", ikinciGirisTarihi, "SAATI....:", ikinciGirisSaati));
+            builder.AppendLine();
+            builder.AppendLine("   " + Field("1.TARTI", FormatKg(birinciTartim)));
+            builder.AppendLine("   " + Field("2.TARTI", FormatKg(ikinciTartim)));
+            builder.AppendLine();
+            builder.AppendLine("   " + Field("NET", FormatKg(net)));
+        }
+
+        private static string FormatFisNo(VehicleMovementRow row)
+        {
+            return string.IsNullOrWhiteSpace(row.IslemNo) ? "-" : row.IslemNo.Trim();
         }
 
         private static string Pair(string leftLabel, string leftValue, string rightLabel, string rightValue)

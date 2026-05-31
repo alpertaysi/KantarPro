@@ -329,6 +329,28 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void ShowPendingKantarFisiPreview(PendingWeighingPrototypeRow row)
+        {
+            if (row == null)
+            {
+                MessageBox.Show("Kantar fisi gosterilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var preview = new KantarFisPreviewWindow(KantarFisFormatter.BuildFromPendingRow(row))
+                {
+                    Owner = this
+                };
+                preview.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kantar fisi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         private void EntryGridPlakaDuzeltMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
@@ -344,6 +366,49 @@ namespace KantarPro.Desktop
             EntrySaveButton.Content = "Değiştir";
             PlakaTextBox.Focus();
             PlakaTextBox.SelectAll();
+        }
+
+        private void EntryGridFirmaGuncelleMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
+            if (row == null)
+            {
+                MessageBox.Show("Firma bilgisi guncellenecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new FirmaUpdateWindow(row.Plaka, row.FirmaAdi)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                using (var context = new KantarDbContext())
+                {
+                    var normalized = NormalizePlaka(row.Plaka);
+                    var arac = context.Araclar.FirstOrDefault(x => x.Plaka == normalized);
+                    if (arac == null)
+                    {
+                        throw new InvalidOperationException("Arac kaydi bulunamadi.");
+                    }
+
+                    arac.FirmaAdi = dialog.FirmaAdi;
+                    context.SaveChanges();
+                }
+
+                LoadDashboardData();
+                MessageBox.Show("Firma bilgisi guncellendi.", "Kantar Pro");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Firma guncellenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void EntryGridMuafMenuItem_Click(object sender, RoutedEventArgs e)
@@ -426,6 +491,52 @@ namespace KantarPro.Desktop
             EntryVehiclesGrid.Focus();
         }
 
+        private void ExitVehiclesGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var row = FindParent<DataGridRow>(e.OriginalSource as DependencyObject);
+            if (row == null)
+            {
+                return;
+            }
+
+            row.IsSelected = true;
+            ExitVehiclesGrid.SelectedItem = row.Item;
+            ExitVehiclesGrid.Focus();
+        }
+
+        private void PendingWeighingsGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var row = FindParent<DataGridRow>(e.OriginalSource as DependencyObject);
+            if (row == null)
+            {
+                return;
+            }
+
+            row.IsSelected = true;
+            PendingWeighingsGrid.SelectedItem = row.Item;
+            PendingWeighingsGrid.Focus();
+        }
+
+        private void ExitGridMakbuzYazdirMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ShowKantarFisiPreview(ExitVehiclesGrid.SelectedItem as VehicleMovementRow);
+        }
+
+        private void ExitGridMakbuzGosterMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ShowKantarFisiPreview(ExitVehiclesGrid.SelectedItem as VehicleMovementRow);
+        }
+
+        private void PendingGridMakbuzYazdirMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPendingKantarFisiPreview(PendingWeighingsGrid.SelectedItem as PendingWeighingPrototypeRow);
+        }
+
+        private void PendingGridMakbuzGosterMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ShowPendingKantarFisiPreview(PendingWeighingsGrid.SelectedItem as PendingWeighingPrototypeRow);
+        }
+
         private void EntryGridTartMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
@@ -438,7 +549,7 @@ namespace KantarPro.Desktop
             try
             {
                 var agirlik = ParseAgirlik(AgirlikTextBox.Text);
-                var tartimTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, "Islem tarihi");
+                var tartimTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
 
                 using (var context = new KantarDbContext())
                 {
@@ -448,6 +559,28 @@ namespace KantarPro.Desktop
                         .Include(x => x.Tartimlar)
                         .FirstOrDefault(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
                     var pendingRow = FindPendingDoluBosRow(context, row.Plaka);
+                    var openVisitPendingRow = openIslem != null ? BuildOpenVisitSecondWeighingRow(openIslem, tartimTarihi) : null;
+                    if (openVisitPendingRow != null)
+                    {
+                        var dialog = new DoluBosSecondWeighingWindow(openVisitPendingRow, agirlik.Value, tartimTarihi)
+                        {
+                            Owner = this
+                        };
+
+                        if (dialog.ShowDialog() != true)
+                        {
+                            return;
+                        }
+
+                        var doluBosKullaniciId = EnsureAdminUser(context);
+                        var doluBosServis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                        doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForOpenVisit(openIslem), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi);
+
+                        LoadDashboardData();
+                        MessageBox.Show("Dolu-bos ikinci tartim eklendi.", "Kantar Pro");
+                        return;
+                    }
+
                     if (openIslem != null && pendingRow != null)
                     {
                         var dialog = new DoluBosSecondWeighingWindow(pendingRow, agirlik.Value, tartimTarihi)
@@ -484,6 +617,38 @@ namespace KantarPro.Desktop
             {
                 MessageBox.Show(ex.Message, "Tartim eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private static PendingWeighingPrototypeRow BuildOpenVisitSecondWeighingRow(Islem islem, DateTime cikisTarihi)
+        {
+            if (islem == null)
+            {
+                return null;
+            }
+
+            var tartimlar = islem.Tartimlar
+                .OrderBy(x => x.TartimTarihi)
+                .ToList();
+            if (tartimlar.Count != 1)
+            {
+                return null;
+            }
+
+            var ilkTartim = tartimlar[0];
+            return new PendingWeighingPrototypeRow
+            {
+                Plaka = islem.Arac.Plaka,
+                FirmaAdi = islem.Arac.FirmaAdi,
+                IlkGirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),
+                IlkGirisSaati = islem.GirisTarihi.ToString("HH:mm:ss"),
+                IlkCikisTarihi = cikisTarihi.ToString("dd.MM.yyyy"),
+                IlkCikisSaati = cikisTarihi.ToString("HH:mm:ss"),
+                IlkTartimTarihi = ilkTartim.TartimTarihi.ToString("dd.MM.yyyy"),
+                IlkTartimSaati = ilkTartim.TartimTarihi.ToString("HH:mm:ss"),
+                IlkAgirlik = ilkTartim.AgirlikKg.ToString("N0"),
+                YukDurumu = ilkTartim.YukDurumu,
+                Aciklama = DashboardVisitInfo.GetBeklenenTartimDurumu(ilkTartim)
+            };
         }
 
         private void DashboardPlakaDegistir()
@@ -726,13 +891,7 @@ namespace KantarPro.Desktop
                 var acikIslemVarMi = context.Islemler.Any(x => x.Arac.Plaka == normalizedPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
                 if (acikIslemVarMi)
                 {
-                    if (!tartimIsteniyor)
-                    {
-                        throw new InvalidOperationException("Bu plaka icin iceride acik islem var. Yeni giris yerine cikis yapin veya tartim ekleyin.");
-                    }
-
-                    servis.SonradanTartimEkle(plaka, YukDurumuFromGelisTuru(gelisTuru), agirlik.Value, kullaniciId, islemTarihi);
-                    return;
+                    throw new InvalidOperationException("Bu plaka icin iceride acik islem var. Yeni giris yapilamaz. Ikinci tartim icin listedeki satira sag tiklayip Tart secenegini kullanin veya Cikis Yap islemini tamamlayin.");
                 }
 
                 servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi, muafMi, muafiyetNedeni);
@@ -1168,6 +1327,32 @@ namespace KantarPro.Desktop
             {
                 _manualCikisSaati = true;
             }
+
+            RefreshDashboardForManualExitDate(textBox);
+        }
+
+        private void CikisTarihiTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            RefreshDashboardForManualExitDate(sender as TextBox);
+        }
+
+        private void RefreshDashboardForManualExitDate(TextBox textBox)
+        {
+            if (textBox == null || !textBox.IsKeyboardFocusWithin)
+            {
+                return;
+            }
+
+            try
+            {
+                ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
+            }
+            catch
+            {
+                return;
+            }
+
+            LoadDashboardData();
         }
 
 

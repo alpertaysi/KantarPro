@@ -597,7 +597,7 @@ namespace KantarPro.Desktop
                 ikinciTartim != null &&
                 ilkTartim.IslemId == ikinciTartim.IslemId)
             {
-                return null;
+                return islem.CikisTarihi;
             }
 
             var ilkTahsilat = islem.Ucretler
@@ -664,7 +664,7 @@ namespace KantarPro.Desktop
         {
             try
             {
-                return ParseIslemTarihi(GirisTarihiTextBox.Text, "Islem tarihi");
+                return ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
             }
             catch
             {

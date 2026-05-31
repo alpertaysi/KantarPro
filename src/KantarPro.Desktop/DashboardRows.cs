@@ -2,6 +2,7 @@ namespace KantarPro.Desktop
 {
     public class VehicleMovementRow
     {
+        public string IslemNo { get; set; }
         public string Plaka { get; set; }
         public string FirmaAdi { get; set; }
         public string GirisTarihi { get; set; }
@@ -64,6 +65,7 @@ namespace KantarPro.Desktop
 
     public class PendingWeighingPrototypeRow
     {
+        public string IslemNo { get; set; }
         public string Plaka { get; set; }
         public string FirmaAdi { get; set; }
         public string IlkGirisTarihi { get; set; }

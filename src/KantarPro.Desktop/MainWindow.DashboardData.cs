@@ -100,6 +100,7 @@ namespace KantarPro.Desktop
 
             return new PendingWeighingPrototypeRow
             {
+                IslemNo = islem.IslemNo,
                 Plaka = dosya.Arac.Plaka,
                 FirmaAdi = dosya.Arac.FirmaAdi,
                 IlkGirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),

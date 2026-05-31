@@ -66,6 +66,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="FirmaUpdateWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PaymentTypeChoiceWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,6 +123,9 @@
     </Compile>
     <Compile Include="PlateCorrectionWindow.xaml.cs">
       <DependentUpon>PlateCorrectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FirmaUpdateWindow.xaml.cs">
+      <DependentUpon>FirmaUpdateWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PaymentTypeChoiceWindow.xaml.cs">
       <DependentUpon>PaymentTypeChoiceWindow.xaml</DependentUpon>

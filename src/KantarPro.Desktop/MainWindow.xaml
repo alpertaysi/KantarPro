@@ -205,7 +205,7 @@
                             <TextBox x:Name="GirisSaatiTextBox" Grid.Row="1" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="GirisSaatiTextBox_TextChanged" />
 
                             <TextBlock Grid.Row="2" Text="Cikis Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" TextChanged="CikisTarihiTextBox_TextChanged" />
                             <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
                             <TextBox x:Name="CikisSaatiTextBox" Grid.Row="2" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="CikisSaatiTextBox_TextChanged" />
 
@@ -249,6 +249,7 @@
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
                                         <MenuItem Header="Kayit Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
+                                        <MenuItem Header="Firma Guncelle" Click="EntryGridFirmaGuncelleMenuItem_Click" />
                                         <MenuItem Header="Ücretten Muaf" Click="EntryGridMuafMenuItem_Click" />
                                         <Separator />
                                         <MenuItem Header="Makbuz Yazdir" Click="EntryGridMakbuzYazdirMenuItem_Click" />
@@ -295,7 +296,13 @@
                     <Grid>
                         <TabControl>
                             <TabItem Header="2. Tartım Bekleyenler">
-                                <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighings}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighings}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" PreviewMouseRightButtonDown="PendingWeighingsGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Kantar Fisi Yazdir" Click="PendingGridMakbuzYazdirMenuItem_Click" />
+                                            <MenuItem Header="Kantar Fisi Goster" Click="PendingGridMakbuzGosterMenuItem_Click" />
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="120" />
                                         <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="250" />
@@ -313,7 +320,13 @@
                                         <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="0" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                    <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="0" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" PreviewMouseRightButtonDown="ExitVehiclesGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Kantar Fisi Yazdir" Click="ExitGridMakbuzYazdirMenuItem_Click" />
+                                                <MenuItem Header="Kantar Fisi Goster" Click="ExitGridMakbuzGosterMenuItem_Click" />
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Binding="{Binding Plaka}" Width="120">
                                                 <DataGridTextColumn.Header>
