@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
@@ -33,7 +33,7 @@ namespace KantarPro.Desktop
 
         private void LoadPreview()
         {
-            using (var context = new KantarDbContext())
+            using (var context = KantarDbContextFactory.Create())
             {
                 _islem = context.Islemler
                     .Include(x => x.Arac)
@@ -84,7 +84,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                using (var context = new KantarDbContext())
+                using (var context = KantarDbContextFactory.Create())
                 {
                     var kullaniciId = EnsureAdminUser(context);
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
@@ -196,3 +196,4 @@ namespace KantarPro.Desktop
         }
     }
 }
+

@@ -26,6 +26,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -98,10 +99,13 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DashboardFormat.cs" />
+    <Compile Include="AutoRefreshPolicy.cs" />
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="DashboardVisitInfo.cs" />
+    <Compile Include="KantarDbContextFactory.cs" />
     <Compile Include="KantarFisFormatter.cs" />
+    <Compile Include="StationSettings.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
     </Compile>

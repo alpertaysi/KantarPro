@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System;
 using System.Linq;
 using KantarPro.Application.Services;
@@ -11,11 +11,11 @@ namespace KantarPro.Desktop
 {
     public partial class MainWindow : Window
     {
-        private void LoadDashboardData()
+        private void LoadDashboardData(bool showErrorMessage = true)
         {
             try
             {
-                using (var context = new KantarDbContext())
+                using (var context = KantarDbContextFactory.Create())
                 {
                     var sahaServisi = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
                     sahaServisi.SuresiDolanKantarDosyalariniKapat(DateTime.Today, 10);
@@ -34,7 +34,13 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ana ekran verileri okunamadi: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (showErrorMessage)
+                {
+                    MessageBox.Show("Ana ekran verileri okunamadi: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                throw;
             }
         }
 
@@ -90,9 +96,10 @@ namespace KantarPro.Desktop
                 return null;
             }
 
+            var dosyaPlaka = NormalizePlaka(dosya.Arac != null ? dosya.Arac.Plaka : null);
             var acikDonusVarMi = context.Islemler.Any(x =>
-                x.AracId == dosya.AracId &&
-                x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
+                (x.AracId == dosya.AracId || x.Arac.Plaka == dosyaPlaka));
             if (acikDonusVarMi)
             {
                 return null;
@@ -172,3 +179,4 @@ namespace KantarPro.Desktop
         }
     }
 }
+

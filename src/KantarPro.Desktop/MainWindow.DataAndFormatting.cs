@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using System.Windows.Controls;
@@ -58,7 +58,7 @@ namespace KantarPro.Desktop
                 }
 
                 var bitisExclusive = bitis.AddDays(1);
-                using (var context = new KantarDbContext())
+                using (var context = KantarDbContextFactory.Create())
                 {
                     var tahsilatlar = context.IslemUcretleri
                         .Include(x => x.Ucret)
@@ -222,7 +222,7 @@ namespace KantarPro.Desktop
         private static string BuildPendingWeighingDetail(PendingWeighingPrototypeRow row)
         {
             var normalized = NormalizePlaka(row.Plaka);
-            using (var context = new KantarDbContext())
+            using (var context = KantarDbContextFactory.Create())
             {
                 var dosya = context.KantarDosyalari
                     .Include(x => x.Arac)
@@ -261,7 +261,7 @@ namespace KantarPro.Desktop
         private static string TryBuildKantarDosyasiDetail(VehicleMovementRow row)
         {
             var normalized = NormalizePlaka(row.Plaka);
-            using (var context = new KantarDbContext())
+            using (var context = KantarDbContextFactory.Create())
             {
                 var dosyalar = context.KantarDosyalari
                     .Include(x => x.Arac)
@@ -328,7 +328,7 @@ namespace KantarPro.Desktop
         private static string GetPaymentHistoryText(string plaka)
         {
             var normalized = NormalizePlaka(plaka);
-            using (var context = new KantarDbContext())
+            using (var context = KantarDbContextFactory.Create())
             {
                 var tahsilatlar = context.IslemUcretleri
                     .Include(x => x.Islem.Arac)
@@ -747,7 +747,6 @@ namespace KantarPro.Desktop
         {
             var ilkTartim = islem != null
                 ? islem.Tartimlar
-                    .Where(x => x.TartimTipi == KantarSabitleri.TartimTipi.Giris)
                     .OrderBy(x => x.TartimTarihi)
                     .FirstOrDefault()
                 : null;
@@ -808,7 +807,7 @@ namespace KantarPro.Desktop
 
         private static void EnsureDatabaseSchema()
         {
-            using (var context = new KantarDbContext())
+            using (var context = KantarDbContextFactory.Create())
             {
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'FaturaId') IS NULL " +
@@ -894,3 +893,4 @@ namespace KantarPro.Desktop
         }
     }
 }
+

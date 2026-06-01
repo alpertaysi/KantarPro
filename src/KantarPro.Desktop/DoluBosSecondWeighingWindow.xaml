@@ -24,7 +24,7 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Background" Value="#FFFFFF" />
         </Style>
-        <Style TargetType="Button">
+        <Style TargetType="Button" BasedOn="{StaticResource ReadableButtonBase}">
             <Setter Property="Height" Value="34" />
             <Setter Property="MinWidth" Value="92" />
             <Setter Property="Padding" Value="10,4" />

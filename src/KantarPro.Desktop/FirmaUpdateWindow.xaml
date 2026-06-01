@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Firma Guncelle"
         Width="430"
-        Height="240"
+        Height="270"
         MinWidth="430"
-        MinHeight="240"
+        MinHeight="270"
         MaxWidth="560"
-        MaxHeight="280"
+        MaxHeight="300"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#EEF2F5"
@@ -17,7 +17,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="16" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -41,7 +41,7 @@
             <TextBox x:Name="CompanyTextBox" Grid.Row="1" Grid.Column="1" CharacterCasing="Upper" Height="32" Padding="8,3" FontSize="15" FontWeight="SemiBold" />
         </Grid>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
             <Button Content="Kaydet" Width="96" MinHeight="34" Margin="0,0,8,0" Click="Save_Click" />
             <Button Content="Vazgec" Width="96" MinHeight="34" Click="Cancel_Click" />
         </StackPanel>

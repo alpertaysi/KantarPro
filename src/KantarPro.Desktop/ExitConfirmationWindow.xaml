@@ -19,7 +19,7 @@
             <Setter Property="Background" Value="#E6ECF7" />
             <Setter Property="IsReadOnly" Value="True" />
         </Style>
-        <Style TargetType="Button">
+        <Style TargetType="Button" BasedOn="{StaticResource ReadableButtonBase}">
             <Setter Property="Height" Value="36" />
             <Setter Property="MinWidth" Value="92" />
             <Setter Property="Padding" Value="12,6" />

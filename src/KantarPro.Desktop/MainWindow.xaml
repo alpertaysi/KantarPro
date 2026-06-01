@@ -18,7 +18,7 @@
         <SolidColorBrush x:Key="PrimaryDark" Color="#115E59" />
         <SolidColorBrush x:Key="Warn" Color="#B45309" />
 
-        <Style TargetType="Button">
+        <Style TargetType="Button" BasedOn="{StaticResource ReadableButtonBase}">
             <Setter Property="MinHeight" Value="46" />
             <Setter Property="Padding" Value="16,8" />
             <Setter Property="FontSize" Value="15" />
@@ -150,9 +150,10 @@
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="SQL: Bagli" Foreground="#86EFAC" Margin="18,0,12,0" VerticalAlignment="Center" />
-                        <TextBlock Text="COM: Beklemede" Foreground="#FCD34D" Margin="0,0,12,0" VerticalAlignment="Center" />
-                        <TextBlock Text="Admin Kullanici" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                        <TextBlock x:Name="SqlStatusText" Text="SQL: Bagli" Foreground="#86EFAC" Margin="18,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="ComStatusText" Text="COM: Beklemede" Foreground="#FCD34D" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="StationStatusText" Text="Giris Kantari" Foreground="#CBD5E1" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="AutoRefreshStatusText" Text="Oto: -" Foreground="#94A3B8" VerticalAlignment="Center" />
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -225,6 +226,7 @@
                                 <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
                                 <StackPanel Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
                                     <Button x:Name="EntrySaveButton" Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
+                                    <Button x:Name="EntryCorrectionCancelButton" Content="Vazgeç" Style="{StaticResource DangerButton}" MinHeight="34" Padding="10,4" FontSize="13" Visibility="Collapsed" Click="EntryCorrectionCancelButton_Click" />
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -512,8 +514,10 @@
 
             <Grid x:Name="SettingsContent" Grid.Row="2" Visibility="Collapsed">
                 <Border Background="#F8FAFC" BorderBrush="#9CA3AF" BorderThickness="1" Padding="22">
-                    <Grid MaxWidth="620" HorizontalAlignment="Left">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid MaxWidth="860" HorizontalAlignment="Left">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -521,7 +525,7 @@
 
                         <StackPanel>
                             <TextBlock Text="Ayarlar" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                            <TextBlock Text="Yeni fiyatlar kaydedildikten sonra sonraki kayit ve tahsilatlarda kullanilir." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
+                            <TextBlock Text="Ucretler ortak SQL veritabaninda, SQL/istasyon/COM bilgileri bu bilgisayarda saklanir." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
                         </StackPanel>
 
                         <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="18" Margin="0,0,0,14">
@@ -551,11 +555,58 @@
                             </Grid>
                         </Border>
 
-                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <Border Grid.Row="2" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="18" Margin="0,0,0,14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="260" />
+                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="220" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="SQL Server / IP" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsSqlServerTextBox" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+
+                                <TextBlock Grid.Column="2" Text="Veritabani" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsDatabaseTextBox" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+
+                                <TextBlock Grid.Row="1" Text="Windows Baglantisi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <CheckBox x:Name="SettingsWindowsAuthCheckBox" Grid.Row="1" Grid.Column="1" Content="Windows kullanicisi ile baglan" VerticalAlignment="Center" Margin="0,0,18,10" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="Istasyon Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <ComboBox x:Name="SettingsStationTypeComboBox" Grid.Row="1" Grid.Column="3" Height="34" FontSize="14" Padding="6,3" Margin="0,0,0,10">
+                                    <ComboBoxItem Content="Giris Kantari" />
+                                    <ComboBoxItem Content="Cikis Kantari" />
+                                </ComboBox>
+
+                                <TextBlock Grid.Row="2" Text="SQL Kullanici" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsSqlUserTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="2" Text="SQL Sifre" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsSqlPasswordTextBox" Grid.Row="2" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+
+                                <TextBlock Grid.Row="3" Text="Kantar COM Port" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                <TextBox x:Name="SettingsComPortTextBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+
+                                <Button Grid.Row="3" Grid.Column="2" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsTestConnectionButton_Click" />
+                                <TextBlock x:Name="SettingsConnectionInfoText" Grid.Row="4" Grid.ColumnSpan="4" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Row="3" Orientation="Horizontal">
                             <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Width="120" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveButton_Click" />
                             <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
                         </StackPanel>
                     </Grid>
+                    </ScrollViewer>
                 </Border>
             </Grid>
 

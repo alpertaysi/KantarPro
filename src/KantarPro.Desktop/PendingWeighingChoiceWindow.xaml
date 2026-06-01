@@ -16,7 +16,7 @@
         <SolidColorBrush x:Key="Line" Color="#D8E0E8" />
         <SolidColorBrush x:Key="Primary" Color="#0F766E" />
 
-        <Style TargetType="Button">
+        <Style TargetType="Button" BasedOn="{StaticResource ReadableButtonBase}">
             <Setter Property="MinHeight" Value="42" />
             <Setter Property="Padding" Value="14,7" />
             <Setter Property="FontSize" Value="14" />

@@ -100,6 +100,21 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void TartimsizZiyareteSonradanIkiTartimEklenirseDoluBosTamamlanir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var ziyaret = servis.GirisKaydet("16 TST 009", "Firma J", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+
+            servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Dolu, 21500m, 1, new DateTime(2026, 5, 12, 10, 20, 0));
+            servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Bos, 8500m, 1, new DateTime(2026, 5, 12, 11, 20, 0));
+
+            Assert.AreEqual(2, ziyaret.Tartimlar.Count);
+            Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.Tamamlandi, uow.KantarDosyasiListesi.Single().Durum);
+            Assert.AreEqual(13000m, uow.KantarDosyasiListesi.Single().NetAgirlikKg);
+        }
+
+        [TestMethod]
         public void GeceYarisiGecilirseBeklemeUcretiTahsilEdilir()
         {
             var uow = new InMemoryUnitOfWork();
