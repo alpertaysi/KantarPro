@@ -15,11 +15,13 @@ namespace KantarPro.Application.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini kullanir. Yeni dolu-bos akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem GirisYap(string plaka, bool tartimIsteniyor, decimal? agirlikKg, int kullaniciId, DateTime islemTarihi)
         {
             return GirisYap(plaka, null, null, tartimIsteniyor, agirlikKg, kullaniciId, islemTarihi);
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini kullanir. Yeni dolu-bos akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem GirisYap(string plaka, string firmaAdi, string aciklama, bool tartimIsteniyor, decimal? agirlikKg, int kullaniciId, DateTime islemTarihi)
         {
             return GirisYap(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlikKg, kullaniciId, islemTarihi, true);
@@ -115,6 +117,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini tamamlar. Yeni dolu-bos akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem GirisYapVeBekleyenTartimiTamamla(string plaka, string firmaAdi, string aciklama, int bekleyenTartimId, decimal ikinciAgirlikKg, int kullaniciId, DateTime islemTarihi)
         {
             if (ikinciAgirlikKg <= 0)
@@ -181,6 +184,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini tamamlar. Yeni dolu-bos akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem IceridekiBekleyenTartimiTamamla(string plaka, int bekleyenTartimId, decimal ikinciAgirlikKg, int kullaniciId, DateTime tartimTarihi)
         {
             if (ikinciAgirlikKg <= 0)
@@ -230,6 +234,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini kullanir. Yeni saha cikis akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem CikisYap(string plaka, bool tartimIsteniyor, decimal? agirlikKg, int kullaniciId, DateTime cikisTarihi, string odemeTuru = KantarSabitleri.OdemeTuru.Nakit)
         {
             var temizPlaka = NormalizePlaka(plaka);
@@ -281,6 +286,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini kullanir. Yeni sonradan tartim akislari icin SahaZiyaretiServisi kullanilmalidir.")]
         public Islem SonradanTartimEkle(string plaka, decimal agirlikKg, int kullaniciId, DateTime tartimTarihi)
         {
             if (agirlikKg <= 0)
@@ -338,6 +344,7 @@ namespace KantarPro.Application.Services
             return islem;
         }
 
+        [Obsolete("Eski BekleyenTartimlar modelini kapatir. Yeni model icin SahaZiyaretiServisi.SuresiDolanKantarDosyalariniKapat kullanilmalidir.")]
         public int SuresiDolanBekleyenTartimlariKapat(DateTime kontrolTarihi, int gunSiniri)
         {
             if (gunSiniri <= 0)

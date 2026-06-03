@@ -82,6 +82,8 @@ CREATE TABLE dbo.Islemler
     CikisKullaniciId INT NULL,
     ToplamTahakkuk DECIMAL(18,2) NOT NULL CONSTRAINT DF_Islemler_ToplamTahakkuk DEFAULT (0),
     ToplamTahsilat DECIMAL(18,2) NOT NULL CONSTRAINT DF_Islemler_ToplamTahsilat DEFAULT (0),
+    MuafMi BIT NOT NULL CONSTRAINT DF_Islemler_MuafMi DEFAULT (0),
+    MuafiyetNedeni NVARCHAR(250) NULL,
     Notlar NVARCHAR(500) NULL,
     CONSTRAINT FK_Islemler_Araclar FOREIGN KEY (AracId) REFERENCES dbo.Araclar(AracId),
     CONSTRAINT FK_Islemler_GirisKullanicilar FOREIGN KEY (GirisKullaniciId) REFERENCES dbo.Kullanicilar(KullaniciId),

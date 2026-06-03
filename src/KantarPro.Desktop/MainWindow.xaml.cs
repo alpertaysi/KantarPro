@@ -673,6 +673,12 @@ namespace KantarPro.Desktop
                         .Include(x => x.Arac)
                         .Include(x => x.Tartimlar)
                         .FirstOrDefault(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                    if (openIslem != null && IsOpenVisitLinkedToCompletedKantarDosyasi(context, openIslem.IslemId))
+                    {
+                        MessageBox.Show("Bu aracin dolu-bos tartimi tamamlandi. Kesin cikis yapilmadan yeni tartim eklenemez.", "Tartim eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
                     var pendingRow = FindPendingDoluBosRow(context, row.Plaka);
                     var openVisitPendingRow = openIslem != null ? BuildOpenVisitSecondWeighingRow(openIslem, tartimTarihi) : null;
                     if (openVisitPendingRow != null)
@@ -732,6 +738,13 @@ namespace KantarPro.Desktop
             {
                 MessageBox.Show(ex.Message, "Tartim eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private static bool IsOpenVisitLinkedToCompletedKantarDosyasi(KantarDbContext context, int islemId)
+        {
+            return context.KantarDosyalari.Any(x =>
+                x.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi &&
+                (x.IlkTartim.IslemId == islemId || (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == islemId)));
         }
 
         private static PendingWeighingPrototypeRow BuildOpenVisitSecondWeighingRow(Islem islem, DateTime cikisTarihi)
@@ -1476,85 +1489,6 @@ namespace KantarPro.Desktop
             };
 
             return dialog.ShowDialog() == true;
-        }
-
-        private int? SelectPendingWeighingIfNeeded(KantarDbContext context, string plaka)
-        {
-            var normalized = NormalizePlaka(plaka);
-            EnsurePendingWeighingsForPlate(context, normalized);
-
-            var pendingRows = context.BekleyenTartimlar
-                .Include(x => x.Arac)
-                .Where(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor)
-                .OrderByDescending(x => x.IlkTartimTarihi)
-                .ToList();
-
-            if (pendingRows.Count == 0)
-            {
-                return null;
-            }
-
-            var rows = new ObservableCollection<PendingWeighingChoiceRow>(
-                pendingRows.Select(x => new PendingWeighingChoiceRow
-                {
-                    BekleyenTartimId = x.BekleyenTartimId,
-                    Plaka = x.Arac.Plaka,
-                    FirmaAdi = x.Arac.FirmaAdi,
-                    IlkTartimTarihi = x.IlkTartimTarihi.ToString("dd.MM.yyyy"),
-                    IlkTartimSaati = x.IlkTartimTarihi.ToString("HH:mm:ss"),
-                    IlkAgirlik = x.IlkAgirlikKg.ToString("N0"),
-                    Aciklama = x.Arac.Aciklama
-                }));
-
-            var dialog = new PendingWeighingChoiceWindow(normalized, rows)
-            {
-                Owner = this
-            };
-
-            if (dialog.ShowDialog() != true)
-            {
-                throw new OperationCanceledException("Giris islemi iptal edildi.");
-            }
-
-            if (dialog.Result == PendingWeighingChoiceResult.UseExisting)
-            {
-                return dialog.SelectedBekleyenTartimId;
-            }
-
-            return null;
-        }
-
-        private static void EnsurePendingWeighingsForPlate(KantarDbContext context, string normalizedPlaka)
-        {
-            var girisTartimlari = context.Tartimlar
-                .Include(x => x.Arac)
-                .Where(x => x.Arac.Plaka == normalizedPlaka && x.TartimTipi == KantarSabitleri.TartimTipi.Giris)
-                .ToList();
-
-            var eklendiMi = false;
-            foreach (var tartim in girisTartimlari)
-            {
-                var bekleyenKayitVarMi = context.BekleyenTartimlar.Any(x => x.IlkTartimId == tartim.TartimId);
-                if (bekleyenKayitVarMi)
-                {
-                    continue;
-                }
-
-                context.BekleyenTartimlar.Add(new BekleyenTartim
-                {
-                    AracId = tartim.AracId,
-                    IlkTartimId = tartim.TartimId,
-                    IlkAgirlikKg = tartim.AgirlikKg,
-                    IlkTartimTarihi = tartim.TartimTarihi,
-                    Durum = KantarSabitleri.BekleyenTartimDurumu.Bekliyor
-                });
-                eklendiMi = true;
-            }
-
-            if (eklendiMi)
-            {
-                context.SaveChanges();
-            }
         }
 
         private string GetPlakaForOperation()

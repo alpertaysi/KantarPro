@@ -43,10 +43,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PendingWeighingChoiceWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="DoluBosSecondWeighingWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -108,9 +104,6 @@
     <Compile Include="StationSettings.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
       <DependentUpon>ExitConfirmationWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="PendingWeighingChoiceWindow.xaml.cs">
-      <DependentUpon>PendingWeighingChoiceWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DoluBosSecondWeighingWindow.xaml.cs">
       <DependentUpon>DoluBosSecondWeighingWindow.xaml</DependentUpon>
