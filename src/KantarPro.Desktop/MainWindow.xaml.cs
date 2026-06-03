@@ -38,6 +38,8 @@ namespace KantarPro.Desktop
         private bool _manualGirisSaati;
         private bool _manualCikisSaati;
         private bool _isAutoRefreshing;
+        private KantarSerialReader _scaleReader;
+        private decimal? _lastScaleWeightKg;
 
         public MainWindow()
         {
@@ -57,6 +59,8 @@ namespace KantarPro.Desktop
             InitializeComponent();
             LoadStationSettings();
             UpdateStationStatus();
+            StartScaleReader();
+            Closing += MainWindow_Closing;
 
             try
             {
@@ -934,6 +938,11 @@ namespace KantarPro.Desktop
             LoadFeeSettings();
         }
 
+        private void SettingsRefreshComPortsButton_Click(object sender, RoutedEventArgs e)
+        {
+            PopulateComPortOptions(GetSelectedComboBoxText(SettingsComPortComboBox));
+        }
+
         private void SettingsTestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -971,6 +980,7 @@ namespace KantarPro.Desktop
                 }
 
                 UpdateStationStatus();
+                StartScaleReader();
                 LoadFeeSettings();
                 LoadDashboardData();
                 MessageBox.Show("Ayarlar kaydedildi. SQL, istasyon, COM ve ucret bilgileri guncellendi.", "Ayarlar");
@@ -1265,9 +1275,33 @@ namespace KantarPro.Desktop
             SettingsWindowsAuthCheckBox.IsChecked = settings.UseWindowsAuthentication;
             SettingsSqlUserTextBox.Text = settings.SqlUsername;
             SettingsSqlPasswordTextBox.Text = settings.SqlPassword;
-            SettingsComPortTextBox.Text = settings.ComPort;
+            PopulateComPortOptions(settings.ComPort);
             SelectComboBoxItem(SettingsStationTypeComboBox, settings.StationType);
             SettingsConnectionInfoText.Text = "Yerel ayar dosyasi: " + StationSettingsStore.GetSettingsPath();
+        }
+
+        private void PopulateComPortOptions(string selectedPort)
+        {
+            var normalizedSelection = (selectedPort ?? string.Empty).Trim().ToUpperInvariant();
+            var portNames = KantarSerialReader.GetAvailablePortNames().ToList();
+            if (!string.IsNullOrWhiteSpace(normalizedSelection) &&
+                !portNames.Any(x => string.Equals(x, normalizedSelection, StringComparison.OrdinalIgnoreCase)))
+            {
+                portNames.Insert(0, normalizedSelection);
+            }
+
+            SettingsComPortComboBox.ItemsSource = portNames;
+            SettingsComPortComboBox.SelectedItem = portNames
+                .FirstOrDefault(x => string.Equals(x, normalizedSelection, StringComparison.OrdinalIgnoreCase));
+
+            if (SettingsComPortComboBox.SelectedItem == null && portNames.Count == 1)
+            {
+                SettingsComPortComboBox.SelectedIndex = 0;
+            }
+
+            SettingsConnectionInfoText.Text = portNames.Count == 0
+                ? "Bu bilgisayarda COM port bulunamadi. USB-RS232 ceviriciyi taktikdan sonra Portlari Yenile'ye basin."
+                : "Bulunan COM portlar: " + string.Join(", ", portNames);
         }
 
         private StationSettings ReadStationSettingsFromForm()
@@ -1280,7 +1314,7 @@ namespace KantarPro.Desktop
                 SqlUsername = (SettingsSqlUserTextBox.Text ?? string.Empty).Trim(),
                 SqlPassword = SettingsSqlPasswordTextBox.Text ?? string.Empty,
                 StationType = GetSelectedComboBoxText(SettingsStationTypeComboBox),
-                ComPort = (SettingsComPortTextBox.Text ?? string.Empty).Trim()
+                ComPort = GetSelectedComboBoxText(SettingsComPortComboBox).Trim()
             };
 
             if (string.IsNullOrWhiteSpace(settings.SqlServerAddress))
@@ -1314,6 +1348,88 @@ namespace KantarPro.Desktop
             StationStatusText.Text = settings.StationType;
         }
 
+        private void StartScaleReader()
+        {
+            StopScaleReader();
+
+            var settings = StationSettingsStore.Load();
+            if (string.IsNullOrWhiteSpace(settings.ComPort))
+            {
+                ComStatusText.Text = "COM: Beklemede";
+                return;
+            }
+
+            try
+            {
+                _scaleReader = new KantarSerialReader();
+                _scaleReader.WeightReceived += ScaleReader_WeightReceived;
+                _scaleReader.ReadError += ScaleReader_ReadError;
+                _scaleReader.Start(settings.ComPort);
+                ComStatusText.Text = _scaleReader.IsOpen
+                    ? "COM: " + settings.ComPort + " dinleniyor"
+                    : "COM: Beklemede";
+            }
+            catch (Exception ex)
+            {
+                StopScaleReader();
+                ComStatusText.Text = "COM: " + settings.ComPort + " hata";
+                SettingsConnectionInfoText.Text = "COM baglantisi acilamadi: " + ex.Message;
+            }
+        }
+
+        private void StopScaleReader()
+        {
+            if (_scaleReader == null)
+            {
+                return;
+            }
+
+            _scaleReader.WeightReceived -= ScaleReader_WeightReceived;
+            _scaleReader.ReadError -= ScaleReader_ReadError;
+            _scaleReader.Dispose();
+            _scaleReader = null;
+        }
+
+        private void ScaleReader_WeightReceived(object sender, ScaleWeightReceivedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _lastScaleWeightKg = e.WeightKg;
+                var text = e.WeightKg.ToString("0.##", CultureInfo.InvariantCulture);
+                SetScaleTextBoxValue(AgirlikTextBox, text);
+                SetScaleTextBoxValue(EntryAgirlikTextBox, text);
+                SetScaleTextBoxValue(ExitAgirlikTextBox, text);
+
+                var settings = StationSettingsStore.Load();
+                ComStatusText.Text = "COM: " + settings.ComPort + " - " + text + " kg";
+            }));
+        }
+
+        private void ScaleReader_ReadError(object sender, string message)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var settings = StationSettingsStore.Load();
+                ComStatusText.Text = "COM: " + settings.ComPort + " okuma hatasi";
+                SettingsConnectionInfoText.Text = "COM okuma hatasi: " + message;
+            }));
+        }
+
+        private static void SetScaleTextBoxValue(TextBox textBox, string value)
+        {
+            if (textBox == null)
+            {
+                return;
+            }
+
+            textBox.Text = value;
+        }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            StopScaleReader();
+        }
+
         private static void SelectComboBoxItem(ComboBox comboBox, string text)
         {
             foreach (var item in comboBox.Items)
@@ -1335,6 +1451,12 @@ namespace KantarPro.Desktop
             if (comboBoxItem != null)
             {
                 return comboBoxItem.Content as string;
+            }
+
+            var selectedText = comboBox.SelectedItem as string;
+            if (selectedText != null)
+            {
+                return selectedText;
             }
 
             return comboBox.Text;

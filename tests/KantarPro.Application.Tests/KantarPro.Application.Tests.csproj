@@ -31,6 +31,7 @@
     <Compile Include="Fakes\InMemoryUnitOfWork.cs" />
     <Compile Include="IslemServisiTests.cs" />
     <Compile Include="KantarFisFormatterTests.cs" />
+    <Compile Include="KantarSerialReaderTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />

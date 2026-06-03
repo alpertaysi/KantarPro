@@ -594,9 +594,10 @@
                                 <TextBox x:Name="SettingsSqlPasswordTextBox" Grid.Row="2" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
 
                                 <TextBlock Grid.Row="3" Text="Kantar COM Port" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsComPortTextBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+                                <ComboBox x:Name="SettingsComPortComboBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,18,10" IsEditable="False" />
 
-                                <Button Grid.Row="3" Grid.Column="2" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsTestConnectionButton_Click" />
+                                <Button Grid.Row="3" Grid.Column="2" Content="Portlari Yenile" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsRefreshComPortsButton_Click" />
+                                <Button Grid.Row="3" Grid.Column="3" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,10" Click="SettingsTestConnectionButton_Click" />
                                 <TextBlock x:Name="SettingsConnectionInfoText" Grid.Row="4" Grid.ColumnSpan="4" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
                             </Grid>
                         </Border>

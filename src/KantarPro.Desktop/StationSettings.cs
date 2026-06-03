@@ -30,7 +30,7 @@ namespace KantarPro.Desktop
                 SqlUsername = "sa",
                 SqlPassword = "",
                 StationType = EntryStation,
-                ComPort = "COM1"
+                ComPort = ""
             };
         }
 
