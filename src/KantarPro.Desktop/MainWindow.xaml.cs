@@ -499,15 +499,8 @@ namespace KantarPro.Desktop
             {
                 using (var context = KantarDbContextFactory.Create())
                 {
-                    var normalized = NormalizePlaka(row.Plaka);
-                    var arac = context.Araclar.FirstOrDefault(x => x.Plaka == normalized);
-                    if (arac == null)
-                    {
-                        throw new InvalidOperationException("Arac kaydi bulunamadi.");
-                    }
-
-                    arac.FirmaAdi = dialog.FirmaAdi;
-                    context.SaveChanges();
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    servis.FirmaAdiniGuncelle(row.Plaka, dialog.FirmaAdi);
                 }
 
                 LoadDashboardData();
@@ -546,31 +539,9 @@ namespace KantarPro.Desktop
                 {
                     using (var context = KantarDbContextFactory.Create())
                     {
-                        var normalized = NormalizePlaka(row.Plaka);
-                        var islem = context.Islemler
-                            .Include(x => x.Arac)
-                            .Include(x => x.Ucretler)
-                            .FirstOrDefault(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
-
-                        if (islem == null)
-                        {
-                            throw new InvalidOperationException("Bu araç için sahada açık ziyaret kaydı bulunamadı.");
-                        }
-
-                        islem.MuafMi = true;
-                        islem.MuafiyetNedeni = dialog.ExemptionReason;
-
-                        // Remove any existing accrued fees for this visit
-                        var ucretler = islem.Ucretler.ToList();
-                        foreach (var ucret in ucretler)
-                        {
-                            context.IslemUcretleri.Remove(ucret);
-                        }
-                        islem.Ucretler.Clear();
-                        islem.ToplamTahakkuk = 0m;
-                        islem.ToplamTahsilat = 0m;
-
-                        context.SaveChanges();
+                        var kullaniciId = EnsureAdminUser(context);
+                        var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                        servis.IslemMuafYap(row.IslemId, dialog.ExemptionReason, kullaniciId);
                     }
 
                     LoadDashboardData();

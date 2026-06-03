@@ -277,6 +277,51 @@ namespace KantarPro.Application.Tests
                 servis.PlakaHatasiniDuzelt("23FEH956", "23FHE956", null, 1));
         }
 
+        [TestMethod]
+        public void PlakaHatasiniDuzelt_HedefPlakaYoksa_YeniAracOlusturur()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            servis.GirisKaydet("23 FEH 956", "Firma P", KantarSabitleri.GelisTuru.Dolu, true, 28000m, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+
+            servis.PlakaHatasiniDuzelt("23FEH956", "23FHE956", null, 1);
+
+            Assert.AreEqual(1, uow.AracListesi.Count(x => x.Plaka == "23FHE956"));
+            Assert.AreEqual(0, uow.IslemListesi.Count(x => x.Arac.Plaka == "23FEH956" && x.Durum == KantarSabitleri.IslemDurumu.Iceride));
+            Assert.AreEqual("23FHE956", uow.IslemListesi.Single().Arac.Plaka);
+        }
+
+        [TestMethod]
+        public void FirmaAdiniGuncelle_AracFirmasiniGunceller()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            servis.GirisKaydet("16 ABC 123", "", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+
+            servis.FirmaAdiniGuncelle("16ABC123", "Yeni Firma");
+
+            Assert.AreEqual("Yeni Firma", uow.AracListesi.Single().FirmaAdi);
+        }
+
+        [TestMethod]
+        public void IslemMuafYap_UcretleriSilerVeLogYazar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var ziyaret = servis.GirisKaydet("16 ABC 123", "Firma", KantarSabitleri.GelisTuru.Dolu, true, 20000m, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+            ziyaret.IslemId = 123;
+
+            servis.IslemMuafYap(123, "Resmi kurum talebi", 1);
+
+            Assert.IsTrue(ziyaret.MuafMi);
+            Assert.AreEqual("Resmi kurum talebi", ziyaret.MuafiyetNedeni);
+            Assert.AreEqual(0, ziyaret.Ucretler.Count);
+            Assert.AreEqual(0m, ziyaret.ToplamTahakkuk);
+            Assert.AreEqual(0m, ziyaret.ToplamTahsilat);
+            Assert.AreEqual(0, uow.IslemUcretiListesi.Count);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "IslemMuafYap"));
+        }
+
         private static void AssertInvalidOperation(Action action)
         {
             try

@@ -26,6 +26,7 @@ namespace KantarPro.Desktop
 
             return new VehicleMovementRow
             {
+                IslemId = islem.IslemId,
                 IslemNo = islem.IslemNo,
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,
@@ -69,6 +70,7 @@ namespace KantarPro.Desktop
 
             return new VehicleMovementRow
             {
+                IslemId = islem.IslemId,
                 IslemNo = islem.IslemNo,
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,

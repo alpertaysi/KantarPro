@@ -2,6 +2,7 @@ namespace KantarPro.Desktop
 {
     public class VehicleMovementRow
     {
+        public int IslemId { get; set; }
         public string IslemNo { get; set; }
         public string Plaka { get; set; }
         public string FirmaAdi { get; set; }

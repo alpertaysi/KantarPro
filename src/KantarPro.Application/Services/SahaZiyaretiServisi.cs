@@ -135,6 +135,52 @@ namespace KantarPro.Application.Services
             return kapanacaklar.Count;
         }
 
+        public Islem AcikZiyaretiGetir(string plaka)
+        {
+            return AcikZiyaretBul(plaka);
+        }
+
+        public Arac FirmaAdiniGuncelle(string plaka, string yeniFirmaAdi)
+        {
+            var temizPlaka = NormalizePlakaZorunlu(plaka, nameof(plaka));
+            var arac = _unitOfWork.Araclar.SingleOrDefault(x => x.Plaka == temizPlaka);
+            if (arac == null)
+            {
+                throw new InvalidOperationException("Arac kaydi bulunamadi.");
+            }
+
+            arac.FirmaAdi = NormalizeOptional(yeniFirmaAdi);
+            _unitOfWork.SaveChanges();
+            return arac;
+        }
+
+        public Islem IslemMuafYap(int islemId, string muafiyetNedeni, int kullaniciId)
+        {
+            var ziyaret = _unitOfWork.Islemler.Query().FirstOrDefault(x => x.IslemId == islemId);
+            if (ziyaret == null)
+            {
+                throw new InvalidOperationException("Saha ziyareti bulunamadi.");
+            }
+
+            if (ziyaret.Durum != KantarSabitleri.IslemDurumu.Iceride)
+            {
+                throw new InvalidOperationException("Sadece sahada acik ziyaretler muaf yapilabilir.");
+            }
+
+            ziyaret.MuafMi = true;
+            ziyaret.MuafiyetNedeni = NormalizeMuafiyetNedeni(true, muafiyetNedeni);
+
+            var ucretler = ziyaret.Ucretler.ToList();
+            _unitOfWork.IslemUcretleri.RemoveRange(ucretler);
+            ziyaret.Ucretler.Clear();
+            ziyaret.ToplamTahakkuk = 0m;
+            ziyaret.ToplamTahsilat = 0m;
+
+            LogEkle(kullaniciId, ziyaret, "IslemMuafYap", "Islem ucretten muaf yapildi: " + ziyaret.Arac.Plaka);
+            _unitOfWork.SaveChanges();
+            return ziyaret;
+        }
+
         public Islem PlakaHatasiniDuzelt(string hataliPlaka, string dogruPlaka, decimal? onaylananIkinciAgirlikKg, int kullaniciId)
         {
             var temizHataliPlaka = NormalizePlakaZorunlu(hataliPlaka, nameof(hataliPlaka));

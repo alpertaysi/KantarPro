@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -35,25 +34,17 @@ namespace KantarPro.Desktop
         {
             using (var context = KantarDbContextFactory.Create())
             {
-                _islem = context.Islemler
-                    .Include(x => x.Arac)
-                    .Include(x => x.Tartimlar)
-                    .Include(x => x.Ucretler.Select(u => u.Ucret))
-                    .FirstOrDefault(x => x.Arac.Plaka == _plaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                var unitOfWork = new KantarUnitOfWork(context);
+                var sahaServisi = new SahaZiyaretiServisi(unitOfWork);
+                var ucretAyarlari = new UcretAyarlariServisi(unitOfWork).Getir(_cikisTarihi);
+                _islem = sahaServisi.AcikZiyaretiGetir(_plaka);
 
-                if (_islem == null)
-                {
-                    throw new InvalidOperationException("Bu plaka icin acik giris islemi bulunamadi.");
-                }
-
-                var tartimUcreti = GetActiveFee(context, KantarSabitleri.UcretKodu.Tartim, _cikisTarihi);
-                var beklemeUcreti = GetActiveFee(context, KantarSabitleri.UcretKodu.Bekleme, _cikisTarihi);
                 var girisCikisToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.GirisCikis);
                 var mevcutTartimAdedi = _islem.Ucretler.Count(x => x.Ucret != null && x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.Tartim && !x.TahsilEdildiMi);
                 var toplamTartimAdedi = mevcutTartimAdedi + (_tartimIsteniyor ? 1 : 0);
-                var tartimToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Tartim) + (_tartimIsteniyor ? tartimUcreti : 0m);
+                var tartimToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Tartim) + (_tartimIsteniyor ? ucretAyarlari.TartimUcreti : 0m);
                 var beklemeAdedi = SahaZiyaretiServisi.HesaplaBeklemeGunSayisi(_islem.GirisTarihi, _cikisTarihi);
-                var beklemeToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Bekleme) + (beklemeAdedi * beklemeUcreti);
+                var beklemeToplam = SumUnpaidFee(_islem, KantarSabitleri.UcretKodu.Bekleme) + (beklemeAdedi * ucretAyarlari.BeklemeUcreti);
 
                 _previewToplam = girisCikisToplam + tartimToplam + beklemeToplam;
 
@@ -130,21 +121,6 @@ namespace KantarPro.Desktop
             return islem.Ucretler
                 .Where(x => x.Ucret != null && x.Ucret.UcretKodu == ucretKodu && !x.TahsilEdildiMi)
                 .Sum(x => x.Tutar);
-        }
-
-        private static decimal GetActiveFee(KantarDbContext context, string ucretKodu, DateTime tarih)
-        {
-            var fee = context.Ucretler
-                .Where(x => x.UcretKodu == ucretKodu && x.AktifMi && x.Yil == tarih.Year)
-                .OrderByDescending(x => x.GecerlilikBaslangic)
-                .FirstOrDefault();
-
-            if (fee == null)
-            {
-                throw new InvalidOperationException("Aktif ucret bulunamadi: " + ucretKodu);
-            }
-
-            return fee.Tutar;
         }
 
         private DateTime ParseExitDateTime()
