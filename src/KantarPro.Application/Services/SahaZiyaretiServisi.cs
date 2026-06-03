@@ -66,6 +66,7 @@ namespace KantarPro.Application.Services
                 TartimKaydet(ziyaret, YukDurumuGetir(ziyaret.GelisTuru), agirlikKg, KantarSabitleri.TartimTipi.Giris, kullaniciId, tarih);
             }
 
+            LogEkle(kullaniciId, ziyaret, "SahaGiris", "Saha girisi kaydedildi: " + ziyaret.Arac.Plaka + ", GelisTuru=" + ziyaret.GelisTuru);
             _unitOfWork.SaveChanges();
             return ziyaret;
         }
@@ -79,6 +80,7 @@ namespace KantarPro.Application.Services
             }
 
             TartimKaydet(ziyaret, NormalizeYukDurumu(yukDurumu), agirlikKg, KantarSabitleri.TartimTipi.Sonradan, kullaniciId, tartimTarihi);
+            LogEkle(kullaniciId, ziyaret, "SahaSonradanTartim", "Sonradan tartim eklendi: " + ziyaret.Arac.Plaka + ", " + agirlikKg.ToString("N0") + " kg");
             _unitOfWork.SaveChanges();
             return ziyaret;
         }
@@ -102,6 +104,7 @@ namespace KantarPro.Application.Services
             }
 
             TahsilEt(ziyaret, kullaniciId, cikisTarihi, odemeTuru);
+            LogEkle(kullaniciId, ziyaret, "SahaCikis", "Saha cikisi yapildi: " + ziyaret.Arac.Plaka + ", Tahakkuk=" + ziyaret.ToplamTahakkuk.ToString("N2"));
             _unitOfWork.SaveChanges();
             return ziyaret;
         }
@@ -121,6 +124,7 @@ namespace KantarPro.Application.Services
             foreach (var dosya in kapanacaklar)
             {
                 dosya.Durum = KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu;
+                LogEkle(null, dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null, "KantarDosyasiSuresiDoldu", "Karsi tartim suresi doldu: " + dosya.Arac.Plaka);
             }
 
             if (kapanacaklar.Count > 0)
@@ -129,6 +133,132 @@ namespace KantarPro.Application.Services
             }
 
             return kapanacaklar.Count;
+        }
+
+        public Islem PlakaHatasiniDuzelt(string hataliPlaka, string dogruPlaka, decimal? onaylananIkinciAgirlikKg, int kullaniciId)
+        {
+            var temizHataliPlaka = NormalizePlakaZorunlu(hataliPlaka, nameof(hataliPlaka));
+            var temizDogruPlaka = NormalizePlakaZorunlu(dogruPlaka, nameof(dogruPlaka));
+            if (temizHataliPlaka == temizDogruPlaka)
+            {
+                return AcikZiyaretBul(temizHataliPlaka);
+            }
+
+            var ziyaret = _unitOfWork.Islemler.Query()
+                .FirstOrDefault(x => x.Arac.Plaka == temizHataliPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+            if (ziyaret == null)
+            {
+                throw new InvalidOperationException("Hatali plaka icin acik saha ziyareti bulunamadi.");
+            }
+
+            var eskiArac = ziyaret.Arac;
+            var eskiAracId = ziyaret.AracId;
+            var hedefArac = _unitOfWork.Araclar.SingleOrDefault(x => x.Plaka == temizDogruPlaka);
+            if (hedefArac == null)
+            {
+                hedefArac = new Arac
+                {
+                    Plaka = temizDogruPlaka,
+                    FirmaAdi = eskiArac != null ? eskiArac.FirmaAdi : null,
+                    AktifMi = true,
+                    OlusturmaTarihi = ziyaret.GirisTarihi
+                };
+                _unitOfWork.Araclar.Add(hedefArac);
+            }
+            else if (hedefArac.AracId != eskiAracId)
+            {
+                var hedefPlakadaAcikIslemVarMi = _unitOfWork.Islemler.Query().Any(x =>
+                    x.AracId == hedefArac.AracId &&
+                    x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
+                    x.IslemId != ziyaret.IslemId);
+                if (hedefPlakadaAcikIslemVarMi)
+                {
+                    throw new InvalidOperationException("Yeni plaka ile iceride acik kayit var. Kayit duzeltilemez.");
+                }
+            }
+
+            var tartimlar = ziyaret.Tartimlar.OrderBy(x => x.TartimTarihi).ToList();
+            var hedefBekleyenDosyalar = _unitOfWork.KantarDosyalari.Query()
+                .Where(x => x.Arac.Plaka == temizDogruPlaka && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                .OrderByDescending(x => x.OlusturmaTarihi)
+                .ToList();
+
+            if (hedefBekleyenDosyalar.Count > 1)
+            {
+                throw new InvalidOperationException("Yeni plaka icin birden fazla bekleyen dolu-bos dosyasi var. Once dogru bekleyen kaydi netlestirin.");
+            }
+
+            var islemTartimIdleri = tartimlar.Select(x => x.TartimId).ToList();
+            var hataliPlakaDosyalari = _unitOfWork.KantarDosyalari.Query()
+                .Where(x => x.Arac.Plaka == temizHataliPlaka && islemTartimIdleri.Contains(x.IlkTartimId))
+                .ToList();
+            _unitOfWork.KantarDosyalari.RemoveRange(hataliPlakaDosyalari);
+
+            ziyaret.AracId = hedefArac.AracId;
+            ziyaret.Arac = hedefArac;
+            if (!hedefArac.Islemler.Contains(ziyaret))
+            {
+                hedefArac.Islemler.Add(ziyaret);
+            }
+
+            foreach (var tartim in tartimlar)
+            {
+                tartim.AracId = hedefArac.AracId;
+                tartim.Arac = hedefArac;
+                if (!hedefArac.Tartimlar.Contains(tartim))
+                {
+                    hedefArac.Tartimlar.Add(tartim);
+                }
+            }
+
+            if (hedefBekleyenDosyalar.Count == 1 && tartimlar.Count > 0)
+            {
+                DoluBosDosyasiniKarsiTartimlaTamamla(ziyaret, hedefBekleyenDosyalar.Single(), tartimlar.Last(), onaylananIkinciAgirlikKg);
+            }
+
+            LogEkle(kullaniciId, ziyaret, "PlakaDuzeltme", "Plaka duzeltildi: " + temizHataliPlaka + " -> " + temizDogruPlaka);
+            _unitOfWork.SaveChanges();
+            return ziyaret;
+        }
+
+        private void LogEkle(int? kullaniciId, Islem islem, string logTipi, string mesaj)
+        {
+            _unitOfWork.Loglar.Add(new LogKaydi
+            {
+                KullaniciId = kullaniciId,
+                Islem = islem,
+                LogTipi = logTipi,
+                Mesaj = mesaj,
+                Tarih = DateTime.Now,
+                BilgisayarAdi = Environment.MachineName
+            });
+        }
+
+        private static void DoluBosDosyasiniKarsiTartimlaTamamla(Islem ziyaret, KantarDosyasi bekleyen, Tartim karsiTartim, decimal? onaylananIkinciAgirlikKg)
+        {
+            if (ReferenceEquals(bekleyen.IlkTartim, karsiTartim) ||
+                (bekleyen.IlkTartimId > 0 && bekleyen.IlkTartimId == karsiTartim.TartimId))
+            {
+                return;
+            }
+
+            if (onaylananIkinciAgirlikKg.HasValue)
+            {
+                karsiTartim.AgirlikKg = onaylananIkinciAgirlikKg.Value;
+            }
+
+            karsiTartim.YukDurumu = bekleyen.IlkTartim.YukDurumu == KantarSabitleri.YukDurumu.Dolu
+                ? KantarSabitleri.YukDurumu.Bos
+                : KantarSabitleri.YukDurumu.Dolu;
+            ziyaret.GelisTuru = karsiTartim.YukDurumu == KantarSabitleri.YukDurumu.Dolu
+                ? KantarSabitleri.GelisTuru.Dolu
+                : KantarSabitleri.GelisTuru.Bos;
+
+            bekleyen.KarsiTartim = karsiTartim;
+            bekleyen.KarsiTartimId = karsiTartim.TartimId;
+            bekleyen.NetAgirlikKg = Math.Abs(bekleyen.IlkTartim.AgirlikKg - karsiTartim.AgirlikKg);
+            bekleyen.Durum = KantarSabitleri.KantarDosyasiDurumu.Tamamlandi;
+            bekleyen.TamamlanmaTarihi = karsiTartim.TartimTarihi;
         }
 
         private void TartimKaydet(Islem ziyaret, string yukDurumu, decimal? agirlikKg, string tartimTipi, int kullaniciId, DateTime tarih)
@@ -411,6 +541,16 @@ namespace KantarPro.Application.Services
         private static string NormalizePlaka(string plaka)
         {
             return plaka.Trim().ToUpperInvariant().Replace(" ", string.Empty);
+        }
+
+        private static string NormalizePlakaZorunlu(string plaka, string parametreAdi)
+        {
+            if (string.IsNullOrWhiteSpace(plaka))
+            {
+                throw new ArgumentException("Plaka bos olamaz.", parametreAdi);
+            }
+
+            return NormalizePlaka(plaka);
         }
 
         private static string NormalizeOptional(string value)

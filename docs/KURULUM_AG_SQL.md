@@ -35,7 +35,7 @@ Varsayilan sunucu ayarlari:
 Sunucu Ethernet IP: 192.168.50.1
 SQL TCP Port: 1433
 SQL Kullanici: kantar_app
-SQL Sifre: KantarPro2026!
+SQL Sifre: SetupServerNetwork.ps1 calisirken girilen sifre
 ```
 
 Script su islemleri yapar:
@@ -81,7 +81,7 @@ SQL Server/IP: tcp:192.168.50.1,1433
 Veritabani: KantarPro
 Windows baglantisi: Isaretsiz
 SQL Kullanici: kantar_app
-SQL Sifre: KantarPro2026!
+SQL Sifre: Sunucu kurulumunda girilen sifre
 Istasyon tipi: Cikis Kantari
 COM Port: Cikis kantarinin portu
 ```

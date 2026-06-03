@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
@@ -34,6 +35,15 @@ namespace KantarPro.Infrastructure.Data
         {
             _set.Add(entity);
         }
+
+        public void Remove(T entity)
+        {
+            _set.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            _set.RemoveRange(entities);
+        }
     }
 }
-

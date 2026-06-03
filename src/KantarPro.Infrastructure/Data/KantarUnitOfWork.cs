@@ -18,6 +18,7 @@ namespace KantarPro.Infrastructure.Data
             IslemUcretleri = new EfRepository<IslemUcreti>(_context);
             BekleyenTartimlar = new EfRepository<BekleyenTartim>(_context);
             Loglar = new EfRepository<LogKaydi>(_context);
+            Ayarlar = new EfRepository<Ayar>(_context);
         }
 
         public IRepository<Arac> Araclar { get; private set; }
@@ -28,6 +29,7 @@ namespace KantarPro.Infrastructure.Data
         public IRepository<IslemUcreti> IslemUcretleri { get; private set; }
         public IRepository<BekleyenTartim> BekleyenTartimlar { get; private set; }
         public IRepository<LogKaydi> Loglar { get; private set; }
+        public IRepository<Ayar> Ayarlar { get; private set; }
 
         public int SaveChanges()
         {

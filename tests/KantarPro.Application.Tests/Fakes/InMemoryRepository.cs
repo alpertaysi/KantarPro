@@ -29,6 +29,18 @@ namespace KantarPro.Application.Tests.Fakes
         {
             _items.Add(entity);
         }
+
+        public void Remove(T entity)
+        {
+            _items.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            foreach (var entity in entities.ToList())
+            {
+                _items.Remove(entity);
+            }
+        }
     }
 }
-

@@ -1,15 +1,32 @@
-$ErrorActionPreference = "Stop"
-
-Write-Host "KantarPro sunucu ag ayarlari yapiliyor..." -ForegroundColor Cyan
-
 param(
     [string]$EthernetAlias = "Ethernet",
     [string]$ServerIp = "192.168.50.1",
     [int]$PrefixLength = 24,
     [string]$DatabaseName = "KantarPro",
     [string]$SqlLogin = "kantar_app",
-    [string]$SqlPassword = "KantarPro2026!"
+    [string]$SqlPassword = ""
 )
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "KantarPro sunucu ag ayarlari yapiliyor..." -ForegroundColor Cyan
+
+if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
+    $securePass = Read-Host "SQL kullanicisi icin sifre girin" -AsSecureString
+    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass)
+    try {
+        $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+    }
+    finally {
+        if ($bstr -ne [IntPtr]::Zero) {
+            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+        }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
+    throw "SQL sifresi bos olamaz."
+}
 
 $serverName = $env:COMPUTERNAME
 $sqlTcpRoot = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQLServer\SuperSocketNetLib\Tcp"

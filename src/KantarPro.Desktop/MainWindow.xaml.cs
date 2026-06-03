@@ -835,7 +835,9 @@ namespace KantarPro.Desktop
                                 onaylananIkinciTartim = dialog.SecondWeightKg;
                             }
 
-                            EskiPlakaKaydiniMevcutAracaTasi(context, islem, hedefArac, onaylananIkinciTartim);
+                            var kullaniciId = EnsureAdminUser(context);
+                            var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                            servis.PlakaHatasiniDuzelt(eskiPlaka, yeniPlaka, onaylananIkinciTartim, kullaniciId);
                         }
                         else if (hedefArac == null)
                         {
@@ -865,70 +867,6 @@ namespace KantarPro.Desktop
             {
                 MessageBox.Show(ex.Message, "Kayit duzeltilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-        }
-
-        private static void EskiPlakaKaydiniMevcutAracaTasi(KantarDbContext context, Islem islem, Arac hedefArac, decimal? onaylananIkinciTartim = null)
-        {
-            var eskiAracId = islem.AracId;
-            var tartimlar = islem.Tartimlar.OrderBy(x => x.TartimTarihi).ToList();
-            var islemTartimIdleri = tartimlar.Select(x => x.TartimId).ToList();
-
-            var hataliPlakaDosyalari = context.KantarDosyalari
-                .Where(x => x.AracId == eskiAracId && islemTartimIdleri.Contains(x.IlkTartimId))
-                .ToList();
-            if (hataliPlakaDosyalari.Count > 0)
-            {
-                context.KantarDosyalari.RemoveRange(hataliPlakaDosyalari);
-            }
-
-            islem.AracId = hedefArac.AracId;
-            islem.Arac = hedefArac;
-            foreach (var tartim in tartimlar)
-            {
-                tartim.AracId = hedefArac.AracId;
-                tartim.Arac = hedefArac;
-            }
-
-            var bekleyenDosyalar = context.KantarDosyalari
-                .Include(x => x.IlkTartim)
-                .Where(x => x.AracId == hedefArac.AracId && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
-                .OrderByDescending(x => x.OlusturmaTarihi)
-                .ToList();
-
-            if (bekleyenDosyalar.Count == 0 || tartimlar.Count == 0)
-            {
-                return;
-            }
-
-            if (bekleyenDosyalar.Count > 1)
-            {
-                throw new InvalidOperationException("Yeni plaka icin birden fazla bekleyen dolu-bos dosyasi var. Once dogru bekleyen kaydi netlestirin.");
-            }
-
-            var bekleyen = bekleyenDosyalar.Single();
-            var karsiTartim = tartimlar.Last();
-            if (onaylananIkinciTartim.HasValue)
-            {
-                karsiTartim.AgirlikKg = onaylananIkinciTartim.Value;
-            }
-
-            if (bekleyen.IlkTartimId == karsiTartim.TartimId)
-            {
-                return;
-            }
-
-            karsiTartim.YukDurumu = bekleyen.IlkTartim.YukDurumu == KantarSabitleri.YukDurumu.Dolu
-                ? KantarSabitleri.YukDurumu.Bos
-                : KantarSabitleri.YukDurumu.Dolu;
-            islem.GelisTuru = karsiTartim.YukDurumu == KantarSabitleri.YukDurumu.Dolu
-                ? KantarSabitleri.GelisTuru.Dolu
-                : KantarSabitleri.GelisTuru.Bos;
-
-            bekleyen.KarsiTartim = karsiTartim;
-            bekleyen.KarsiTartimId = karsiTartim.TartimId;
-            bekleyen.NetAgirlikKg = Math.Abs(bekleyen.IlkTartim.AgirlikKg - karsiTartim.AgirlikKg);
-            bekleyen.Durum = KantarSabitleri.KantarDosyasiDurumu.Tamamlandi;
-            bekleyen.TamamlanmaTarihi = karsiTartim.TartimTarihi;
         }
 
         private void ClearPlateCorrectionMode()

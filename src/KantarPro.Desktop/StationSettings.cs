@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace KantarPro.Desktop
@@ -55,6 +56,8 @@ namespace KantarPro.Desktop
 
     public static class StationSettingsStore
     {
+        private const string ProtectedPrefix = "dpapi:";
+
         private static readonly string SettingsDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "KantarPro");
@@ -125,7 +128,9 @@ namespace KantarPro.Desktop
 
         private static string Encode(string value)
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? string.Empty));
+            var bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
+            var protectedBytes = ProtectedData.Protect(bytes, null, DataProtectionScope.CurrentUser);
+            return ProtectedPrefix + Convert.ToBase64String(protectedBytes);
         }
 
         private static string Decode(string value)
@@ -137,6 +142,14 @@ namespace KantarPro.Desktop
 
             try
             {
+                if (value.StartsWith(ProtectedPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    var protectedBytes = Convert.FromBase64String(value.Substring(ProtectedPrefix.Length));
+                    var bytes = ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser);
+                    return Encoding.UTF8.GetString(bytes);
+                }
+
+                // Eski ayar dosyalarinda sifre Base64 olarak saklaniyordu; geriye donuk okuma icin korunur.
                 return Encoding.UTF8.GetString(Convert.FromBase64String(value));
             }
             catch

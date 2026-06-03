@@ -21,6 +21,8 @@ namespace KantarPro.Application.Tests
             var ikinciZiyaret = servis.GirisKaydet("16 BKK 747", "Firma A", KantarSabitleri.GelisTuru.Bos, true, 12000m, 1, new DateTime(2026, 5, 14, 10, 0, 0));
 
             Assert.AreEqual(2, uow.IslemListesi.Count);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "SahaGiris"));
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "SahaCikis"));
             Assert.AreEqual(2, uow.IslemUcretiListesi.Count(x => x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.GirisCikis));
             Assert.AreEqual(2, uow.IslemUcretiListesi.Count(x => x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.Tartim));
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.Tamamlandi, uow.KantarDosyasiListesi.Single().Durum);
@@ -94,6 +96,7 @@ namespace KantarPro.Application.Tests
             servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Dolu, 21500m, 1, new DateTime(2026, 5, 12, 10, 20, 0));
 
             Assert.AreEqual(1, ziyaret.Tartimlar.Count);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "SahaSonradanTartim"));
             Assert.AreEqual(1, uow.KantarDosyasiListesi.Count);
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor, uow.KantarDosyasiListesi.Single().Durum);
             Assert.AreEqual(732m, ziyaret.ToplamTahakkuk);
@@ -219,7 +222,59 @@ namespace KantarPro.Application.Tests
             var kapanan = servis.SuresiDolanKantarDosyalariniKapat(new DateTime(2026, 5, 12, 9, 0, 0), 10);
 
             Assert.AreEqual(1, kapanan);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "KantarDosyasiSuresiDoldu"));
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu, uow.KantarDosyasiListesi.Single().Durum);
+        }
+
+        [TestMethod]
+        public void PlakaHatasiniDuzelt_YanlisIkinciGelisDogruBekleyenDosyayiTamamlar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ilk = servis.GirisKaydet("23 FHE 956", "Firma P", KantarSabitleri.GelisTuru.Dolu, true, 28000m, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+            servis.CikisYap(ilk.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+            var yanlis = servis.GirisKaydet("23 FEH 956", "Firma P", KantarSabitleri.GelisTuru.Bos, true, 12500m, 1, new DateTime(2026, 5, 14, 9, 0, 0));
+
+            var dogruArac = ilk.Arac;
+            servis.PlakaHatasiniDuzelt("23FEH956", "23FHE956", 12000m, 1);
+
+            var dosya = uow.KantarDosyasiListesi.Single(x => x.AracId == dogruArac.AracId);
+            var karsiTartim = yanlis.Tartimlar.OrderBy(x => x.TartimTarihi).Last();
+            Assert.AreEqual(dogruArac.AracId, yanlis.AracId);
+            Assert.IsTrue(yanlis.Tartimlar.All(x => x.AracId == dogruArac.AracId));
+            Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.Tamamlandi, dosya.Durum);
+            Assert.AreEqual(karsiTartim, dosya.KarsiTartim);
+            Assert.AreEqual(12000m, karsiTartim.AgirlikKg);
+            Assert.AreEqual(16000m, dosya.NetAgirlikKg);
+            Assert.AreEqual(KantarSabitleri.YukDurumu.Bos, karsiTartim.YukDurumu);
+            Assert.AreEqual(KantarSabitleri.GelisTuru.Bos, yanlis.GelisTuru);
+            Assert.AreEqual(0, uow.KantarDosyasiListesi.Count(x => x.Arac.Plaka == "23FEH956"));
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "PlakaDuzeltme"));
+        }
+
+        [TestMethod]
+        public void PlakaHatasiniDuzelt_DogruPlakadaBirdenFazlaBekleyenDosyaVarsaReddeder()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ilk = servis.GirisKaydet("23 FHE 956", "Firma P", KantarSabitleri.GelisTuru.Dolu, true, 28000m, 1, new DateTime(2026, 5, 12, 9, 0, 0));
+            servis.CikisYap(ilk.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+            uow.KantarDosyasiListesi.Add(new KantarPro.Domain.Entities.KantarDosyasi
+            {
+                KantarDosyasiId = 999,
+                Arac = ilk.Arac,
+                AracId = ilk.AracId,
+                IlkTartim = ilk.Tartimlar.Single(),
+                IlkTartimId = ilk.Tartimlar.Single().TartimId,
+                Durum = KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor,
+                OlusturmaTarihi = new DateTime(2026, 5, 13, 9, 0, 0)
+            });
+            servis.GirisKaydet("23 FEH 956", "Firma P", KantarSabitleri.GelisTuru.Bos, true, 12500m, 1, new DateTime(2026, 5, 14, 9, 0, 0));
+
+            AssertInvalidOperation(() =>
+                servis.PlakaHatasiniDuzelt("23FEH956", "23FHE956", null, 1));
         }
 
         private static void AssertInvalidOperation(Action action)

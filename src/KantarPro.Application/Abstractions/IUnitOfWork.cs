@@ -12,6 +12,7 @@ namespace KantarPro.Application.Abstractions
         IRepository<IslemUcreti> IslemUcretleri { get; }
         IRepository<BekleyenTartim> BekleyenTartimlar { get; }
         IRepository<LogKaydi> Loglar { get; }
+        IRepository<Ayar> Ayarlar { get; }
         int SaveChanges();
     }
 }

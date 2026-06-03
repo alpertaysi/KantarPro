@@ -12,7 +12,11 @@ Bu depo, Bursa Tasfiye Isletme Mudurlugu cift kantar akisi icin hazirlanan WPF t
 
 ## Klasorler
 
-- `database/001_create_schema.sql`: SQL Server 2008 uyumlu tablo, iliski, indeks ve seed scripti.
+- `database/001_create_schema.sql`: SQL Server 2008 uyumlu temiz kurulum tablo, iliski ve indeks scripti.
+- `database/002_add_saha_ziyareti_kantar_dosyasi.sql`: Mevcut veritabanlari icin saha ziyareti ve kantar dosyasi guncellemesi.
+- `database/003_seed_random_demo_data.sql`: Demo veri scripti.
+- `database/004_add_fatura_id.sql`: Mevcut veritabanlari icin fatura/tahsilat alanlari.
+- `database/005_add_muaf_kolonlari.sql`: Mevcut veritabanlari icin muafiyet alanlari.
 - `src/KantarPro.Domain`: Entity ve sabitler.
 - `src/KantarPro.Application`: Is kurallari ve uygulama servisleri.
 - `src/KantarPro.Infrastructure`: EF6 DbContext, Fluent API mapping ve repository.
@@ -22,7 +26,8 @@ Bu depo, Bursa Tasfiye Isletme Mudurlugu cift kantar akisi icin hazirlanan WPF t
 ## Ilk Kurulum
 
 1. SQL Server 2008 Express uzerinde `KantarPro` adli veritabani olusturun.
-2. `database/001_create_schema.sql` dosyasini calistirin.
-3. `src/KantarPro.Desktop/App.config` icindeki connection string sunucu adini saha ortamindaki SQL instance ile guncelleyin.
-4. Visual Studio ile `KantarPro.sln` dosyasini acip NuGet paketlerini geri yukleyin.
-
+2. Yeni kurulum icin `database/001_create_schema.sql` dosyasini calistirin.
+3. Demo veri istenirse `database/003_seed_random_demo_data.sql` dosyasini calistirin.
+4. Mevcut eski veritabani guncellenecekse scriptleri sirasiyla calistirin: `002_add_saha_ziyareti_kantar_dosyasi.sql`, `004_add_fatura_id.sql`, `005_add_muaf_kolonlari.sql`.
+5. `src/KantarPro.Desktop/App.config` icindeki connection string sunucu adini saha ortamindaki SQL instance ile guncelleyin.
+6. Visual Studio ile `KantarPro.sln` dosyasini acip NuGet paketlerini geri yukleyin.
