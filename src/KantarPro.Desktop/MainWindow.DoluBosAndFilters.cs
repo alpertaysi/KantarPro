@@ -152,6 +152,14 @@ namespace KantarPro.Desktop
                     _revenueFirmaFilter = NormalizeText(value);
                     DailyRevenueView.Refresh();
                     break;
+                case "PendingPlaka":
+                    _pendingPlakaFilter = NormalizePlaka(value);
+                    PendingWeighingsView.Refresh();
+                    break;
+                case "PendingFirma":
+                    _pendingFirmaFilter = NormalizeText(value);
+                    PendingWeighingsView.Refresh();
+                    break;
             }
         }
 
@@ -275,6 +283,27 @@ namespace KantarPro.Desktop
 
             if (!string.IsNullOrWhiteSpace(_revenueFirmaFilter) &&
                 !NormalizeText(row.FirmaAdi).Contains(_revenueFirmaFilter))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool FilterPendingWeighing(object item)
+        {
+            var row = item as PendingWeighingPrototypeRow;
+            if (row == null)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_pendingPlakaFilter) && !NormalizePlaka(row.Plaka).Contains(_pendingPlakaFilter))
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_pendingFirmaFilter) && !NormalizeText(row.FirmaAdi).Contains(_pendingFirmaFilter))
             {
                 return false;
             }

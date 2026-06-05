@@ -28,6 +28,7 @@ namespace KantarPro.Desktop
                     LoadPendingWeighingRows(context);
                     LoadExitVehicleRows(context);
                     EntryVehiclesView.Refresh();
+                    PendingWeighingsView.Refresh();
                     ExitVehiclesView.Refresh();
                     LoadDailyTransactionRows(context, bugun, yarin);
                 }
@@ -107,7 +108,8 @@ namespace KantarPro.Desktop
 
             return new PendingWeighingPrototypeRow
             {
-                IslemNo = islem.IslemNo,
+                IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
+                KantarFisNo = dosya.IlkTartim.KantarFisNo,
                 Plaka = dosya.Arac.Plaka,
                 FirmaAdi = dosya.Arac.FirmaAdi,
                 IlkGirisTarihi = islem.GirisTarihi.ToString("dd.MM.yyyy"),

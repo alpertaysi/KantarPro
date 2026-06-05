@@ -11,6 +11,8 @@ namespace KantarPro.Desktop
         private readonly DateTime _secondWeighingDate;
 
         public decimal SecondWeightKg { get; private set; }
+        public string CustomerName { get; private set; }
+        public string Description { get; private set; }
 
         public DoluBosSecondWeighingWindow(PendingWeighingPrototypeRow pendingRow, decimal scaleWeightKg, DateTime secondWeighingDate)
         {
@@ -29,8 +31,8 @@ namespace KantarPro.Desktop
             EntryTimeTextBox.Text = string.IsNullOrWhiteSpace(_pendingRow.IlkGirisSaati) ? _pendingRow.IlkTartimSaati : _pendingRow.IlkGirisSaati;
             ExitDateTextBox.Text = _pendingRow.IlkCikisTarihi;
             ExitTimeTextBox.Text = _pendingRow.IlkCikisSaati;
-            CustomerComboBox.Text = _pendingRow.FirmaAdi;
-            DescriptionComboBox.Text = _pendingRow.Aciklama;
+            CustomerTextBox.Text = _pendingRow.FirmaAdi;
+            DescriptionTextBox.Text = _pendingRow.Aciklama;
             FirstWeightTextBox.Text = _pendingRow.IlkAgirlik;
             SecondWeightTextBox.Text = "0";
             NetWeightTextBox.Text = "0";
@@ -52,6 +54,8 @@ namespace KantarPro.Desktop
             }
 
             SecondWeightKg = secondWeight;
+            CustomerName = (CustomerTextBox.Text ?? string.Empty).Trim();
+            Description = (DescriptionTextBox.Text ?? string.Empty).Trim();
             DialogResult = true;
             Close();
         }

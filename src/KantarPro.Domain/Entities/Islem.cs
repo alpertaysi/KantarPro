@@ -13,6 +13,7 @@ namespace KantarPro.Domain.Entities
 
         public int IslemId { get; set; }
         public string IslemNo { get; set; }
+        public string CikisNo { get; set; }
         public int AracId { get; set; }
         public DateTime GirisTarihi { get; set; }
         public DateTime? CikisTarihi { get; set; }

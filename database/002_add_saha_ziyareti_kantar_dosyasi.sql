@@ -39,6 +39,11 @@ BEGIN TRY
         ALTER TABLE dbo.Tartimlar ADD YukDurumu NVARCHAR(20) NULL;
     END
 
+    IF COL_LENGTH(N'dbo.Tartimlar', N'KantarFisNo') IS NULL
+    BEGIN
+        ALTER TABLE dbo.Tartimlar ADD KantarFisNo NVARCHAR(20) NULL;
+    END
+
     IF COL_LENGTH(N'dbo.IslemUcretleri', N'TahsilatId') IS NULL
     BEGIN
         ALTER TABLE dbo.IslemUcretleri ADD TahsilatId NVARCHAR(40) NULL;

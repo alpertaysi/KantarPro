@@ -28,7 +28,7 @@ namespace KantarPro.Application.Services
                 : KantarSabitleri.GelisTuru.Dolu;
         }
 
-        public Islem GirisKaydet(string plaka, string firmaAdi, string gelisTuru, bool tartimYap, decimal? agirlikKg, int kullaniciId, DateTime tarih, bool muafMi = false, string muafiyetNedeni = null)
+        public Islem GirisKaydet(string plaka, string firmaAdi, string gelisTuru, bool tartimYap, decimal? agirlikKg, int kullaniciId, DateTime tarih, bool muafMi = false, string muafiyetNedeni = null, string notlar = null)
         {
             var arac = AracBulVeyaOlustur(plaka, firmaAdi, tarih);
             if (_unitOfWork.Islemler.Query().Any(x => x.Arac.Plaka == arac.Plaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride))
@@ -54,7 +54,8 @@ namespace KantarPro.Application.Services
                 Durum = KantarSabitleri.IslemDurumu.Iceride,
                 GirisKullaniciId = kullaniciId,
                 MuafMi = muafMi,
-                MuafiyetNedeni = temizMuafiyetNedeni
+                MuafiyetNedeni = temizMuafiyetNedeni,
+                Notlar = NormalizeOptional(notlar)
             };
 
             arac.Islemler.Add(ziyaret);
@@ -71,12 +72,18 @@ namespace KantarPro.Application.Services
             return ziyaret;
         }
 
-        public Islem SonradanTartimEkle(string plaka, string yukDurumu, decimal agirlikKg, int kullaniciId, DateTime tartimTarihi)
+        public Islem SonradanTartimEkle(string plaka, string yukDurumu, decimal agirlikKg, int kullaniciId, DateTime tartimTarihi, string notlar = null)
         {
             var ziyaret = AcikZiyaretBul(plaka);
             if (TamamlanmisDosyayaBagliMi(ziyaret))
             {
                 throw new InvalidOperationException("Bu ziyaretin dolu-bos tartimi tamamlandi. Yeni tartim eklenemez.");
+            }
+
+            var temizNotlar = NormalizeOptional(notlar);
+            if (!string.IsNullOrWhiteSpace(temizNotlar))
+            {
+                ziyaret.Notlar = temizNotlar;
             }
 
             TartimKaydet(ziyaret, NormalizeYukDurumu(yukDurumu), agirlikKg, KantarSabitleri.TartimTipi.Sonradan, kullaniciId, tartimTarihi);
@@ -96,6 +103,10 @@ namespace KantarPro.Application.Services
             ziyaret.CikisTarihi = cikisTarihi;
             ziyaret.CikisKullaniciId = kullaniciId;
             ziyaret.Durum = KantarSabitleri.IslemDurumu.CikisYapti;
+            if (string.IsNullOrWhiteSpace(ziyaret.CikisNo))
+            {
+                ziyaret.CikisNo = UretSiradakiCikisNo();
+            }
 
             var beklemeGunSayisi = HesaplaBeklemeGunSayisi(ziyaret.GirisTarihi, cikisTarihi);
             for (var i = 0; i < beklemeGunSayisi; i++)
@@ -103,7 +114,7 @@ namespace KantarPro.Application.Services
                 UcretEkle(ziyaret, KantarSabitleri.UcretKodu.Bekleme, cikisTarihi);
             }
 
-            TahsilEt(ziyaret, kullaniciId, cikisTarihi, odemeTuru);
+            TahsilEt(ziyaret, kullaniciId, cikisTarihi, odemeTuru, ziyaret.CikisNo);
             LogEkle(kullaniciId, ziyaret, "SahaCikis", "Saha cikisi yapildi: " + ziyaret.Arac.Plaka + ", Tahakkuk=" + ziyaret.ToplamTahakkuk.ToString("N2"));
             _unitOfWork.SaveChanges();
             return ziyaret;
@@ -140,7 +151,7 @@ namespace KantarPro.Application.Services
             return AcikZiyaretBul(plaka);
         }
 
-        public Arac FirmaAdiniGuncelle(string plaka, string yeniFirmaAdi)
+        public Arac FirmaAdiniGuncelle(string plaka, string yeniFirmaAdi, int? kullaniciId = null)
         {
             var temizPlaka = NormalizePlakaZorunlu(plaka, nameof(plaka));
             var arac = _unitOfWork.Araclar.SingleOrDefault(x => x.Plaka == temizPlaka);
@@ -149,7 +160,15 @@ namespace KantarPro.Application.Services
                 throw new InvalidOperationException("Arac kaydi bulunamadi.");
             }
 
+            var eskiFirmaAdi = NormalizeOptional(arac.FirmaAdi);
             arac.FirmaAdi = NormalizeOptional(yeniFirmaAdi);
+            if (eskiFirmaAdi != arac.FirmaAdi)
+            {
+                var acikZiyaret = _unitOfWork.Islemler.Query()
+                    .FirstOrDefault(x => x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                LogEkle(kullaniciId, acikZiyaret, "FirmaGuncelle", "Firma guncellendi: " + temizPlaka + ", " + (eskiFirmaAdi ?? "-") + " -> " + (arac.FirmaAdi ?? "-"));
+            }
+
             _unitOfWork.SaveChanges();
             return arac;
         }
@@ -238,7 +257,6 @@ namespace KantarPro.Application.Services
             var hataliPlakaDosyalari = _unitOfWork.KantarDosyalari.Query()
                 .Where(x => x.Arac.Plaka == temizHataliPlaka && islemTartimIdleri.Contains(x.IlkTartimId))
                 .ToList();
-            _unitOfWork.KantarDosyalari.RemoveRange(hataliPlakaDosyalari);
 
             ziyaret.AracId = hedefArac.AracId;
             ziyaret.Arac = hedefArac;
@@ -259,7 +277,20 @@ namespace KantarPro.Application.Services
 
             if (hedefBekleyenDosyalar.Count == 1 && tartimlar.Count > 0)
             {
+                _unitOfWork.KantarDosyalari.RemoveRange(hataliPlakaDosyalari);
                 DoluBosDosyasiniKarsiTartimlaTamamla(ziyaret, hedefBekleyenDosyalar.Single(), tartimlar.Last(), onaylananIkinciAgirlikKg);
+            }
+            else
+            {
+                foreach (var dosya in hataliPlakaDosyalari)
+                {
+                    dosya.AracId = hedefArac.AracId;
+                    dosya.Arac = hedefArac;
+                    if (!hedefArac.KantarDosyalari.Contains(dosya))
+                    {
+                        hedefArac.KantarDosyalari.Add(dosya);
+                    }
+                }
             }
 
             LogEkle(kullaniciId, ziyaret, "PlakaDuzeltme", "Plaka duzeltildi: " + temizHataliPlaka + " -> " + temizDogruPlaka);
@@ -415,11 +446,10 @@ namespace KantarPro.Application.Services
             ziyaret.ToplamTahakkuk += ucret.Tutar;
         }
 
-        private void TahsilEt(Islem ziyaret, int kullaniciId, DateTime tarih, string odemeTuru)
+        private void TahsilEt(Islem ziyaret, int kullaniciId, DateTime tarih, string odemeTuru, string tahsilatNo)
         {
             var tahsilatId = "THS" + tarih.ToString("yyyyMMddHHmmssfff") + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpperInvariant();
             var odenecekler = ziyaret.Ucretler.Where(x => !x.TahsilEdildiMi).ToList();
-            var tahsilatNo = odenecekler.Count > 0 ? UretSiradakiTahsilatNo() : null;
             var temizOdemeTuru = NormalizeOdemeTuru(odemeTuru);
             foreach (var ucret in odenecekler)
             {
@@ -442,12 +472,18 @@ namespace KantarPro.Application.Services
                 : KantarSabitleri.OdemeTuru.Nakit;
         }
 
-        private string UretSiradakiTahsilatNo()
+        private string UretSiradakiCikisNo()
         {
-            var sonNo = _unitOfWork.IslemUcretleri.Query()
+            var ucretNolari = _unitOfWork.IslemUcretleri.Query()
                 .Where(x => x.TahsilatNo != null && x.TahsilatNo != "")
                 .Select(x => x.TahsilatNo)
-                .ToList()
+                .ToList();
+            var cikisNolari = _unitOfWork.Islemler.Query()
+                .Where(x => x.CikisNo != null && x.CikisNo != "")
+                .Select(x => x.CikisNo)
+                .ToList();
+            var sonNo = ucretNolari
+                .Concat(cikisNolari)
                 .Select(ParseTahsilatNo)
                 .DefaultIfEmpty(0)
                 .Max();
@@ -615,9 +651,24 @@ namespace KantarPro.Application.Services
             return muafMi ? temizNeden : null;
         }
 
-        private static string UretIslemNo(DateTime tarih)
+        private string UretIslemNo(DateTime tarih)
         {
-            return "ZYR" + tarih.ToString("yyyyMMddHHmmssfff");
+            var temelNo = "ZYR" + tarih.ToString("yyyyMMddHHmmssfff");
+            if (!_unitOfWork.Islemler.Query().Any(x => x.IslemNo == temelNo))
+            {
+                return temelNo;
+            }
+
+            for (var sira = 1; sira <= 999; sira++)
+            {
+                var adayNo = temelNo + "-" + sira.ToString("000");
+                if (!_unitOfWork.Islemler.Query().Any(x => x.IslemNo == adayNo))
+                {
+                    return adayNo;
+                }
+            }
+
+            return temelNo + "-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
         }
 
         public static int HesaplaBeklemeGunSayisi(DateTime girisTarihi, DateTime cikisTarihi)

@@ -13,5 +13,13 @@ namespace KantarPro.Application.Tests
 
             Assert.AreEqual("Tartimsiz", sonuc);
         }
+
+        [TestMethod]
+        public void IsTartimsizMovement_TartimsizGirisDurumunuYakalaydi()
+        {
+            var sonuc = KantarDisplayFormatter.IsTartimsizMovement("Tartimsiz giris", "", "");
+
+            Assert.IsTrue(sonuc);
+        }
     }
 }

@@ -53,6 +53,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<Islem>().ToTable("Islemler");
             modelBuilder.Entity<Islem>().HasKey(x => x.IslemId);
             modelBuilder.Entity<Islem>().Property(x => x.IslemNo).HasMaxLength(30).IsRequired();
+            modelBuilder.Entity<Islem>().Property(x => x.CikisNo).HasMaxLength(20);
             modelBuilder.Entity<Islem>().Property(x => x.GelisTuru).HasMaxLength(20).IsRequired();
             modelBuilder.Entity<Islem>().Property(x => x.Durum).HasMaxLength(30).IsRequired();
             modelBuilder.Entity<Islem>().Property(x => x.ToplamTahakkuk).HasPrecision(18, 2);
@@ -67,6 +68,7 @@ namespace KantarPro.Infrastructure.Data
             modelBuilder.Entity<Tartim>().HasKey(x => x.TartimId);
             modelBuilder.Entity<Tartim>().Property(x => x.TartimTipi).HasMaxLength(30).IsRequired();
             modelBuilder.Entity<Tartim>().Property(x => x.YukDurumu).HasMaxLength(20);
+            modelBuilder.Entity<Tartim>().Property(x => x.KantarFisNo).HasMaxLength(20);
             modelBuilder.Entity<Tartim>().Property(x => x.AgirlikKg).HasPrecision(18, 2);
             modelBuilder.Entity<Tartim>().HasOptional(x => x.Islem).WithMany(x => x.Tartimlar).HasForeignKey(x => x.IslemId);
             modelBuilder.Entity<Tartim>().HasRequired(x => x.Arac).WithMany(x => x.Tartimlar).HasForeignKey(x => x.AracId).WillCascadeOnDelete(false);

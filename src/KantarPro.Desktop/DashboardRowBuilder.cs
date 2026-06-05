@@ -28,6 +28,7 @@ namespace KantarPro.Desktop
             {
                 IslemId = islem.IslemId,
                 IslemNo = islem.IslemNo,
+                KantarFisNo = FormatKantarFisNo(ilkTartim, ikinciTartim),
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,
                 GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
@@ -71,7 +72,8 @@ namespace KantarPro.Desktop
             return new VehicleMovementRow
             {
                 IslemId = islem.IslemId,
-                IslemNo = islem.IslemNo,
+                IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
+                KantarFisNo = FormatKantarFisNo(ilkTartim, ikinciTartim),
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,
                 GirisTarihi = FormatDoluGelisTarihi(islem, ilkTartim),
@@ -165,6 +167,14 @@ namespace KantarPro.Desktop
         private static string FormatNetAgirlik(Tartim ilkTartim, Tartim ikinciTartim)
         {
             return KantarDisplayFormatter.FormatNetAgirlik(false, ilkTartim != null ? (decimal?)ilkTartim.AgirlikKg : null, ikinciTartim != null ? (decimal?)ikinciTartim.AgirlikKg : null);
+        }
+
+        private static string FormatKantarFisNo(Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            var hedefTartim = ikinciTartim ?? ilkTartim;
+            return hedefTartim != null && !string.IsNullOrWhiteSpace(hedefTartim.KantarFisNo)
+                ? hedefTartim.KantarFisNo.Trim()
+                : "";
         }
 
         private static string FormatNetAgirlik(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)

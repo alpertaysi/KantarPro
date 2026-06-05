@@ -56,14 +56,14 @@
                         <RowDefinition Height="26" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="56" />
-                        <ColumnDefinition Width="154" />
+                        <ColumnDefinition Width="74" />
+                        <ColumnDefinition Width="136" />
                         <ColumnDefinition Width="54" />
                         <ColumnDefinition Width="118" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Text="Plaka No:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
-                    <TextBox x:Name="PlateTextBox" Grid.Column="1" FontSize="22" FontWeight="Bold" Foreground="#0059C8" Height="30" Text="01AFE890" />
+                    <TextBox x:Name="PlateTextBox" Grid.Column="1" FontSize="22" FontWeight="Bold" Foreground="#0059C8" Height="30" Text="01AFE890" IsReadOnly="True" />
 
                     <TextBlock Grid.Row="1" Text="Giris Tarihi:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
                     <TextBox x:Name="EntryDateTextBox" Grid.Row="1" Grid.Column="1" IsReadOnly="True" />
@@ -75,23 +75,11 @@
                     <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
                     <TextBox x:Name="ExitTimeTextBox" Grid.Row="2" Grid.Column="3" IsReadOnly="True" TextAlignment="Right" />
 
-                    <TextBlock Grid.Row="3" Text="Mali Cinsi:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
-                    <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" />
+                    <TextBlock Grid.Row="3" Text="Musteri Adi:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
+                    <TextBox x:Name="CustomerTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" />
 
-                    <TextBlock Grid.Row="4" Text="Musteri Adi:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
-                    <ComboBox x:Name="CustomerComboBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" IsEditable="True" />
-
-                    <TextBlock Grid.Row="5" Text="Aciklama:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
-                    <ComboBox x:Name="DescriptionComboBox" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" IsEditable="True" />
-                </Grid>
-
-                <Grid Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="82" />
-                        <ColumnDefinition Width="126" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Makbuz No:" VerticalAlignment="Top" TextAlignment="Right" Margin="0,8,6,0" />
-                    <TextBox x:Name="ReceiptTextBox" Grid.Column="1" Text="0000000000" Margin="0,4,0,0" />
+                    <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,4,0" />
+                    <TextBox x:Name="DescriptionTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" />
                 </Grid>
             </Grid>
         </Border>
@@ -125,7 +113,6 @@
         </Border>
 
         <Grid Grid.Row="2" Background="#F1F1F1">
-            <TextBlock Text="Giris :UZAY" VerticalAlignment="Top" Margin="20,5,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0">
                 <Button Content="Kaydet" Width="96" Background="#05A000" Foreground="White" Margin="0,0,14,0" Click="Save_Click" />
                 <Button Content="Vazgec" Width="96" Background="#111111" Foreground="White" Click="Cancel_Click" />

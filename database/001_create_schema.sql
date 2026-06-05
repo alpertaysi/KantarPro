@@ -143,6 +143,7 @@ BEGIN TRY
         ManuelMi BIT NOT NULL CONSTRAINT DF_Tartimlar_ManuelMi DEFAULT (0),
         KullaniciId INT NOT NULL,
         FisYazdirildiMi BIT NOT NULL CONSTRAINT DF_Tartimlar_FisYazdirildiMi DEFAULT (0),
+        KantarFisNo NVARCHAR(20) NULL,
         CONSTRAINT CK_Tartimlar_AgirlikKg CHECK (AgirlikKg > 0 AND AgirlikKg < 100000),
         CONSTRAINT FK_Tartimlar_Islemler FOREIGN KEY (IslemId) REFERENCES dbo.Islemler(IslemId),
         CONSTRAINT FK_Tartimlar_Araclar FOREIGN KEY (AracId) REFERENCES dbo.Araclar(AracId),

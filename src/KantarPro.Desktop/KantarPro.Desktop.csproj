@@ -102,6 +102,7 @@
     <Compile Include="DashboardVisitInfo.cs" />
     <Compile Include="KantarDbContextFactory.cs" />
     <Compile Include="KantarFisFormatter.cs" />
+    <Compile Include="KantarFisPreviewData.cs" />
     <Compile Include="KantarSerialReader.cs" />
     <Compile Include="StationSettings.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">

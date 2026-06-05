@@ -27,6 +27,7 @@ namespace KantarPro.Desktop
         public ICollectionView EntryVehiclesView { get; private set; }
         public ICollectionView ExitVehiclesView { get; private set; }
         public ICollectionView DailyRevenueView { get; private set; }
+        public ICollectionView PendingWeighingsView { get; private set; }
 
         private string _entryPlakaFilter = string.Empty;
         private string _entryFirmaFilter = string.Empty;
@@ -34,6 +35,8 @@ namespace KantarPro.Desktop
         private string _exitFirmaFilter = string.Empty;
         private string _revenuePlakaFilter = string.Empty;
         private string _revenueFirmaFilter = string.Empty;
+        private string _pendingPlakaFilter = string.Empty;
+        private string _pendingFirmaFilter = string.Empty;
         private string _plateCorrectionOriginalPlate;
         private bool _manualGirisSaati;
         private bool _manualCikisSaati;
@@ -51,9 +54,11 @@ namespace KantarPro.Desktop
             EntryVehiclesView = CollectionViewSource.GetDefaultView(EntryVehicles);
             ExitVehiclesView = CollectionViewSource.GetDefaultView(ExitVehicles);
             DailyRevenueView = CollectionViewSource.GetDefaultView(DailyRevenueRows);
+            PendingWeighingsView = CollectionViewSource.GetDefaultView(PendingWeighings);
             EntryVehiclesView.Filter = FilterEntryVehicle;
             ExitVehiclesView.Filter = FilterExitVehicle;
             DailyRevenueView.Filter = FilterDailyRevenue;
+            PendingWeighingsView.Filter = FilterPendingWeighing;
 
             DataContext = this;
             InitializeComponent();
@@ -428,7 +433,9 @@ namespace KantarPro.Desktop
 
             try
             {
-                var preview = new KantarFisPreviewWindow(KantarFisFormatter.BuildFromRow(row))
+                row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+                var rawText = KantarFisFormatter.BuildFromRow(row);
+                var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromVehicleRow(row, rawText))
                 {
                     Owner = this
                 };
@@ -450,7 +457,9 @@ namespace KantarPro.Desktop
 
             try
             {
-                var preview = new KantarFisPreviewWindow(KantarFisFormatter.BuildFromPendingRow(row))
+                row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
+                var rawText = KantarFisFormatter.BuildFromPendingRow(row);
+                var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromPendingRow(row, rawText))
                 {
                     Owner = this
                 };
@@ -460,6 +469,111 @@ namespace KantarPro.Desktop
             {
                 MessageBox.Show(ex.Message, "Kantar fisi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private static string EnsureKantarFisNoForVehicleRow(VehicleMovementRow row)
+        {
+            using (var context = KantarDbContextFactory.Create())
+            using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+            {
+                var target = FindVehicleRowKantarFisTartim(context, row);
+                var fisNo = EnsureKantarFisNo(context, target);
+                transaction.Commit();
+                return fisNo;
+            }
+        }
+
+        private static string EnsureKantarFisNoForPendingRow(PendingWeighingPrototypeRow row)
+        {
+            var normalized = NormalizePlaka(row.Plaka);
+            using (var context = KantarDbContextFactory.Create())
+            using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+            {
+                var dosyalar = context.KantarDosyalari
+                    .Include(x => x.Arac)
+                    .Include(x => x.IlkTartim)
+                    .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                        x.Arac.Plaka == normalized)
+                    .ToList();
+
+                var dosya = dosyalar.FirstOrDefault(x =>
+                    MatchesRowTartim(x.IlkTartim, row.IlkTartimTarihi, row.IlkTartimSaati, row.IlkAgirlik)) ??
+                    dosyalar.FirstOrDefault();
+                if (dosya == null || dosya.IlkTartim == null)
+                {
+                    throw new InvalidOperationException("Bu bekleyen kayit icin kantar tartimi bulunamadi.");
+                }
+
+                var target = context.Tartimlar.First(x => x.TartimId == dosya.IlkTartimId);
+                var fisNo = EnsureKantarFisNo(context, target);
+                transaction.Commit();
+                return fisNo;
+            }
+        }
+
+        private static Tartim FindVehicleRowKantarFisTartim(KantarDbContext context, VehicleMovementRow row)
+        {
+            var islem = context.Islemler
+                .Include(x => x.Tartimlar)
+                .FirstOrDefault(x => x.IslemId == row.IslemId);
+            if (islem == null)
+            {
+                throw new InvalidOperationException("Kantar fisi icin islem kaydi bulunamadi.");
+            }
+
+            var dosya = GetKantarDosyasiForIslem(context, islem);
+            var doluBosFisi = HasKantarFisWeight(row.IkinciTartim) && HasKantarFisWeight(row.NetAgirlik);
+            Tartim target;
+            if (doluBosFisi)
+            {
+                target = (dosya != null ? dosya.KarsiTartim : null) ?? DashboardVisitInfo.GetIkinciTartim(islem);
+            }
+            else
+            {
+                target = (dosya != null ? dosya.IlkTartim : null) ?? DashboardVisitInfo.GetIlkTartim(islem);
+            }
+
+            if (target == null)
+            {
+                throw new InvalidOperationException("Bu kayitta kantar tartimi yok. Tartimsiz girisler icin kantar fisi olusturulmaz.");
+            }
+
+            return context.Tartimlar.First(x => x.TartimId == target.TartimId);
+        }
+
+        private static string EnsureKantarFisNo(KantarDbContext context, Tartim tartim)
+        {
+            if (!string.IsNullOrWhiteSpace(tartim.KantarFisNo))
+            {
+                return tartim.KantarFisNo.Trim();
+            }
+
+            var fisNolari = context.Tartimlar
+                .Where(x => x.KantarFisNo != null && x.KantarFisNo != "")
+                .Select(x => x.KantarFisNo)
+                .ToList();
+            var sonNumara = 0;
+            foreach (var fisNo in fisNolari)
+            {
+                int parsed;
+                if (int.TryParse(fisNo, out parsed) && parsed > sonNumara)
+                {
+                    sonNumara = parsed;
+                }
+            }
+
+            tartim.KantarFisNo = (sonNumara + 1).ToString("0000");
+            context.SaveChanges();
+            return tartim.KantarFisNo;
+        }
+
+        private static bool HasKantarFisWeight(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                value.IndexOf("tartimsiz", StringComparison.OrdinalIgnoreCase) < 0 &&
+                value.IndexOf("tartim yok", StringComparison.OrdinalIgnoreCase) < 0 &&
+                value.Trim() != "-" &&
+                value.Trim() != "0";
         }
 
         private void EntryGridPlakaDuzeltMenuItem_Click(object sender, RoutedEventArgs e)
@@ -670,7 +784,8 @@ namespace KantarPro.Desktop
 
                         var doluBosKullaniciId = EnsureAdminUser(context);
                         var doluBosServis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                        doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForOpenVisit(openIslem), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi);
+                        doluBosServis.FirmaAdiniGuncelle(row.Plaka, dialog.CustomerName, doluBosKullaniciId);
+                        doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForOpenVisit(openIslem), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi, dialog.Description);
 
                         LoadDashboardData();
                         MessageBox.Show("Dolu-bos ikinci tartim eklendi.", "Kantar Pro");
@@ -691,7 +806,8 @@ namespace KantarPro.Desktop
 
                         var doluBosKullaniciId = EnsureAdminUser(context);
                         var doluBosServis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                        doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForPending(pendingRow), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi);
+                        doluBosServis.FirmaAdiniGuncelle(row.Plaka, dialog.CustomerName, doluBosKullaniciId);
+                        doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForPending(pendingRow), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi, dialog.Description);
 
                         LoadDashboardData();
                         MessageBox.Show("Dolu-bos ikinci tartim eklendi.", "Kantar Pro");
@@ -778,8 +894,11 @@ namespace KantarPro.Desktop
                         throw new InvalidOperationException("Bu plaka icin acik saha ziyareti bulunamadi.");
                     }
 
+                    var kullaniciId = EnsureAdminUser(context);
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
                     if (eskiPlaka != yeniPlaka)
                     {
+                        decimal? onaylananIkinciTartim = null;
                         var hedefArac = context.Araclar.FirstOrDefault(x => x.Plaka == yeniPlaka);
                         if (hedefArac != null && hedefArac.AracId != islem.AracId)
                         {
@@ -792,7 +911,6 @@ namespace KantarPro.Desktop
                                 throw new InvalidOperationException("Yeni plaka ile iceride acik kayit var. Kayit duzeltilemez.");
                             }
 
-                            decimal? onaylananIkinciTartim = null;
                             var sonTartim = islem.Tartimlar.OrderBy(x => x.TartimTarihi).LastOrDefault();
                             var pendingRow = FindPendingDoluBosRow(context, yeniPlaka);
                             if (pendingRow != null && sonTartim != null)
@@ -809,28 +927,12 @@ namespace KantarPro.Desktop
 
                                 onaylananIkinciTartim = dialog.SecondWeightKg;
                             }
-
-                            var kullaniciId = EnsureAdminUser(context);
-                            var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                            servis.PlakaHatasiniDuzelt(eskiPlaka, yeniPlaka, onaylananIkinciTartim, kullaniciId);
                         }
-                        else if (hedefArac == null)
-                        {
-                            var acikIslemVarMi = context.Islemler.Any(x =>
-                                x.Arac.Plaka == yeniPlaka &&
-                                x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
-                                x.IslemId != islem.IslemId);
-                            if (acikIslemVarMi)
-                            {
-                                throw new InvalidOperationException("Yeni plaka ile iceride acik kayit var. Kayit duzeltilemez.");
-                            }
 
-                            islem.Arac.Plaka = yeniPlaka;
-                        }
+                        servis.PlakaHatasiniDuzelt(eskiPlaka, yeniPlaka, onaylananIkinciTartim, kullaniciId);
                     }
 
-                    islem.Arac.FirmaAdi = yeniFirma;
-                    context.SaveChanges();
+                    servis.FirmaAdiniGuncelle(yeniPlaka, yeniFirma, kullaniciId);
                 }
 
                 LoadDashboardData();
@@ -1035,6 +1137,61 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void PendingWeighingsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is TextBox)
+            {
+                return;
+            }
+
+            var row = PendingWeighingsGrid.SelectedItem as PendingWeighingPrototypeRow;
+            if (row == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var dialog = new EntrySaveChoiceWindow(false)
+                {
+                    Owner = this
+                };
+
+                if (dialog.ShowDialog() != true)
+                {
+                    return;
+                }
+
+                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giris tarihi");
+                if (dialog.Choice == EntrySaveChoice.WeighAndSave)
+                {
+                    var agirlik = ParseAgirlik(AgirlikTextBox.Text);
+                    if (!agirlik.HasValue || agirlik.Value <= 0)
+                    {
+                        throw new InvalidOperationException("Tart ve Kaydet icin gecerli kilo alinmali.");
+                    }
+
+                    if (!TryCompletePendingDoluBosFromDashboard(row.Plaka, agirlik.Value, islemTarihi))
+                    {
+                        throw new InvalidOperationException("Bekleyen dolu-bos kaydi bulunamadi.");
+                    }
+                }
+                else if (dialog.Choice == EntrySaveChoice.SaveWithoutWeighing)
+                {
+                    if (!TryOpenPendingDoluBosWithoutWeighingFromDashboard(row.Plaka, islemTarihi))
+                    {
+                        throw new InvalidOperationException("Bekleyen dolu-bos kaydi bulunamadi.");
+                    }
+                }
+
+                ClearDashboardEntryForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Bekleyen tartim acilamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         private void ExitPageEntryVehiclesGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var row = ExitPageEntryVehiclesGrid.SelectedItem as VehicleMovementRow;
@@ -1060,7 +1217,7 @@ namespace KantarPro.Desktop
                     throw new InvalidOperationException("Bu plaka icin iceride acik islem var. Yeni giris yapilamaz. Ikinci tartim icin listedeki satira sag tiklayip Tart secenegini kullanin veya Cikis Yap islemini tamamlayin.");
                 }
 
-                servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi, muafMi, muafiyetNedeni);
+                servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi, muafMi, muafiyetNedeni, aciklama);
             }
         }
 
@@ -1088,7 +1245,7 @@ namespace KantarPro.Desktop
                     ? KantarSabitleri.GelisTuru.Dolu
                     : KantarSabitleri.GelisTuru.Bos;
 
-                CreateEntry(pendingRow.Plaka, pendingRow.FirmaAdi, pendingRow.Aciklama, true, dialog.SecondWeightKg, secondWeighingDate, gelisTuru, muafMi, muafiyetNedeni);
+                CreateEntry(pendingRow.Plaka, dialog.CustomerName, dialog.Description, true, dialog.SecondWeightKg, secondWeighingDate, gelisTuru, muafMi, muafiyetNedeni);
             }
 
             LoadDashboardData();

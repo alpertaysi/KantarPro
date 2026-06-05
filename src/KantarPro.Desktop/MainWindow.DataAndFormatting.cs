@@ -107,7 +107,9 @@ namespace KantarPro.Desktop
                         DailyRevenueRows.Add(new DailyRevenueRow
                         {
                             SiraNo = siraNo++,
-                            IslemNo = string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo,
+                            IslemNo = !string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.CikisNo : (string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo),
+                            IslemTipi = FormatRevenueIslemTipi(islem, ilkTartim, ikinciTartim),
+                            KantarFisNo = FormatRevenueKantarFisNo(ilkTartim, ikinciTartim),
                             OdemeTuru = islem.MuafMi ? "Muaf" : tahsilat.Key.OdemeTuru,
                             MuafiyetNedeni = islem.MuafMi ? islem.MuafiyetNedeni : "",
                             FirmaAdi = islem.MuafMi ? islem.MuafiyetNedeni : islem.Arac.FirmaAdi,
@@ -146,7 +148,9 @@ namespace KantarPro.Desktop
                         DailyRevenueRows.Add(new DailyRevenueRow
                         {
                             SiraNo = siraNo++,
-                            IslemNo = islem.IslemNo,
+                            IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
+                            IslemTipi = FormatRevenueIslemTipi(islem, ilkTartim, ikinciTartim),
+                            KantarFisNo = FormatRevenueKantarFisNo(ilkTartim, ikinciTartim),
                             OdemeTuru = "Muaf",
                             MuafiyetNedeni = islem.MuafiyetNedeni,
                             FirmaAdi = islem.MuafiyetNedeni,
@@ -179,6 +183,32 @@ namespace KantarPro.Desktop
             }
         }
 
+        private static string FormatRevenueIslemTipi(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            if (ilkTartim == null && ikinciTartim == null)
+            {
+                return "Tartimsiz";
+            }
+
+            if (islem != null && islem.MuafMi)
+            {
+                return "Muaf Tartim";
+            }
+
+            return ikinciTartim != null ? "Dolu-Bos" : "Tek Tartim";
+        }
+
+        private static string FormatRevenueKantarFisNo(Tartim ilkTartim, Tartim ikinciTartim)
+        {
+            var fisNolari = new[] { ilkTartim, ikinciTartim }
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.KantarFisNo))
+                .Select(x => x.KantarFisNo.Trim())
+                .Distinct()
+                .ToList();
+
+            return fisNolari.Count == 0 ? "-" : string.Join(", ", fisNolari);
+        }
+
         private void ShowVehicleMovementDetail(VehicleMovementRow row)
         {
             if (row == null || SelectedVehicleDetailTextBox == null)
@@ -197,12 +227,34 @@ namespace KantarPro.Desktop
                 return detay;
             }
 
+            var tartimsiz = KantarDisplayFormatter.IsTartimsizMovement(row.Durum, row.Tartim, row.NetAgirlik);
+            if (tartimsiz)
+            {
+                return
+                    "Plaka: " + row.Plaka + Environment.NewLine +
+                    "Firma: " + (string.IsNullOrWhiteSpace(row.FirmaAdi) ? "-" : row.FirmaAdi) + Environment.NewLine +
+                    "Durum: " + row.Durum + Environment.NewLine +
+                    "Aciklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine + Environment.NewLine +
+                    "Saha Hareketleri" + Environment.NewLine +
+                    "Giris: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
+                    "Cikis: " + DashboardFormat.BosDeger(row.CikisTarihi + " " + row.CikisSaati) + Environment.NewLine + Environment.NewLine +
+                    "Ucret Dokumu" + Environment.NewLine +
+                    "Giris-Cikis: " + DashboardFormat.BosDeger(row.GirisCikisUcreti) + Environment.NewLine +
+                    "Tartim: " + DashboardFormat.BosDeger(row.TartimUcreti) + Environment.NewLine +
+                    "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
+                    "Toplam: " + DashboardFormat.BosDeger(row.Ucret) + Environment.NewLine +
+                    "Tahsilat: " + DashboardFormat.BosDeger(row.Tahsilat) + Environment.NewLine +
+                    "Tahsilat No: " + DashboardFormat.BosDeger(GetIslemCikisNo(row.IslemId)) +
+                    GetPaymentHistoryText(row.Plaka);
+            }
+
             return
                 "Plaka: " + row.Plaka + Environment.NewLine +
                 "Firma: " + (string.IsNullOrWhiteSpace(row.FirmaAdi) ? "-" : row.FirmaAdi) + Environment.NewLine +
                 "Durum: " + row.Durum + Environment.NewLine + Environment.NewLine +
                 "Dolu Hareket" + Environment.NewLine +
                 "Gelis: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
+                "Aciklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + DashboardFormat.BosDeger(row.Tartim) + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(row.DoluCikisTarihi + " " + row.DoluCikisSaati) + Environment.NewLine + Environment.NewLine +
                 "Bos Hareket" + Environment.NewLine +
@@ -214,7 +266,7 @@ namespace KantarPro.Desktop
                 "Giris-Cikis: " + DashboardFormat.BosDeger(row.GirisCikisUcreti) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(row.TartimUcreti) + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
-                "Toplam Tahakkuk: " + DashboardFormat.BosDeger(row.Ucret) + Environment.NewLine +
+                "Toplam: " + DashboardFormat.BosDeger(row.Ucret) + Environment.NewLine +
                 "Tahsilat: " + DashboardFormat.BosDeger(row.Tahsilat) +
                 GetPaymentHistoryText(row.Plaka);
         }
@@ -372,11 +424,11 @@ namespace KantarPro.Desktop
                 "Gelis: " + DashboardFormat.BosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Aciklama: " + DashboardFormat.BosDeger(islem != null ? islem.Notlar : "") + Environment.NewLine +
                 "Muafiyet: " + DashboardFormat.BosDeger(islem != null && islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme) : "") + Environment.NewLine +
-                "Tahakkuk: " + DashboardFormat.BosDeger(islem != null ? DashboardFormat.Para(islem.ToplamTahakkuk) : "") + Environment.NewLine +
                 "Tahsilat: " + DashboardFormat.BosDeger(islem != null ? DashboardFormat.Para(islem.ToplamTahsilat) : "") + Environment.NewLine +
                 "Tahsilat No: " + DashboardFormat.BosDeger(GetLastTahsilatNo(islem));
         }
@@ -393,11 +445,11 @@ namespace KantarPro.Desktop
                 "Cikis: " + DashboardFormat.BosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "1. Tartim: " + DashboardFormat.BosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
                 "2. Tartim: " + DashboardFormat.BosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Aciklama: " + DashboardFormat.BosDeger(islem.Notlar) + Environment.NewLine +
                 "Muafiyet: " + DashboardFormat.BosDeger(islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Bekleme)) + Environment.NewLine +
-                "Tahakkuk: " + DashboardFormat.BosDeger(DashboardFormat.Para(islem.ToplamTahakkuk)) + Environment.NewLine +
                 "Tahsilat: " + DashboardFormat.BosDeger(DashboardFormat.Para(islem.ToplamTahsilat)) + Environment.NewLine +
                 "Tahsilat No: " + DashboardFormat.BosDeger(GetLastTahsilatNo(islem));
         }
@@ -438,6 +490,11 @@ namespace KantarPro.Desktop
                 return "";
             }
 
+            if (!string.IsNullOrWhiteSpace(islem.CikisNo))
+            {
+                return islem.CikisNo;
+            }
+
             var tahsilatNo = islem.Ucretler
                 .Where(x => x.TahsilEdildiMi && !string.IsNullOrWhiteSpace(x.TahsilatNo))
                 .OrderByDescending(x => x.TahsilTarihi)
@@ -456,6 +513,38 @@ namespace KantarPro.Desktop
                 .FirstOrDefault();
 
             return faturaId ?? "";
+        }
+
+        private static string GetIslemNotlari(int islemId)
+        {
+            if (islemId <= 0)
+            {
+                return "";
+            }
+
+            using (var context = KantarDbContextFactory.Create())
+            {
+                return context.Islemler
+                    .Where(x => x.IslemId == islemId)
+                    .Select(x => x.Notlar)
+                    .FirstOrDefault() ?? "";
+            }
+        }
+
+        private static string GetIslemCikisNo(int islemId)
+        {
+            if (islemId <= 0)
+            {
+                return "";
+            }
+
+            using (var context = KantarDbContextFactory.Create())
+            {
+                return context.Islemler
+                    .Where(x => x.IslemId == islemId)
+                    .Select(x => x.CikisNo)
+                    .FirstOrDefault() ?? "";
+            }
         }
 
         private static string GetDisplayTahsilatNo(IslemUcreti ucret)
@@ -816,14 +905,23 @@ namespace KantarPro.Desktop
                     "IF COL_LENGTH('dbo.Islemler', 'GelisTuru') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD GelisTuru NVARCHAR(20) NOT NULL CONSTRAINT DF_Islemler_GelisTuru DEFAULT (N'Tartimsiz')");
                 context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'CikisNo') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD CikisNo NVARCHAR(20) NULL");
+                context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'MuafMi') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD MuafMi BIT NOT NULL CONSTRAINT DF_Islemler_MuafMi DEFAULT (0)");
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'MuafiyetNedeni') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD MuafiyetNedeni NVARCHAR(250) NULL");
                 context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'Notlar') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD Notlar NVARCHAR(500) NULL");
+                context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Tartimlar', 'YukDurumu') IS NULL " +
                     "ALTER TABLE dbo.Tartimlar ADD YukDurumu NVARCHAR(20) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Tartimlar', 'KantarFisNo') IS NULL " +
+                    "ALTER TABLE dbo.Tartimlar ADD KantarFisNo NVARCHAR(20) NULL");
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatId') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD TahsilatId NVARCHAR(40) NULL");

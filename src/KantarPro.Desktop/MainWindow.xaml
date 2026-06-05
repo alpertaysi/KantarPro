@@ -298,7 +298,7 @@
                     <Grid>
                         <TabControl>
                             <TabItem Header="2. Tartım Bekleyenler">
-                                <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighings}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" PreviewMouseRightButtonDown="PendingWeighingsGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
+                                <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighingsView}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" MouseDoubleClick="PendingWeighingsGrid_MouseDoubleClick" PreviewMouseRightButtonDown="PendingWeighingsGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                     <DataGrid.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Kantar Fisi Yazdir" Click="PendingGridMakbuzYazdirMenuItem_Click" />
@@ -306,8 +306,22 @@
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="120" />
-                                        <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="250" />
+                                        <DataGridTextColumn Binding="{Binding Plaka}" Width="120">
+                                            <DataGridTextColumn.Header>
+                                                <StackPanel>
+                                                    <TextBlock Text="Plaka" />
+                                                    <TextBox Tag="PendingPlaka" Width="100" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Plaka filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                                </StackPanel>
+                                            </DataGridTextColumn.Header>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="250">
+                                            <DataGridTextColumn.Header>
+                                                <StackPanel>
+                                                    <TextBlock Text="Firma" />
+                                                    <TextBox Tag="PendingFirma" Width="200" Height="22" Padding="4,1" FontSize="12" FontWeight="Normal" ToolTip="Firma filtrele" TextChanged="ColumnFilterTextBox_TextChanged" />
+                                                </StackPanel>
+                                            </DataGridTextColumn.Header>
+                                        </DataGridTextColumn>
                                         <DataGridTextColumn Header="İlk Tartım Tarihi" Binding="{Binding IlkTartimTarihi}" Width="150" />
                                         <DataGridTextColumn Header="İlk Tartım Saati" Binding="{Binding IlkTartimSaati}" Width="120" />
                                         <DataGridTextColumn Header="1. KG" Binding="{Binding IlkAgirlik}" Width="120" />
@@ -429,6 +443,8 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
                         <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="100" />
+                        <DataGridTextColumn Header="Islem Tipi" Binding="{Binding IslemTipi}" Width="115" />
+                        <DataGridTextColumn Header="Kantar Fis No" Binding="{Binding KantarFisNo}" Width="115" />
                         <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="110" />
                         <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="200">
                             <DataGridTextColumn.Header>
@@ -460,6 +476,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="52" />
                             <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="115" />
+                            <ColumnDefinition Width="115" />
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="200" />
                             <ColumnDefinition Width="120" />
@@ -471,9 +489,9 @@
                             <ColumnDefinition Width="*" MinWidth="140" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock x:Name="RevenueRowCountText" Grid.Column="0" Grid.ColumnSpan="7" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock x:Name="RevenueRowCountText" Grid.Column="0" Grid.ColumnSpan="9" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
 
-                        <Grid Grid.Column="7" Margin="0,0,8,0">
+                        <Grid Grid.Column="9" Margin="0,0,8,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -482,7 +500,7 @@
                             <TextBlock x:Name="RevenueEntryExitTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
                         </Grid>
 
-                        <Grid Grid.Column="8" Margin="0,0,8,0">
+                        <Grid Grid.Column="10" Margin="0,0,8,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -491,7 +509,7 @@
                             <TextBlock x:Name="RevenueWeighingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
                         </Grid>
 
-                        <Grid Grid.Column="9" Margin="0,0,8,0">
+                        <Grid Grid.Column="11" Margin="0,0,8,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
@@ -500,7 +518,7 @@
                             <TextBlock x:Name="RevenueWaitingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
                         </Grid>
 
-                        <Grid Grid.Column="10">
+                        <Grid Grid.Column="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />

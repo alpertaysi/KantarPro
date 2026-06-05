@@ -15,6 +15,7 @@ namespace KantarPro.Domain.Entities
         public bool ManuelMi { get; set; }
         public int KullaniciId { get; set; }
         public bool FisYazdirildiMi { get; set; }
+        public string KantarFisNo { get; set; }
 
         public virtual Islem Islem { get; set; }
         public virtual Arac Arac { get; set; }

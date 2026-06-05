@@ -14,10 +14,11 @@ namespace KantarPro.Desktop
     {
         public EntrySaveChoice Choice { get; private set; }
 
-        public EntrySaveChoiceWindow()
+        public EntrySaveChoiceWindow(bool showExempt = true)
         {
             InitializeComponent();
             Choice = EntrySaveChoice.None;
+            ExemptButton.Visibility = showExempt ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void WeighAndSave_Click(object sender, RoutedEventArgs e)

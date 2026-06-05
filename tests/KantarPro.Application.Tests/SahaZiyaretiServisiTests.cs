@@ -118,6 +118,18 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void SonradanTartimEkle_NotlariGunceller()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var ziyaret = servis.GirisKaydet("16 NOT 002", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+
+            servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Dolu, 21500m, 1, new DateTime(2026, 5, 12, 10, 20, 0), "Sonradan tartim aciklamasi");
+
+            Assert.AreEqual("Sonradan tartim aciklamasi", ziyaret.Notlar);
+        }
+
+        [TestMethod]
         public void GeceYarisiGecilirseBeklemeUcretiTahsilEdilir()
         {
             var uow = new InMemoryUnitOfWork();
@@ -143,6 +155,47 @@ namespace KantarPro.Application.Tests
 
             Assert.AreEqual("0001", ilk.Ucretler.Single().TahsilatNo);
             Assert.IsTrue(ikinci.Ucretler.All(x => x.TahsilatNo == "0002"));
+        }
+
+        [TestMethod]
+        public void CikisYap_MuafIslemlereDeSiraliCikisNoVerir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var muaf = servis.GirisKaydet("16 MNO 001", "Resmi Kurum", KantarSabitleri.GelisTuru.Dolu, true, 18000m, 1, new DateTime(2026, 5, 12, 9, 0, 0), true, "Resmi gorev");
+            servis.CikisYap(muaf.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+            var ucretli = servis.GirisKaydet("16 MNO 002", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 11, 0, 0));
+            servis.CikisYap(ucretli.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 12, 0, 0));
+
+            Assert.AreEqual("0001", muaf.CikisNo);
+            Assert.AreEqual(0, muaf.Ucretler.Count);
+            Assert.AreEqual("0002", ucretli.CikisNo);
+            Assert.IsTrue(ucretli.Ucretler.All(x => x.TahsilatNo == "0002"));
+        }
+
+        [TestMethod]
+        public void GirisKaydet_NotlariIslemeYazar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ziyaret = servis.GirisKaydet("16 NOT 001", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 9, 0, 0), false, null, "Kapıdaki aciklama");
+
+            Assert.AreEqual("Kapıdaki aciklama", ziyaret.Notlar);
+        }
+
+        [TestMethod]
+        public void GirisKaydet_AyniTarihSaatteFarkliAraclaraBenzersizIslemNoVerir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var tarih = new DateTime(2026, 6, 1, 10, 0, 45);
+
+            var ilk = servis.GirisKaydet("16 DUP 001", "Firma", KantarSabitleri.GelisTuru.Dolu, true, 22000m, 1, tarih);
+            var ikinci = servis.GirisKaydet("16 DUP 002", "Firma", KantarSabitleri.GelisTuru.Dolu, true, 23000m, 1, tarih);
+
+            Assert.AreNotEqual(ilk.IslemNo, ikinci.IslemNo);
         }
 
         [TestMethod]
@@ -286,21 +339,29 @@ namespace KantarPro.Application.Tests
 
             servis.PlakaHatasiniDuzelt("23FEH956", "23FHE956", null, 1);
 
+            var duzeltilenIslem = uow.IslemListesi.Single();
+            var duzeltilenTartim = duzeltilenIslem.Tartimlar.Single();
+            var dosya = uow.KantarDosyasiListesi.Single();
             Assert.AreEqual(1, uow.AracListesi.Count(x => x.Plaka == "23FHE956"));
             Assert.AreEqual(0, uow.IslemListesi.Count(x => x.Arac.Plaka == "23FEH956" && x.Durum == KantarSabitleri.IslemDurumu.Iceride));
-            Assert.AreEqual("23FHE956", uow.IslemListesi.Single().Arac.Plaka);
+            Assert.AreEqual("23FHE956", duzeltilenIslem.Arac.Plaka);
+            Assert.AreEqual(duzeltilenIslem.AracId, duzeltilenTartim.AracId);
+            Assert.AreEqual(duzeltilenIslem.AracId, dosya.AracId);
+            Assert.AreEqual(duzeltilenTartim.TartimId, dosya.IlkTartimId);
+            Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor, dosya.Durum);
         }
 
         [TestMethod]
-        public void FirmaAdiniGuncelle_AracFirmasiniGunceller()
+        public void FirmaAdiniGuncelle_AracFirmasiniGuncellerVeLogYazar()
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
             servis.GirisKaydet("16 ABC 123", "", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 9, 0, 0));
 
-            servis.FirmaAdiniGuncelle("16ABC123", "Yeni Firma");
+            servis.FirmaAdiniGuncelle("16ABC123", "Yeni Firma", 1);
 
             Assert.AreEqual("Yeni Firma", uow.AracListesi.Single().FirmaAdi);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "FirmaGuncelle" && x.Mesaj.Contains("Yeni Firma")));
         }
 
         [TestMethod]

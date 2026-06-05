@@ -10,7 +10,22 @@ namespace KantarPro.Desktop
         {
             if (dosya == null)
             {
-                return islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz ? "Tartimsiz cikis bekliyor" : "Cikis bekliyor";
+                var ilkTartim = GetIlkTartim(islem);
+                if (ilkTartim != null)
+                {
+                    return ilkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
+                        ? "Bos Tartim Yapildi"
+                        : "Dolu Tartim Yapildi";
+                }
+
+                if (islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
+                {
+                    return islem.Durum == KantarSabitleri.IslemDurumu.CikisYapti
+                        ? "Tartimsiz cikis"
+                        : "Tartimsiz giris";
+                }
+
+                return "Cikis bekliyor";
             }
 
             if (dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)

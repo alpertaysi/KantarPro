@@ -39,7 +39,8 @@
                     Foreground="White"
                     FontWeight="SemiBold"
                     Click="SaveWithoutWeighing_Click" />
-            <Button Content="Muaf"
+            <Button x:Name="ExemptButton"
+                    Content="Muaf"
                     Width="110"
                     Height="38"
                     Background="#0F766E"

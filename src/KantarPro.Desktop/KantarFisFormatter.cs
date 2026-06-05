@@ -65,6 +65,7 @@ namespace KantarPro.Desktop
             var fisRow = new VehicleMovementRow
             {
                 IslemNo = row.IslemNo,
+                KantarFisNo = row.KantarFisNo,
                 Plaka = row.Plaka,
                 GirisTarihi = FirstNonEmpty(row.IlkTartimTarihi, row.IlkGirisTarihi),
                 GirisSaati = FirstNonEmpty(row.IlkTartimSaati, row.IlkGirisSaati),
@@ -108,7 +109,7 @@ namespace KantarPro.Desktop
 
         private static string FormatFisNo(VehicleMovementRow row)
         {
-            return string.IsNullOrWhiteSpace(row.IslemNo) ? "-" : row.IslemNo.Trim();
+            return KantarFisPreviewData.FormatFisNo(row);
         }
 
         private static string Pair(string leftLabel, string leftValue, string rightLabel, string rightValue)
