@@ -32,6 +32,7 @@
     <Compile Include="IslemServisiTests.cs" />
     <Compile Include="KantarFisFormatterTests.cs" />
     <Compile Include="KantarSerialReaderTests.cs" />
+    <Compile Include="DailyRevenuePdfExporterTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
     <Compile Include="KullaniciServisiTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />

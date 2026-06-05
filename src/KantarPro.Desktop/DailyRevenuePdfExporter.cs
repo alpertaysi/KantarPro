@@ -1,20 +1,27 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Printing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace KantarPro.Desktop
 {
     public sealed class DailyRevenuePdfExporter
     {
+        private const float PageWidth = 842f;
+        private const float PageHeight = 595f;
+        private const float LeftMargin = 28f;
+        private const float RightMargin = 28f;
+        private const float TopMargin = 34f;
+        private const float RowHeight = 18f;
+
         private readonly IList<DailyRevenueRow> _rows;
         private readonly string _title;
         private readonly string _entryTotal;
         private readonly string _weighingTotal;
         private readonly string _waitingTotal;
         private readonly string _grandTotal;
-        private int _rowIndex;
 
         public DailyRevenuePdfExporter(
             IEnumerable<DailyRevenueRow> rows,
@@ -39,117 +46,201 @@ namespace KantarPro.Desktop
                 throw new InvalidOperationException("PDF dosya yolu secilmedi.");
             }
 
-            using (var document = new PrintDocument())
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
             {
-                document.DocumentName = "Gunluk Tahsilat Dokumu";
-                document.PrinterSettings.PrinterName = "Microsoft Print to PDF";
-                document.PrinterSettings.PrintToFile = true;
-                document.PrinterSettings.PrintFileName = filePath;
-                document.DefaultPageSettings.Landscape = true;
-                document.DefaultPageSettings.Margins = new Margins(35, 35, 35, 35);
-                document.PrintPage += PrintPage;
-                _rowIndex = 0;
-                document.Print();
+                Directory.CreateDirectory(directory);
             }
+
+            var pages = BuildPages();
+            WritePdf(filePath, pages);
         }
 
-        private void PrintPage(object sender, PrintPageEventArgs e)
+        private IList<string> BuildPages()
         {
-            var bounds = e.MarginBounds;
-            using (var titleFont = new Font("Segoe UI", 14, FontStyle.Bold))
-            using (var headerFont = new Font("Segoe UI", 8, FontStyle.Bold))
-            using (var rowFont = new Font("Segoe UI", 8, FontStyle.Regular))
-            using (var totalFont = new Font("Segoe UI", 9, FontStyle.Bold))
-            using (var linePen = new Pen(Color.FromArgb(180, 190, 200)))
-            using (var headerBrush = new SolidBrush(Color.FromArgb(235, 240, 248)))
+            var pages = new List<string>();
+            var columns = BuildColumns();
+            var rowIndex = 0;
+
+            do
             {
-                var y = bounds.Top;
-                e.Graphics.DrawString(_title, titleFont, Brushes.Black, bounds.Left, y);
-                y += 28;
+                var content = new StringBuilder();
+                DrawText(content, _title, 16, LeftMargin, PageHeight - TopMargin, true);
 
-                var columns = BuildColumns(bounds.Width);
-                DrawHeader(e.Graphics, headerFont, headerBrush, linePen, columns, bounds.Left, y);
-                y += 24;
+                var y = PageHeight - TopMargin - 34;
+                DrawTableHeader(content, columns, y);
+                y -= RowHeight;
 
-                while (_rowIndex < _rows.Count && y + 22 < bounds.Bottom - 42)
+                while (rowIndex < _rows.Count && y > 64)
                 {
-                    DrawRow(e.Graphics, rowFont, linePen, columns, bounds.Left, y, _rows[_rowIndex]);
-                    y += 22;
-                    _rowIndex++;
+                    DrawTableRow(content, columns, _rows[rowIndex], y);
+                    y -= RowHeight;
+                    rowIndex++;
                 }
 
-                if (_rowIndex >= _rows.Count)
+                if (rowIndex >= _rows.Count)
                 {
-                    y = Math.Max(y + 12, bounds.Bottom - 34);
                     var totals = string.Format(
-                        "Giris: {0}    Tartim: {1}    Isgaliye: {2}    Toplam: {3}",
+                        CultureInfo.InvariantCulture,
+                        "Giris: {0}   Tartim: {1}   Isgaliye: {2}   Toplam: {3}",
                         _entryTotal,
                         _weighingTotal,
                         _waitingTotal,
                         _grandTotal);
-                    e.Graphics.DrawString(totals, totalFont, Brushes.Black, bounds.Left, y);
-                    e.HasMorePages = false;
+                    DrawText(content, totals, 10, LeftMargin, 34, true);
                 }
-                else
-                {
-                    e.HasMorePages = true;
-                }
+
+                pages.Add(content.ToString());
             }
+            while (rowIndex < _rows.Count);
+
+            return pages;
         }
 
-        private static IList<ReportColumn> BuildColumns(int totalWidth)
+        private static IList<ReportColumn> BuildColumns()
         {
-            var widths = new[] { 35, 55, 80, 70, 75, 120, 75, 70, 70, 70, 80, 80, 80, 85 };
-            var sum = widths.Sum();
-            var scale = totalWidth / (float)sum;
+            var baseWidths = new[] { 28, 45, 64, 50, 58, 105, 62, 62, 58, 62, 67, 67, 72, 72 };
+            var scale = (PageWidth - LeftMargin - RightMargin) / baseWidths.Sum();
+            var widths = baseWidths.Select(x => (float)Math.Floor(x * scale)).ToArray();
             return new[]
             {
-                new ReportColumn("Sira", widths[0] * scale, x => x.SiraNo.ToString()),
-                new ReportColumn("Islem", widths[1] * scale, x => x.IslemNo),
-                new ReportColumn("Tip", widths[2] * scale, x => x.IslemTipi),
-                new ReportColumn("Fis", widths[3] * scale, x => x.KantarFisNo),
-                new ReportColumn("Odeme", widths[4] * scale, x => x.OdemeTuru),
-                new ReportColumn("Firma", widths[5] * scale, x => x.FirmaAdi),
-                new ReportColumn("Plaka", widths[6] * scale, x => x.Plaka),
-                new ReportColumn("Cikis T.", widths[7] * scale, x => x.CikisTarihi),
-                new ReportColumn("Cikis S.", widths[8] * scale, x => x.CikisSaati),
-                new ReportColumn("1.Tartim", widths[9] * scale, x => x.IlkTartim),
-                new ReportColumn("Giris", widths[10] * scale, x => x.GirisCikisUcreti),
-                new ReportColumn("Tartim", widths[11] * scale, x => x.TartimUcreti),
-                new ReportColumn("Isgaliye", widths[12] * scale, x => x.BeklemeUcreti),
-                new ReportColumn("Toplam", widths[13] * scale, x => x.ToplamUcret)
+                new ReportColumn("Sira", widths[0], x => x.SiraNo.ToString(CultureInfo.InvariantCulture)),
+                new ReportColumn("Islem", widths[1], x => x.IslemNo),
+                new ReportColumn("Tip", widths[2], x => x.IslemTipi),
+                new ReportColumn("Fis", widths[3], x => x.KantarFisNo),
+                new ReportColumn("Odeme", widths[4], x => x.OdemeTuru),
+                new ReportColumn("Firma", widths[5], x => x.FirmaAdi),
+                new ReportColumn("Plaka", widths[6], x => x.Plaka),
+                new ReportColumn("Cikis T.", widths[7], x => x.CikisTarihi),
+                new ReportColumn("Cikis S.", widths[8], x => x.CikisSaati),
+                new ReportColumn("1.Tartim", widths[9], x => x.IlkTartim),
+                new ReportColumn("Giris", widths[10], x => x.GirisCikisUcreti),
+                new ReportColumn("Tartim", widths[11], x => x.TartimUcreti),
+                new ReportColumn("Isgaliye", widths[12], x => x.BeklemeUcreti),
+                new ReportColumn("Toplam", widths[13], x => x.ToplamUcret)
             };
         }
 
-        private static void DrawHeader(Graphics graphics, Font font, Brush headerBrush, Pen linePen, IList<ReportColumn> columns, int left, int y)
+        private static void DrawTableHeader(StringBuilder content, IList<ReportColumn> columns, float y)
         {
-            float x = left;
+            var x = LeftMargin;
             foreach (var column in columns)
             {
-                var rect = new RectangleF(x, y, column.Width, 24);
-                graphics.FillRectangle(headerBrush, rect);
-                graphics.DrawRectangle(linePen, rect.X, rect.Y, rect.Width, rect.Height);
-                graphics.DrawString(column.Header, font, Brushes.Black, rect.X + 3, rect.Y + 5);
+                DrawRectangle(content, x, y - 3, column.Width, RowHeight);
+                DrawText(content, column.Header, 7, x + 2, y + 2, true);
                 x += column.Width;
             }
         }
 
-        private static void DrawRow(Graphics graphics, Font font, Pen linePen, IList<ReportColumn> columns, int left, int y, DailyRevenueRow row)
+        private static void DrawTableRow(StringBuilder content, IList<ReportColumn> columns, DailyRevenueRow row, float y)
         {
-            float x = left;
+            var x = LeftMargin;
             foreach (var column in columns)
             {
-                var rect = new RectangleF(x, y, column.Width, 22);
-                graphics.DrawRectangle(linePen, rect.X, rect.Y, rect.Width, rect.Height);
-                graphics.DrawString(TrimToFit(column.Read(row), 24), font, Brushes.Black, rect.X + 3, rect.Y + 4);
+                DrawRectangle(content, x, y - 3, column.Width, RowHeight);
+                DrawText(content, TrimToFit(column.Read(row), column.MaxLength), 7, x + 2, y + 2, false);
                 x += column.Width;
             }
+        }
+
+        private static void DrawRectangle(StringBuilder content, float x, float y, float width, float height)
+        {
+            content.AppendFormat(CultureInfo.InvariantCulture, "0.75 w {0:0.##} {1:0.##} {2:0.##} {3:0.##} re S\n", x, y, width, height);
+        }
+
+        private static void DrawText(StringBuilder content, string text, int size, float x, float y, bool bold)
+        {
+            content.AppendFormat(CultureInfo.InvariantCulture, "BT /{0} {1} Tf {2:0.##} {3:0.##} Td ({4}) Tj ET\n", bold ? "F2" : "F1", size, x, y, EscapePdfText(ToPdfText(text)));
+        }
+
+        private static void WritePdf(string filePath, IList<string> pages)
+        {
+            var objects = new List<string>();
+            var pageObjectIds = new List<int>();
+
+            objects.Add("<< /Type /Catalog /Pages 2 0 R >>");
+            objects.Add("");
+            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+
+            foreach (var page in pages)
+            {
+                var contentId = objects.Count + 2;
+                var pageId = objects.Count + 1;
+                pageObjectIds.Add(pageId);
+                objects.Add(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {0} {1}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents {2} 0 R >>",
+                    PageWidth,
+                    PageHeight,
+                    contentId));
+                var bytes = Encoding.ASCII.GetBytes(page);
+                objects.Add("<< /Length " + bytes.Length.ToString(CultureInfo.InvariantCulture) + " >>\nstream\n" + page + "endstream");
+            }
+
+            objects[1] = "<< /Type /Pages /Kids [" + string.Join(" ", pageObjectIds.Select(x => x.ToString(CultureInfo.InvariantCulture) + " 0 R")) + "] /Count " + pageObjectIds.Count.ToString(CultureInfo.InvariantCulture) + " >>";
+
+            using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                WriteAscii(stream, "%PDF-1.4\n");
+                var offsets = new List<long> { 0 };
+                for (var i = 0; i < objects.Count; i++)
+                {
+                    offsets.Add(stream.Position);
+                    WriteAscii(stream, (i + 1).ToString(CultureInfo.InvariantCulture) + " 0 obj\n");
+                    WriteAscii(stream, objects[i]);
+                    WriteAscii(stream, "\nendobj\n");
+                }
+
+                var xrefStart = stream.Position;
+                WriteAscii(stream, "xref\n");
+                WriteAscii(stream, "0 " + (objects.Count + 1).ToString(CultureInfo.InvariantCulture) + "\n");
+                WriteAscii(stream, "0000000000 65535 f \n");
+                for (var i = 1; i < offsets.Count; i++)
+                {
+                    WriteAscii(stream, offsets[i].ToString("0000000000", CultureInfo.InvariantCulture) + " 00000 n \n");
+                }
+
+                WriteAscii(stream, "trailer\n");
+                WriteAscii(stream, "<< /Size " + (objects.Count + 1).ToString(CultureInfo.InvariantCulture) + " /Root 1 0 R >>\n");
+                WriteAscii(stream, "startxref\n");
+                WriteAscii(stream, xrefStart.ToString(CultureInfo.InvariantCulture) + "\n");
+                WriteAscii(stream, "%%EOF");
+            }
+        }
+
+        private static void WriteAscii(Stream stream, string text)
+        {
+            var bytes = Encoding.ASCII.GetBytes(text);
+            stream.Write(bytes, 0, bytes.Length);
         }
 
         private static string TrimToFit(string value, int max)
         {
             value = value ?? "";
             return value.Length <= max ? value : value.Substring(0, max - 1) + ".";
+        }
+
+        private static string EscapePdfText(string text)
+        {
+            return (text ?? "").Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+        }
+
+        private static string ToPdfText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return "";
+            }
+
+            return text
+                .Replace('ç', 'c').Replace('Ç', 'C')
+                .Replace('ğ', 'g').Replace('Ğ', 'G')
+                .Replace('ı', 'i').Replace('İ', 'I')
+                .Replace('ö', 'o').Replace('Ö', 'O')
+                .Replace('ş', 's').Replace('Ş', 'S')
+                .Replace('ü', 'u').Replace('Ü', 'U')
+                .Replace('₺', 'T');
         }
 
         private sealed class ReportColumn
@@ -159,10 +250,12 @@ namespace KantarPro.Desktop
                 Header = header;
                 Width = width;
                 Read = read;
+                MaxLength = Math.Max(4, (int)Math.Floor(width / 5));
             }
 
             public string Header { get; private set; }
             public float Width { get; private set; }
+            public int MaxLength { get; private set; }
             public Func<DailyRevenueRow, string> Read { get; private set; }
         }
     }
