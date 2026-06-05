@@ -30,6 +30,7 @@
     <Compile Include="Abstractions\IRepository.cs" />
     <Compile Include="Services\IslemServisi.cs" />
     <Compile Include="Services\KantarDisplayFormatter.cs" />
+    <Compile Include="Services\KullaniciServisi.cs" />
     <Compile Include="Services\SahaZiyaretiServisi.cs" />
     <Compile Include="Services\UcretAyarlariServisi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

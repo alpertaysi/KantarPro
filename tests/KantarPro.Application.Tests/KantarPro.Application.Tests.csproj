@@ -33,6 +33,7 @@
     <Compile Include="KantarFisFormatterTests.cs" />
     <Compile Include="KantarSerialReaderTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
+    <Compile Include="KullaniciServisiTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />
     <Compile Include="UcretAyarlariServisiTests.cs" />

@@ -67,6 +67,7 @@ namespace KantarPro.Desktop
                 IslemNo = row.IslemNo,
                 KantarFisNo = row.KantarFisNo,
                 Plaka = row.Plaka,
+                FirmaAdi = row.FirmaAdi,
                 GirisTarihi = FirstNonEmpty(row.IlkTartimTarihi, row.IlkGirisTarihi),
                 GirisSaati = FirstNonEmpty(row.IlkTartimSaati, row.IlkGirisSaati),
                 Tartim = birinciTartim
@@ -77,14 +78,16 @@ namespace KantarPro.Desktop
 
         private static void AppendHeader(StringBuilder builder)
         {
+            builder.AppendLine(Center("TURKIYE CUMHURIYETI", 72));
             builder.AppendLine(Center("TICARET BAKANLIGI", 72));
             builder.AppendLine(Center("ULUDAG GUMRUK VE TICARET BOLGE MUDURLUGU", 72));
-            builder.AppendLine(Center("BURSATASFIYE ISLETME MUDURLUGU", 72));
+            builder.AppendLine(Center("BURSA TASFIYE ISLETME MUDURLUGU", 72));
         }
 
         private static void AppendTekTartimFis(StringBuilder builder, VehicleMovementRow row, string birinciTartim)
         {
             builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            AppendFirma(builder, row.FirmaAdi);
             builder.AppendLine();
             builder.AppendLine("   " + Pair("GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
             builder.AppendLine();
@@ -97,6 +100,7 @@ namespace KantarPro.Desktop
             var ikinciGirisSaati = FirstNonEmpty(row.BosGelisSaati, row.IkinciTartimSaati);
 
             builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            AppendFirma(builder, row.FirmaAdi);
             builder.AppendLine();
             builder.AppendLine("   " + Pair("1.GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
             builder.AppendLine("   " + Pair("2.GIRIS TARIHI:", ikinciGirisTarihi, "SAATI....:", ikinciGirisSaati));
@@ -110,6 +114,14 @@ namespace KantarPro.Desktop
         private static string FormatFisNo(VehicleMovementRow row)
         {
             return KantarFisPreviewData.FormatFisNo(row);
+        }
+
+        private static void AppendFirma(StringBuilder builder, string firmaAdi)
+        {
+            if (!string.IsNullOrWhiteSpace(firmaAdi))
+            {
+                builder.AppendLine("   " + Field("FIRMA", firmaAdi));
+            }
         }
 
         private static string Pair(string leftLabel, string leftValue, string rightLabel, string rightValue)

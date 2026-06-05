@@ -15,6 +15,7 @@ namespace KantarPro.Application.Tests.Fakes
         public readonly List<Ucret> UcretListesi = new List<Ucret>();
         public readonly List<IslemUcreti> IslemUcretiListesi = new List<IslemUcreti>();
         public readonly List<BekleyenTartim> BekleyenTartimListesi = new List<BekleyenTartim>();
+        public readonly List<Kullanici> KullaniciListesi = new List<Kullanici>();
         public readonly List<LogKaydi> LogListesi = new List<LogKaydi>();
         public readonly List<Ayar> AyarListesi = new List<Ayar>();
 
@@ -32,6 +33,7 @@ namespace KantarPro.Application.Tests.Fakes
             Ucretler = new InMemoryRepository<Ucret>(UcretListesi);
             IslemUcretleri = new InMemoryRepository<IslemUcreti>(IslemUcretiListesi);
             BekleyenTartimlar = new InMemoryRepository<BekleyenTartim>(BekleyenTartimListesi);
+            Kullanicilar = new InMemoryRepository<Kullanici>(KullaniciListesi);
             Loglar = new InMemoryRepository<LogKaydi>(LogListesi);
             Ayarlar = new InMemoryRepository<Ayar>(AyarListesi);
         }
@@ -43,6 +45,7 @@ namespace KantarPro.Application.Tests.Fakes
         public IRepository<Ucret> Ucretler { get; private set; }
         public IRepository<IslemUcreti> IslemUcretleri { get; private set; }
         public IRepository<BekleyenTartim> BekleyenTartimlar { get; private set; }
+        public IRepository<Kullanici> Kullanicilar { get; private set; }
         public IRepository<LogKaydi> Loglar { get; private set; }
         public IRepository<Ayar> Ayarlar { get; private set; }
 

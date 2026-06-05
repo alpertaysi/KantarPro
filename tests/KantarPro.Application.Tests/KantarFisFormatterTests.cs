@@ -29,6 +29,10 @@ namespace KantarPro.Application.Tests
 
             StringAssert.Contains(fis, "PLAKA NO");
             StringAssert.Contains(fis, "34TCL633");
+            StringAssert.Contains(fis, "TURKIYE CUMHURIYETI");
+            StringAssert.Contains(fis, "BURSA TASFIYE ISLETME MUDURLUGU");
+            StringAssert.Contains(fis, "FIRMA");
+            StringAssert.Contains(fis, "TEST FIRMA");
             StringAssert.Contains(fis, "FIS NO");
             StringAssert.Contains(fis, "0060");
             StringAssert.Contains(fis, "GIRIS TARIHI");
@@ -55,7 +59,8 @@ namespace KantarPro.Application.Tests
                 BosGelisSaati = "16:09:00",
                 Tartim = "24.500 kg",
                 IkinciTartim = "9.500 kg",
-                NetAgirlik = "15.000 kg"
+                NetAgirlik = "15.000 kg",
+                FirmaAdi = "DOLU BOS FIRMA"
             };
 
             var fis = KantarFisFormatter.BuildFromRow(row);
@@ -67,6 +72,7 @@ namespace KantarPro.Application.Tests
             StringAssert.Contains(fis, "NET");
             StringAssert.Contains(fis, "15.000 Kg");
             StringAssert.Contains(fis, "0061");
+            StringAssert.Contains(fis, "DOLU BOS FIRMA");
             Assert.IsFalse(fis.Contains("MAL CINSI"));
             Assert.IsFalse(fis.Contains("GITTIGI YER"));
             Assert.IsFalse(fis.Contains("GELDIGI YER"));
@@ -83,7 +89,8 @@ namespace KantarPro.Application.Tests
                 GirisSaati = "18:20:00",
                 Tartim = "24.500 kg",
                 IkinciTartim = "",
-                NetAgirlik = ""
+                NetAgirlik = "",
+                FirmaAdi = "TEST FIRMA"
             };
             var rawText = KantarFisFormatter.BuildFromRow(row);
 
@@ -95,6 +102,7 @@ namespace KantarPro.Application.Tests
             Assert.AreEqual("31.05.2026", data.GirisTarihi);
             Assert.AreEqual("18:20:00", data.GirisSaati);
             Assert.AreEqual("24.500 kg", data.BirinciTartim);
+            Assert.AreEqual("TEST FIRMA", data.Firma);
             Assert.AreEqual("", data.IkinciTartim);
             Assert.AreEqual("", data.Net);
             Assert.AreEqual(rawText, data.RawText);
@@ -195,13 +203,15 @@ namespace KantarPro.Application.Tests
                 IlkGirisSaati = "18:20:00",
                 IlkTartimTarihi = "31.05.2026",
                 IlkTartimSaati = "18:22:00",
-                IlkAgirlik = "24.500"
+                IlkAgirlik = "24.500",
+                FirmaAdi = "BEKLEYEN FIRMA"
             };
 
             var fis = KantarFisFormatter.BuildFromPendingRow(row);
 
             StringAssert.Contains(fis, "0062");
             StringAssert.Contains(fis, "34TCL633");
+            StringAssert.Contains(fis, "BEKLEYEN FIRMA");
             StringAssert.Contains(fis, "1.TARTI");
             StringAssert.Contains(fis, "24.500 Kg");
             Assert.IsFalse(fis.Contains("2.TARTI"));

@@ -27,6 +27,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
@@ -80,6 +81,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PrintReceiptPromptWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -97,12 +106,14 @@
     </Compile>
     <Compile Include="DashboardFormat.cs" />
     <Compile Include="AutoRefreshPolicy.cs" />
+    <Compile Include="DailyRevenuePdfExporter.cs" />
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="DashboardVisitInfo.cs" />
     <Compile Include="KantarDbContextFactory.cs" />
     <Compile Include="KantarFisFormatter.cs" />
     <Compile Include="KantarFisPreviewData.cs" />
+    <Compile Include="RawPrinterHelper.cs" />
     <Compile Include="KantarSerialReader.cs" />
     <Compile Include="StationSettings.cs" />
     <Compile Include="ExitConfirmationWindow.xaml.cs">
@@ -135,6 +146,12 @@
     </Compile>
     <Compile Include="KantarFisPreviewWindow.xaml.cs">
       <DependentUpon>KantarFisPreviewWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PrintReceiptPromptWindow.xaml.cs">
+      <DependentUpon>PrintReceiptPromptWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

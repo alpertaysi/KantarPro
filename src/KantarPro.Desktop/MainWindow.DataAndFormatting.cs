@@ -14,6 +14,7 @@ using KantarPro.Domain;
 using KantarPro.Domain.Entities;
 using KantarPro.Infrastructure.Data;
 using System.Data.Entity;
+using Microsoft.Win32;
 
 namespace KantarPro.Desktop
 {
@@ -44,6 +45,50 @@ namespace KantarPro.Desktop
         private void RevenueListButton_Click(object sender, RoutedEventArgs e)
         {
             LoadDailyRevenueData();
+        }
+
+        private void RevenueExportPdfButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var rows = DailyRevenueView.Cast<DailyRevenueRow>().ToList();
+                if (rows.Count == 0)
+                {
+                    MessageBox.Show("PDF olusturmak icin once tahsilat listesini doldurun.", "Gunluk Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var baslangic = RevenueStartDatePicker.SelectedDate.GetValueOrDefault(DateTime.Today).ToString("dd.MM.yyyy");
+                var bitis = RevenueEndDatePicker.SelectedDate.GetValueOrDefault(DateTime.Today).ToString("dd.MM.yyyy");
+                var dialog = new SaveFileDialog
+                {
+                    Title = "Gunluk tahsilat PDF dosyasi",
+                    Filter = "PDF dosyasi (*.pdf)|*.pdf",
+                    FileName = "GunlukTahsilat_" + DateTime.Today.ToString("yyyyMMdd") + ".pdf",
+                    AddExtension = true,
+                    DefaultExt = ".pdf"
+                };
+
+                if (dialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+
+                var exporter = new DailyRevenuePdfExporter(
+                    rows,
+                    "Gunluk Tahsilat Dokumu (" + baslangic + " - " + bitis + ")",
+                    RevenueEntryExitTotalText.Text,
+                    RevenueWeighingTotalText.Text,
+                    RevenueWaitingTotalText.Text,
+                    RevenueGrandTotalText.Text);
+
+                exporter.Export(dialog.FileName);
+                MessageBox.Show("Gunluk tahsilat PDF dosyasi olusturuldu.", "Gunluk Tahsilat");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("PDF olusturulamadi: " + ex.Message, "Gunluk Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void LoadDailyRevenueData()

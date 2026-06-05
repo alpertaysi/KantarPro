@@ -1,55 +1,102 @@
-# KantarPro Proje Devam Rehberi
+﻿# KantarPro Proje Devam Rehberi
 
-Son guncelleme tarihi: 31.05.2026
+Son guncelleme: 05.06.2026
 
-Bu dosya, proje baska bir Codex oturumunda veya baska bir yapay zeka aracinda devam ettirilecekse okunmasi gereken ana hafiza dosyasidir. Amac, sohbet gecmisi kaybolsa bile is mantigi, ekran akislari, teknik yapi, kararlar, yarim kalan noktalar ve test/derleme komutlarinin tek yerden anlasilmasidir.
+Bu dosya, sohbet gecmisi olmayan yeni bir Codex oturumunda KantarPro projesini yeniden tanitmak icin hazirlanmistir. Yeni oturumda once bu dosya okunmali, sonra `git status`, derleme ve test komutlari calistirilmalidir. Amac, bu projeyi hic bilmeyen bir yardimcinin is mantigini, teknik yapiyi, sahadaki gercek kullanim senaryolarini ve hassas noktalari tek dosyadan anlamasidir.
 
-## 1. Projenin Amaci
+## 1. Yeni Oturumda Ilk Yapilacaklar
 
-Bu proje, Bursa Tasfiye Isletme Mudurlugu sahasinda kullanilacak gumruk kantar otomasyon programidir. Hedef, mevcut iki ayrik ihtiyaci tek programda birlestirmektir:
+Yeni hesapta veya yeni bilgisayarda projeye devam ederken su sirayi izle:
 
-- Saha giris-cikis takibi.
-- Dolu-bos kantar tartim sureci.
-- Tahakkuk/tahsilat takibi.
-- Gunluk hasilat dokumu.
-- Kantar fisi/makbuz onizleme ve yazdirma.
-- Ucretten muaf resmi/istisnai araclarin takip edilmesi.
+```powershell
+cd "C:\Users\DELL\OneDrive\Masaustu\KantarPro_Tasima_Paketi\KantarPro_Tasima_Paketi\project\Codex Kantar"
+git status -sb
+```
 
-Program, mevcut aktif kantar programindaki ana operasyon mantigini korumaya calisir ancak daha sade, daha takip edilebilir ve ileriye donuk bakimi kolay bir kod yapisina tasinir.
+Derleme:
 
-## 2. Calisma Klasoru
+```powershell
+& "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe" "KantarPro.sln" /p:Configuration=Debug /v:minimal
+```
+
+Test:
+
+```powershell
+& "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" "tests\KantarPro.Application.Tests\bin\Debug\KantarPro.Application.Tests.dll"
+```
+
+Programi acma:
+
+```powershell
+Start-Process -FilePath "src\KantarPro.Desktop\bin\Debug\KantarPro.Desktop.exe"
+```
+
+Varsayilan ilk kullanicilar:
+
+- Admin: `admin` / `admin`
+- Memur: `memur` / `memur`
+
+Admin rolunde Ayarlar sekmesi gorunur. Memur rolunde Ayarlar sekmesi gizlenir.
+
+## 2. Projenin Amaci
+
+KantarPro, Bursa Tasfiye Isletme Mudurlugu sahasinda kullanilacak gumruk kantar otomasyon programidir. Programin temel hedefi, aktif kullanilan eski kantar programindaki giris-cikis ve tartim islerini daha anlasilir, daha izlenebilir ve iki bilgisayarli ortak SQL yapisina uygun sekilde yeniden kurmaktir.
+
+Program su isleri yapar:
+
+- Arac sahaya giris kaydi.
+- Tartimli, tartimsiz ve muaf giris.
+- Dolu-bos kantar takip dosyasi.
+- Ilk tartim, ikinci tartim ve net agirlik hesabi.
+- Cikis ve tahsilat.
+- Bekleme/isgaliye ucreti hesabi.
+- Nakit veya kredi karti odeme turu.
+- Gunluk tahsilat dokumu.
+- PDF olarak gunluk tahsilat disari aktarma.
+- OKI ML5720 nokta vuruslu yazici icin kantar fisi basma.
+- SQL Server uzerinden iki bilgisayarli ortak calisma.
+- Kullanici adi/sifre girisi ve Admin/Memur rol ayrimi.
+
+## 3. Calisma Klasoru ve Git
 
 Ana proje klasoru:
 
 ```text
-C:\Users\DELL\OneDrive\Masaüstü\KantarPro_Tasima_Paketi\KantarPro_Tasima_Paketi\project\Codex Kantar
+C:\Users\DELL\OneDrive\Masaustu\KantarPro_Tasima_Paketi\KantarPro_Tasima_Paketi\project\Codex Kantar
 ```
 
-Solution dosyasi:
+Solution:
 
 ```text
 KantarPro.sln
 ```
 
-Calisan exe derleme cikisi:
+GitHub remote:
 
 ```text
-src\KantarPro.Desktop\bin\Debug\KantarPro.Desktop.exe
+https://github.com/alpertaysi/KantarPro.git
 ```
 
-## 3. Teknoloji Yigini
+Aktif gelistirme branch'i:
+
+```text
+codex/saha-ziyareti-model
+```
+
+## 4. Teknoloji Yigini
 
 - Dil: C#
-- Arayuz: WPF
+- UI: WPF
 - Framework: .NET Framework 4.8
 - ORM: Entity Framework 6
 - Veritabani: SQL Server Express
 - Test: MSTest / Visual Studio Test Platform
-- Mimari hedef: Domain, Application, Infrastructure, Desktop katmanlari ayrilmis sekilde ilerlemek.
+- Yazici: OKI ML5720 / OKI Dot-Matrix 9Pin ESC/P Class Driver
+- Kantar haberlesmesi: RS232 / USB-to-Serial COM port
 
-## 4. Proje Katmanlari
+## 5. Katmanlar
 
-### 4.1 Domain
+### 5.1 Domain
 
 Klasor:
 
@@ -57,22 +104,18 @@ Klasor:
 src\KantarPro.Domain
 ```
 
-Icerik:
-
-- Entity siniflari.
-- Sabitler.
-- Islem, arac, tartim, ucret, kantar dosyasi gibi temel veri nesneleri.
-
-Onemli dosyalar:
+Temel entity ve sabitler buradadir:
 
 - `Entities\Arac.cs`
 - `Entities\Islem.cs`
 - `Entities\Tartim.cs`
-- `Entities\IslemUcreti.cs`
 - `Entities\KantarDosyasi.cs`
+- `Entities\IslemUcreti.cs`
+- `Entities\Kullanici.cs`
+- `Entities\LogKaydi.cs`
 - `KantarSabitleri.cs`
 
-### 4.2 Application
+### 5.2 Application
 
 Klasor:
 
@@ -80,21 +123,17 @@ Klasor:
 src\KantarPro.Application
 ```
 
-Icerik:
-
-- Is kurallari.
-- Saha ziyareti ve cikis mantigi.
-- Ucret ayarlari.
-- Formatlama yardimcilari.
+Is kurallari burada tutulur. Yeni is mantigi mumkunse bu katmana eklenmelidir.
 
 Onemli servisler:
 
-- `Services\SahaZiyaretiServisi.cs`
-- `Services\IslemServisi.cs` eski/onceki akistan kalan servis; bazi testler halen bunu kapsar.
-- `Services\UcretAyarlariServisi.cs`
-- `Services\KantarDisplayFormatter.cs`
+- `Services\SahaZiyaretiServisi.cs`: yeni ana is akisi. Giris, cikis, sonradan tartim, muafiyet, plaka/firma duzeltme, kantar dosyasi islemleri.
+- `Services\UcretAyarlariServisi.cs`: giris-cikis, tartim ve bekleme ucretlerini okur/gunceller.
+- `Services\KullaniciServisi.cs`: login, parola hash, varsayilan admin/memur kullanicilari.
+- `Services\KantarDisplayFormatter.cs`: durum ve liste gorunum metinleri.
+- `Services\IslemServisi.cs`: eski modelden kalan servis. Bazi testler hala bunu kapsar ama yeni akislarda asil servis `SahaZiyaretiServisi`dir.
 
-### 4.3 Infrastructure
+### 5.3 Infrastructure
 
 Klasor:
 
@@ -102,18 +141,13 @@ Klasor:
 src\KantarPro.Infrastructure
 ```
 
-Icerik:
-
-- EF6 `DbContext`
-- Mapping
-- Repository/UnitOfWork
-
-Onemli dosyalar:
+EF6 veritabani altyapisi:
 
 - `Data\KantarDbContext.cs`
 - `Data\KantarUnitOfWork.cs`
+- `Data\EfRepository.cs`
 
-### 4.4 Desktop
+### 5.4 Desktop
 
 Klasor:
 
@@ -121,17 +155,7 @@ Klasor:
 src\KantarPro.Desktop
 ```
 
-Icerik:
-
-- WPF ekranlari.
-- Ana ekran.
-- Kantar fisi onizleme.
-- Odeme turu secimi.
-- Ucretten muafiyet formu.
-- Dolu-bos ikinci tartim formu.
-- Dashboard satir olusturucular.
-
-Onemli dosyalar:
+WPF ekranlari ve masaustu davranislari:
 
 - `MainWindow.xaml`
 - `MainWindow.xaml.cs`
@@ -141,70 +165,104 @@ Onemli dosyalar:
 - `DashboardRowBuilder.cs`
 - `DashboardVisitInfo.cs`
 - `DashboardRows.cs`
+- `KantarSerialReader.cs`
 - `KantarFisFormatter.cs`
-- `KantarFisPreviewWindow.xaml`
+- `RawPrinterHelper.cs`
+- `DailyRevenuePdfExporter.cs`
+- `LoginWindow.xaml`
+- `ExitConfirmationWindow.xaml`
 - `DoluBosSecondWeighingWindow.xaml`
 - `PaymentTypeChoiceWindow.xaml`
-- `ExemptionReasonWindow.xaml`
-- `FirmaUpdateWindow.xaml`
+- `PrintReceiptPromptWindow.xaml`
+- `KantarFisPreviewWindow.xaml`
 
-## 5. Veritabani ve Eski Sistem Kaynaklari
+## 6. Veritabani Modeli
 
-Kullanici tarafindan bildirilen eski/aktif sistem kaynaklari:
+Temel tablolar:
 
-```text
-C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\Backup\GumrukTirKontrol_24012024_2028.bak
-C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\Backup\ForWin1_15052026_000000.bak
-C:\Users\DELL\OneDrive\Masaüstü\GumrukTirKontrol_Programi
-C:\Users\DELL\OneDrive\Masaüstü\Fatura Prog
-C:\Users\DELL\OneDrive\Masaüstü\Kantar Ekran Görüntüleri
-```
+- `Araclar`: plaka, firma, arac bilgisi.
+- `Islemler`: sahaya giris-cikis ziyareti.
+- `Tartimlar`: her tartim kaydi.
+- `KantarDosyalari`: dolu-bos eslestirme dosyasi.
+- `IslemUcretleri`: tahakkuk ve tahsilat kalemleri.
+- `Ucretler`: yillik ucret tarifesi.
+- `Kullanicilar`: admin/memur kullanici kayitlari.
+- `Loglar`: kritik islemlerin log kaydi.
+- `Ayarlar`: uygulama ayarlari.
 
-Bu yedekler ve ekran goruntuleri yeni programin is akisini anlamak icin referans olarak kullanildi.
+`EnsureDatabaseSchema()` uygulama acilisinda eksik kolon/tablo eklemeleri icin calisir. Mevcut SQL yedeklerinden veya eski kurulumdan gelen veritabanini bozmadan gerekli kolonlari eklemek icin kullanilir.
 
-## 6. Ana Is Kavramlari
+Onemli kolonlar:
 
-### 6.1 Arac
+- `Islemler.CikisNo`: her cikis icin surekli artan 4 haneli cikis/tahsilat no.
+- `Islemler.MuafMi`, `Islemler.MuafiyetNedeni`: ucretten muaf araclar.
+- `Islemler.Notlar`: giris veya dolu-bos form aciklamalari.
+- `Tartimlar.KantarFisNo`: kantar fisi numarasi.
+- `IslemUcretleri.TahsilatNo`: ucretli tahsilat numarasi.
+- `IslemUcretleri.OdemeTuru`: Nakit veya Kredi Karti.
 
-Plaka ve firma bilgisi ile temsil edilir. Firma bazen giriste unutulabilir; bunun icin sag tik menusunde `Firma Guncelle` eklendi.
+## 7. Kullanici ve Yetki
 
-### 6.2 Islem / Saha Ziyareti
+Program acilirken login penceresi gelir.
 
-Bir aracin sahaya girisinden cikisina kadar olan ziyarettir.
+Varsayilan kullanicilar tablo eksikse otomatik olusturulur:
+
+- `admin/admin`, rol: Admin
+- `memur/memur`, rol: Memur
+
+Parolalar `KullaniciServisi` icinde PBKDF2 hash ile saklanir. Eski gelistirme placeholder hash'i sadece admin icin geriye uyumluluk amaciyla taninir.
+
+Rol davranisi:
+
+- Admin: tum ekranlari kullanir, Ayarlar sekmesini gorur.
+- Memur: giris-cikis, tartim, tahsilat, makbuz/fis islemlerini yapar; Ayarlar sekmesini gormez.
+
+Yeni kullanici yonetimi ekrani henuz yoktur. Gerekirse sonraki fazda Admin icin kullanici ekleme/sifre degistirme ekrani eklenebilir.
+
+## 8. Ana Is Kavramlari
+
+### 8.1 Arac
+
+Plaka ve firma bilgisi ile takip edilir. Firma bilgisi giriste unutulursa sag tik `Firma Guncelle` ile sonradan degistirilebilir. Plaka hatasi icin `Kayit Duzelt` kullanilir.
+
+### 8.2 Islem / Saha Ziyareti
+
+Bir aracin sahaya girisinden cikisina kadar olan kayittir. Her ziyaret bir `Islem`dir.
 
 Durumlar:
 
-- `Iceride`: Arac sahada.
-- `CikisYapti`: Arac cikis yapti.
+- `Iceride`: arac sahada, cikis yapmamis.
+- `CikisYapti`: arac cikis yapmis.
+- `Iptal`: iptal edilmis.
 
-Her giris icin bir islem kaydi olusur. Tartimli, tartimsiz veya muaf olabilir.
+Islem tartimli, tartimsiz veya muaf olabilir.
 
-### 6.3 Tartim
+### 8.3 Tartim
 
-Bir aracin kantar uzerinde tartilmasidir.
+Bir kantar okumasidir.
 
 Tartim tipleri:
 
-- Giris tartimi.
-- Sonradan tartim.
-- Cikis tartimi.
+- `Giris`
+- `Cikis`
+- `Sonradan`
 
-Uygulamada dolu-bos mantigi icin asil onemli olan agirlik ve yuk durumudur:
+Yuk durumu:
 
-- Dolu
-- Bos
+- `Dolu`
+- `Bos`
 
-### 6.4 Kantar Dosyasi
+### 8.4 Kantar Dosyasi
 
-Dolu-bos tartim eslestirme dosyasidir.
+Dolu-bos tartimlarin eslestirildigi dosyadir.
 
 Mantik:
 
-- Ilk tartim yapilinca bir `KantarDosyasi` acilir.
-- Karsi tartim yapilinca dosya tamamlanir.
-- Net agirlik iki tartim arasindaki mutlak farktir.
-- Ilk tartimdan sonra arac cikabilir ve ikinci tartim icin daha sonra gelebilir.
-- 10 gun icinde ikinci tartim gelmezse dosya suresi doldu olarak kapatilabilir.
+1. Ilk tartim yapilir.
+2. `KantarDosyasi` acilir.
+3. Karsi tartim beklenir.
+4. Ikinci tartim geldiginde net = iki agirligin mutlak farki.
+5. Dosya tamamlanir.
 
 Durumlar:
 
@@ -212,101 +270,174 @@ Durumlar:
 - `Tamamlandi`
 - `SuresiDoldu`
 
-### 6.5 Ucretler
+10 gun icinde ikinci tartim gelmeyen dosyalar suresi doldu olarak kapatilabilir.
 
-Ucret kalemleri:
+## 9. Ana Ekran
 
-- Giris-cikis ucreti.
-- Tartim ucreti.
-- Bekleme/isgaliye ucreti.
+Ust sekmeler:
 
-Bekleme ucreti gece 00:00 sonrasi gun farkina gore hesaplanir. Test icin cikis tarihi ve saati su an manuel degistirilebilir. Program nihai hale geldiginde bu manuel alan kaldirilabilir.
+- `Giris-Cikis Islemleri`
+- `Gunluk Tahsilat`
+- `Ayarlar` (sadece Admin)
 
-### 6.6 Tahsilat
+Giris-Cikis ekraninda:
 
-Cikis yapilirken o isleme ait tahsil edilmemis ucretler tahsil edilir.
+- Sol ust: plaka, tarih, saat, firma, aciklama, kilo ve kaydet alani.
+- Sag ust: `Dolu-Bos Kantar Hareketleri`.
+- Alt bolum: `Kesin Cikis Yapilanlar`, `2. Tartim Bekleyenler`, `Son Islem` gibi takip alanlari.
 
-Odeme turu:
+## 10. Kaydet Akisi
 
-- Nakit
-- Kredi Karti
-
-Cikis onayinda odeme turu sorulur. Muaf araclarda odeme turu sorulmaz.
-
-Tahsilat numarasi surekli artar, gunluk sifirlanmaz.
-
-### 6.7 Muafiyet
-
-Bazi resmi/istisnai araclar ucretten muaftir. Ornek: polis veya kamu kurumu tarafindan kacirilan/emanet esya getirilmesi.
-
-Muaf kayit:
-
-- Ilk kayitta `Muaf` secenegi ile yapilabilir.
-- Muafiyet nedeni zorunludur.
-- Muaf araclar genellikle tartilir ama ucret tahakkuk etmez.
-- Muafiyet nedeni gunluk hasilatta firma alaninda gosterilecek sekilde tasarlanmistir.
-- Muaf arac cikisinda odeme turu sorulmaz.
-
-## 7. Ana Ekran Mantigi
-
-Ana ekran tek operasyon ekrani olarak tasarlanmistir.
-
-Bolumler:
-
-- Sol ust: arac bilgileri ve kayit alani.
-- Sag ust: `Dolu-Bos Kantar Hareketleri` tablosu.
-- Alt sekmeler:
-  - `2. Tartim Bekleyenler`
-  - `Kesin Cikis Yapanlar`
-  - `Son Islem`
-- Ust sekmeler:
-  - `Giris-Cikis Islemleri`
-  - `Gunluk Hasilat`
-  - `Ayarlar`
-
-## 8. Kayit Butonu Akisi
-
-Sol ustte tek `Kaydet` butonu vardir.
-
-`Kaydet` basildiginda secenek penceresi acilir:
+Sol ustteki `Kaydet` butonu dogrudan kayit yapmaz. Once secim penceresi acar:
 
 - Tart ve Kaydet
 - Tartmadan Kaydet
 - Muaf
 
-### 8.1 Tart ve Kaydet
+### 10.1 Tart ve Kaydet
 
-Duruma gore:
+Plaka yeni ise:
 
-- Plaka icin acik islem yoksa yeni giris acilir.
-- Plaka icin bekleyen dolu-bos dosyasi varsa ikinci tartim formu acilir.
-- Plaka zaten icerideyse yeni giris yapilmaz; kullaniciya listeden sag tik `Tart` veya `Cikis Yap` kullanmasi soylenir.
+1. Arac kaydi acilir.
+2. Kantar kilosu alinir.
+3. Ilk tartim yazilir.
+4. Giris-cikis + tartim ucreti tahakkuk eder.
+5. Kantar fisi yazdirilsin mi sorulur.
 
-### 8.2 Tartmadan Kaydet
+Plaka daha once ilk tartim yapip ciktiysa:
 
-Yeni arac tartimsiz girer.
+1. Sistem alt listede bekleyen dolu-bos dosyasini bulur.
+2. Dolu-bos ikinci tartim formu acilir.
+3. `Kilo Al` ile ikinci tartim alinip net hesaplanir.
+4. Kaydedilince arac tekrar ust listeye alinir.
+5. Cikis yapinca kesin cikisa gider.
 
-Sonradan sag tik `Tart` ile tartim eklenirse:
+Plaka zaten icerideyse:
 
-- Arac icin ilk tartim olusur.
-- Durum karsi tartim bekler hale gelir.
-- Bu arac cikinca hemen kesin cikisa atilmaz; ikinci tartimi bekleyebilir.
+- Yeni kayit acmamali.
+- Kullaniciya mevcut acik islem oldugu bildirilmeli.
+- Icerideki arac icin sag tik `Tart` veya `Cikis Yap` kullanilir.
 
-### 8.3 Muaf
+### 10.2 Tartmadan Kaydet
 
-Muafiyet nedeni zorunlu form acilir.
+Arac tartimsiz girer.
 
-Muaf arac:
+- Sadece giris-cikis ucreti tahakkuk eder.
+- Tartim yoksa kantar fisi uretilmez.
+- Sonradan sag tik `Tart` ile tartim eklenebilir.
 
+### 10.3 Muaf
+
+Resmi/istisnai araclar icin kullanilir.
+
+- Muafiyet nedeni zorunludur.
 - Ucret tahakkuk etmez.
-- Cikis sirasinda odeme turu sorulmaz.
-- Dolu-bos tartimi varsa normal tartim mantigi isler ancak ucret uretilmez.
+- Cikis yaparken odeme turu sorulmaz.
+- Gunluk tahsilatta odeme turu `Muaf` gorunur.
+- Muafiyet nedeni firma alaninda gosterilir.
 
-## 9. Sag Tik Menuleri
+## 11. Cikis Akisi
 
-### 9.1 Dolu-Bos Kantar Hareketleri
+`Cikis Yap`:
 
-Sag tik secenekleri:
+1. Acik islem bulunur.
+2. Cikis tarihi/saatine gore bekleme ucreti hesaplanir.
+3. Odeme ozet penceresi acilir.
+4. Muaf degilse odeme turu sorulur:
+   - Nakit
+   - Kredi Karti
+5. Cikis tamamlanir.
+6. Tahsilat no / cikis no uretilir.
+7. Ucretler tahsil edildi isaretlenir.
+8. Liste yenilenir.
+
+Test asamasinda cikis tarihi ve saati manuel degistirilebilir. Gercek sahaya gecmeden once bu alanlar kaldirilabilir veya sadece Admin rolune acilabilir.
+
+## 12. Ucret ve Bekleme Mantigi
+
+Ucret kalemleri:
+
+- Giris-Cikis Ucreti
+- Tartim Ucreti
+- Bekleme / Isgaliye Ucreti
+
+Bekleme hesabi:
+
+- Ayni gun girip cikan araca bekleme ucreti yoktur.
+- Gece 00:00 sonrasi her gun icin bekleme ucreti uygulanir.
+- Test icin tarih/saat elle degistirildiginde listedeki bekleme/toplam alanlari da guncellenmelidir.
+
+Ucretler `Ayarlar > Ucret Ayarlari` altindan Admin tarafindan degistirilir.
+
+## 13. Senaryolar
+
+### Senaryo 1: En yaygin akisi
+
+1. Arac dolu gelir.
+2. Tartilir.
+3. Giris-cikis + tartim ucreti tahakkuk eder.
+4. Cikis yaparken odeme alinir.
+5. Arac ikinci tartim icin daha sonra gelir.
+6. Sistem eski ilk tartimi yakalar.
+7. Dolu-bos formu acilir.
+8. Ikinci tartim alinir.
+9. Net hesaplanir.
+10. Ikinci ziyaret icin yeni giris-cikis + tartim ucreti tahakkuk eder.
+11. Cikis yapinca kesin cikisa gider.
+
+### Senaryo 2: Arac cikmadan ikinci tartimi ister
+
+1. Arac tartimli girer.
+2. Cikis yapmadan tekrar tartilmak ister.
+3. Sag tik `Tart` ile dolu-bos formu acilir.
+4. Ikinci tartim alinir.
+5. Net hesaplanir.
+6. Cikis yapilinca kesin cikisa gider.
+
+### Senaryo 3: Tartimsiz giris
+
+1. Arac tartilmak istemez.
+2. Tartmadan kaydedilir.
+3. Sadece giris-cikis ucreti tahakkuk eder.
+4. Cikis yaparsa tartimsiz kesin cikis olur.
+5. Kantar fisi yoktur.
+
+### Senaryo 4: Tartimsiz girip sonradan tartim
+
+1. Arac tartimsiz girer.
+2. Icerideyken tartilmak ister.
+3. Sag tik `Tart` ile ilk tartim eklenir.
+4. Tartim ucreti eklenir.
+5. Karsi tartim bekler.
+6. Cikis yaparsa ikinci tartim bekleyen akisa girer.
+
+### Senaryo 5: Ikinci tartima gelmeyen arac
+
+1. Arac ilk tartimini yapar.
+2. Cikis yapar ve odemesini yapar.
+3. 2. Tartim Bekleyenler listesine duser.
+4. 10 gun icinde gelmezse suresi doldu olarak kapatilir.
+
+### Senaryo 6: Muaf arac
+
+1. Arac gelir.
+2. Muaf secilir.
+3. Muafiyet nedeni yazilir.
+4. Tartim varsa kayit tutulur.
+5. Ucret yoktur.
+6. Cikis yaparken odeme turu sorulmaz.
+
+### Senaryo 7: Plaka hatasi
+
+1. Ilk tartimli arac cikmis ve ikinci tartim bekliyordur.
+2. Arac ikinci geliste plaka yanlis yazilabilir.
+3. `Kayit Duzelt` ile dogru plaka yazilir.
+4. Sistem dogru plakadaki bekleyen dosyayi bulup eslestirmelidir.
+5. Birden fazla aday varsa otomatik eslestirme yapmamalidir.
+
+## 14. Sag Tik Menuleri
+
+`Dolu-Bos Kantar Hareketleri`:
 
 - Tart
 - Kayit Duzelt
@@ -315,537 +446,335 @@ Sag tik secenekleri:
 - Makbuz Yazdir
 - Makbuz Goster
 
-`Tart`:
+`2. Tartim Bekleyenler`:
 
-- Acik islemde tek tartim varsa dolu-bos ikinci tartim formunu acar.
-- Kilo alindiktan sonra net hesaplanir.
-- Dolu-bos tamamlandiysa tekrar tartima izin verilmez.
+- Makbuz Yazdir
+- Makbuz Goster
 
-`Kayit Duzelt`:
+`Kesin Cikis Yapilanlar`:
 
-- Plaka ve firma gibi temel bilgiler duzeltilebilir.
+- Makbuz Yazdir
+- Makbuz Goster
 
-`Firma Guncelle`:
+Tamamlanmis dolu-bos kaydinda tekrar `Tart` yapmaya izin verilmemelidir.
 
-- Sadece firma bilgisini sonradan girme/duzeltme icindir.
+## 15. Kantar Fisi / Makbuz
 
-`Ucretten Muaf`:
+Kantar fisi OKI ML5720 nokta vuruslu yazici icin ham metin olarak uretilir. Modern kart onizlemesi kaldirildi; asil cikti sabit genislikli metindir.
 
-- Acik islem sonradan muaf hale getirilebilir.
+Ilgili dosyalar:
 
-`Makbuz Yazdir/Goster`:
+- `KantarFisFormatter.cs`
+- `KantarFisPreviewData.cs`
+- `KantarFisPreviewWindow.xaml`
+- `RawPrinterHelper.cs`
+- `PrintReceiptPromptWindow.xaml`
 
-- Kantar fisi onizleme/yazdirma akisini acar.
+Baslik:
 
-### 9.2 2. Tartim Bekleyenler
+```text
+TURKIYE CUMHURIYETI
+TICARET BAKANLIGI
+ULUDAG GUMRUK VE TICARET BOLGE MUDURLUGU
+BURSA TASFIYE ISLETME MUDURLUGU
+```
 
-Sag tik secenekleri:
+Tek tartim fisi:
 
-- Kantar Fisi Yazdir
-- Kantar Fisi Goster
+- Plaka
+- Fis No
+- Firma
+- Giris Tarihi / Saati
+- 1. Tarti
+- Memur Imza
 
-Bu listede sadece ilk tartim oldugu icin tek tartim fisi uretilir.
+Dolu-bos fisi:
 
-### 9.3 Kesin Cikis Yapanlar
+- Plaka
+- Fis No
+- Firma
+- 1. Giris Tarihi / Saati
+- 2. Giris Tarihi / Saati
+- 1. Tartim
+- 2. Tartim
+- Net
+- Memur Imza
 
-Sag tik secenekleri:
+Tartimsiz araclara fis verilmez. Tartimsiz girip sonradan tartilan arac icin tek tartim fisi alinabilir.
 
-- Kantar Fisi Yazdir
-- Kantar Fisi Goster
+Yazdirma davranisi:
 
-Kayit:
+- Tartimdan sonra `Kantar fisi yazdirilsin mi?` penceresi gelir.
+- `Evet` denirse direkt yazdirir.
+- Basarili yazdirma sonrasi ekstra messagebox yoktur.
+- Hata olursa hata mesaji gosterilir.
+- Sag tik `Makbuz Goster` onizleme acar.
+- `Makbuz Yazdir` direkt yazdirir.
 
-- Tek tartimliysa tek tartim fisi.
-- Dolu-bos tamamlandiysa dolu-bos fisi.
-- Tartimsiz ciktiysa fisi yok uyarisi.
+OKI ML5720 icin calisan yaklasim:
 
-## 10. Temel Senaryolar
+- Driver: OKI Dot-Matrix 9Pin ESC/P Class Driver veya OKI ML5720 uyumlu driver.
+- Yontem: Windows driver uzerinden `PrintDocument`.
+- Ham metin fontu: Courier New.
+- Surekli form uzunlugu: sahada 14 cm / 5.5 inch olarak test edildi.
+- Yazici ayarlarinda `Rear Feed`, `Page Length 139.7 mm (5.5")`, `Form Tear-Off` ve `Initial Position` cok onemlidir.
 
-### Senaryo 1: En yaygin akisi
+## 16. Kantar COM Okuma
 
-1. Arac dolu gelir.
-2. Tartilir.
-3. Giris-cikis + dolu kantar ucreti tahakkuk eder.
-4. Ayni gun cikarsa bekleme ucreti yoktur.
-5. Cikis yaparken odemesini yapar.
-6. Arac daha sonra bos/ikinci tartim icin gelir.
-7. Sistem eski ilk tartimi bulur.
-8. Dolu-bos formu acilir.
-9. Ikinci tartim alinir.
-10. Net agirlik hesaplanir.
-11. Bu ikinci gelis icin yeni giris-cikis + tartim ucreti tahakkuk eder.
-12. Cikis yapinca kesin cikisa alinir.
+Gercek kantar indikatorden veri COM porttan okunur.
 
-### Senaryo 2: Arac cikarken ikinci tartimi da yapmak ister
+Ilgili dosya:
 
-1. Arac dolu gelir ve tartilir.
-2. Ayni gun veya sonra cikarken ikinci tartimi yapmak ister.
-3. Sag tik `Tart` ile dolu-bos formu acilir.
-4. Ikinci tartim alinir.
-5. Net hesaplanir.
-6. Cikis yapilir.
-7. Odeme alinir.
-8. Dolu-bos tamamlandigi icin kesin cikis listesine gider.
+```text
+src\KantarPro.Desktop\KantarSerialReader.cs
+```
 
-### Senaryo 3: Arac tartilmak istemeden girer
+Test edilen aktif ayarlar:
 
-1. Arac gelir ama tartilmaz.
-2. Tartmadan kaydedilir.
-3. Sadece giris-cikis ucreti tahakkuk eder.
-4. Cikis yaparsa tartimsiz kesin cikis olabilir.
-5. Kantar fisi uretilmez.
+- Port: sahaya gore degisir. Test bilgisayarinda COM5 calisti.
+- Baudrate: 9600
+- Parity: None
+- DataBits: 8
+- StopBits: 1
+- Okuma sikligi: anlik degisimi gosterecek sekilde hizlandirildi.
 
-### Senaryo 4: Tartimsiz giren arac sonradan tartilmak ister
+COM port otomatik listeleme:
 
-1. Arac tartimsiz girer.
-2. Daha sonra tartilmak ister.
-3. Sag tik `Tart` ile tartim eklenir.
-4. Tartim ucreti eklenir.
-5. Bu artik ilk tartim sayilir.
-6. Karsi tartim bekler.
-7. Cikis yaparsa ikinci tartim bekleyenler mantigina gore takip edilir.
+- Ayarlar > Baglanti Ayarlari > Portlari Yenile
+- Her bilgisayarda kendi kantarinin COM portu secilir.
 
-### Senaryo 5: Ilk tartimdan sonra ikinci tartima gelmez
+Gercek sahada COM numarasi test bilgisayarindan farkli olabilir. Bu normaldir.
 
-1. Arac ilk tartimini yapar.
-2. Cikis yapar ve odemesini yapar.
-3. Ikinci tartim icin bekleyenler listesine duser.
-4. 10 gun icinde ikinci tartima gelmezse suresi dolan kantar dosyasi kapatilabilir.
-5. Ilk tartim kaydi sistemde kalir; dolu-bos tamamlanmamis olur.
+## 17. Iki Bilgisayarli Mimari
 
-### Senaryo 6: Muaf arac
+Hedef saha yapisi:
 
-1. Arac gelir.
-2. Muaf secilir.
-3. Muafiyet nedeni yazilir.
-4. Tartim varsa tartim kaydi tutulur.
-5. Ucret tahakkuk etmez.
-6. Cikis yaparken odeme turu sorulmaz.
+- Giris kantari bilgisayari SQL Server sunucusu.
+- Cikis kantari bilgisayari istemci.
+- Iki bilgisayar ortak SQL veritabanini kullanir.
+- Her bilgisayarin COM port ayari yereldir.
 
-## 11. Cikis Akisi
+Detayli kurulum:
 
-`Cikis Yap` butonu:
+```text
+docs\KURULUM_AG_SQL.md
+```
 
-1. Secili plaka veya girilen plaka icin acik islem bulunur.
-2. Cikis tarihi ve saati okunur.
-3. Bekleme ucreti hesaplanir.
-4. Odeme ozeti gosterilir.
-5. Muaf degilse odeme turu sorulur:
-   - Nakit
-   - Kredi Karti
-6. Cikis tamamlanir.
-7. Tahsilat no ve tahsilat bilgileri yazilir.
-8. Liste yenilenir.
+Yerel ayar dosyasi:
 
-Not: Test icin cikis tarihi/saatini manuel degistirme ozelligi var. Nihai surumde bu alan kaldirilabilir.
+```text
+%AppData%\KantarPro\station-settings.ini
+```
 
-## 12. Gunluk Hasilat
+Sunucu ornek ayarlari:
 
-Gunluk hasilat sekmesi cikis/tahsilat tarihine gore listeleme yapar.
+- SQL Server/IP: `.\SQLEXPRESS`
+- Veritabani: `KantarPro`
+- Windows baglantisi: isaretli
+- Istasyon tipi: Giris Kantari
+- COM Port: giris kantari portu
 
-Alanlar:
+Istemci ornek ayarlari:
+
+- SQL Server/IP: `tcp:192.168.50.1,1433`
+- Veritabani: `KantarPro`
+- Windows baglantisi: isaretsiz
+- SQL kullanici: `kantar_app`
+- Istasyon tipi: Cikis Kantari
+- COM Port: cikis kantari portu
+
+Oto yenileme vardir; memur surekli Yenile basmak zorunda kalmamali.
+
+## 18. Gunluk Tahsilat
+
+Tarih araligi cikis/tahsilat tarihine gore calisir.
+
+Listelenenler:
+
+- Ucretli cikislar.
+- Muaf cikislar.
+- Tek tartim, dolu-bos, tartimsiz cikislar.
+
+Kolonlar:
 
 - Sira
-- Islem No / Tahsilat No
+- Islem No
+- Islem Tipi
+- Kantar Fis No
 - Odeme Turu
 - Firma
 - Plaka
 - Cikis Tarihi
 - Cikis Saati
-- 1. Tartim
-- 2. Tartim
-- Net
 - Giris Ucreti
 - Tartim Ucreti
-- Isgaliye/Bekleme Ucreti
+- Isgaliye Ucreti
 - Toplam Ucret
 
-Arama:
+Plaka ve Firma kolonlarinda filtre kutulari vardir.
 
-- Plaka filtresi.
-- Firma filtresi.
+Butonlar:
 
-Gunluk hasilat sadece kesin cikislari degil, odemesi alinan cikis islemlerini listeler.
+- Listele
+- PDF Olarak Disa Aktar
 
-## 13. Kantar Fisi Mantigi
-
-Kantar fisi su an OKI 5720 icin metin tabanli form olarak uretilir. Onizleme penceresi vardir.
-
-Formatter:
+PDF exporter:
 
 ```text
-src\KantarPro.Desktop\KantarFisFormatter.cs
+src\KantarPro.Desktop\DailyRevenuePdfExporter.cs
 ```
 
-Onizleme:
+PDF icin `Microsoft Print to PDF` yazicisi kullanilir.
 
-```text
-src\KantarPro.Desktop\KantarFisPreviewWindow.xaml
-```
+## 19. Ayarlar
 
-### 13.1 Tek tartim fisi
+Ayarlar sadece Admin rolunde gorunur.
 
-Ilk tartimi olan ama dolu-bos tamamlanmamis araclar icin.
+Iki alt sekme vardir:
 
-Alanlar:
+### 19.1 Ucret Ayarlari
 
-- Plaka
-- Fis No
-- Giris Tarihi
-- Giris Saati
-- 1. Tarti
-- Memur Imza
+- Giris-Cikis Ucreti
+- Tartim Ucreti
+- Bekleme Ucreti
+- Ucretleri Kaydet
 
-### 13.2 Dolu-bos fisi
+Ucretler SQL veritabaninda ortaktir.
 
-Iki tartimi tamamlanmis araclar icin.
+### 19.2 Baglanti Ayarlari
 
-Alanlar:
+- SQL Server / IP
+- Veritabani
+- Windows baglantisi
+- SQL kullanici/sifre
+- Istasyon tipi
+- Kantar COM Port
+- Portlari Yenile
+- Baglantiyi Test Et
+- Baglantiyi Kaydet
 
-- Plaka
-- Fis No
-- 1. Giris Tarihi
-- 1. Giris Saati
-- 2. Giris Tarihi
-- 2. Giris Saati
-- 1. Tartim
-- 2. Tartim
-- Net
-- Memur Imza
+Baglanti ve COM ayarlari bu bilgisayara ozeldir.
 
-### 13.3 Tartimsiz araclar
+## 20. Log ve Duzeltmeler
 
-Tartimsiz giren ve tartilmeden cikan araclar icin kantar fisi olusturulmaz.
+Loglanmasi gereken kritik islemler:
 
-Tartimsiz girip sonradan tartilan arac icin tek tartim fisi alinabilir.
+- Plaka duzeltme.
+- Firma guncelleme.
+- Muaf yapma.
+- Cikis/tahsilat.
+- Tartim ekleme.
 
-### 13.4 Fis No Karari
+Mevcut servislerde log mantigi kismen uygulanmistir. Yeni kritik islem eklenecekse `SahaZiyaretiServisi` icinde log eklenmelidir.
 
-Su an fis no olarak `IslemNo` kullaniliyor.
+## 21. Test Durumu
 
-Kullanici idareye soracak:
+Son dogrulama:
 
-- Fis No = Islem No olarak mi kalsin?
-- Yoksa sadece kantar fisi basilan islemler icin ayri `KantarFisNo` mu uretilsin?
+- Derleme: basarili.
+- Test: 59 test, 59 gecti.
 
-Bu karar henuz kesinlesmedi. Ileride idareden cevap gelince uygulanacak.
+Bilinen derleme uyarilari:
 
-## 14. Bilinen Kararlar ve Gerekceler
-
-- Tek liste fikrinden vazgecildi. Cikis yapan/tahsilati alinan ve ikinci tartim bekleyenler alt listede ayrildi.
-- Kesin cikis yapanlar ayri listede tutuluyor.
-- Dolu-bos hareketleri ana takip listesi olarak korunuyor.
-- Tartimsiz araclara kantar fisi verilmez.
-- Muaf araclarda odeme turu sorulmaz.
-- Tahsilat numarasi gunluk sifirlanmaz, surekli artar.
-- Cikis tarihi/saatini manuel degistirme sadece test amaclidir.
-- Sag tik menuleri operasyonel islemler icin ana yoldur.
-
-## 15. Kodda Yapilan Refaktorler
-
-`MainWindow.xaml.cs` cok buyudugu icin bir kisim sorumluluklar ayrildi:
-
-- `MainWindow.DashboardData.cs`: listeleri yukleme.
-- `MainWindow.DataAndFormatting.cs`: detay metinleri, formatlama, ortak yardimcilar.
-- `MainWindow.DoluBosAndFilters.cs`: filtre ve dolu-bos ekran yardimcilari.
-- `DashboardRowBuilder.cs`: tablo satirlarini olusturma.
-- `DashboardVisitInfo.cs`: ziyaret/tartim durum bilgileri.
-- `DashboardFormat.cs`: para, tarih, tartim formatlari.
-- `KantarFisFormatter.cs`: kantar fisi metni.
-
-Ama `MainWindow.xaml.cs` halen buyuk. Ileri asamada daha da bolunebilir:
-
-- Entry operations partial class.
-- Exit operations partial class.
-- Context menu handlers partial class.
-- Receipt/printing partial class.
-
-## 16. Testler
-
-Test projesi:
-
-```text
-tests\KantarPro.Application.Tests
-```
-
-Son bilinen test sayisi:
-
-```text
-32
-```
+- `IslemServisi` icin obsolete uyarilari var. Bunlar beklenen uyarilardir; eski model testleri halen korunuyor.
 
 Onemli test dosyalari:
 
 - `SahaZiyaretiServisiTests.cs`
 - `IslemServisiTests.cs`
-- `UcretAyarlariServisiTests.cs`
-- `KantarDisplayFormatterTests.cs`
 - `KantarFisFormatterTests.cs`
+- `KantarSerialReaderTests.cs`
+- `KullaniciServisiTests.cs`
+- `UcretAyarlariServisiTests.cs`
+- `AutoRefreshPolicyTests.cs`
 
-Testlerin kapsadigi ana konular:
+## 22. Bilinen Hassas Noktalar
 
-- Tartimli giris.
-- Tartimsiz giris.
-- Dolu-bos eslestirme.
-- Cikis ve bekleme ucreti.
-- Tahsilat no.
-- Odeme turu.
-- Muafiyet.
-- Kantar fisi formatlari.
+### 22.1 MainWindow halen buyuk
 
-## 17. Derleme ve Test Komutlari
+`MainWindow.xaml.cs` parcalara ayrildi ama hala buyuk. Yeni buyuk davranis eklenirken mumkunse:
 
-Ana klasorde calistir:
+- servis Application katmanina,
+- tablo satiri olusturma DashboardRowBuilder'a,
+- formatlama DashboardFormat veya formatter'a,
+- ekran yardimcilari partial class'a
 
-```powershell
-cd "C:\Users\DELL\OneDrive\Masaüstü\KantarPro_Tasima_Paketi\KantarPro_Tasima_Paketi\project\Codex Kantar"
-```
+tasinsin.
 
-Derleme:
+### 22.2 Cikis tarihi/saat alanlari test amacli
 
-```powershell
-& 'C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' .\KantarPro.sln /t:Build /p:Configuration=Debug
-```
+Gercek sahada bu alanlar kaldirilacak veya yetkiliye acilacak. Simdilik bekleme ucreti testleri icin duruyor.
 
-Test:
+### 22.3 Kantar fisi numarasi
 
-```powershell
-& 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe' .\tests\KantarPro.Application.Tests\bin\Debug\KantarPro.Application.Tests.dll
-```
+Fis no ve islem no konusunda idare karari gerekebilir. Su an fislerde 4 haneli numara kullanilir. Tartimsiz islemler de islem no aldigi icin idare isterse sadece tartimli fislere ozel ayri sayac yapilabilir.
 
-Son dogrulama:
+### 22.4 PDF
 
-- Derleme: 0 hata, 0 uyari.
-- Test: 32/32 gecti.
+PDF disari aktarim `Microsoft Print to PDF` yazicisini kullanir. Gercek bilgisayarda bu yazici devre disiysa Windows ozelliklerinden acilmasi gerekebilir.
 
-Not: Derleme sirasinda `KantarPro.Desktop.exe` aciksa dosya kilitlenebilir. Bu durumda program kapatilmali veya su komut calistirilmalidir:
+### 22.5 SQL 2008 Express
 
-```powershell
-Get-Process KantarPro.Desktop -ErrorAction SilentlyContinue | Stop-Process -Force
-```
+Gercek eski kantar bilgisayarlarinda SQL Server 2008 Express olabilir. EF6 ve uygulama .NET 4.8 ile calisir; ancak schema scriptleri ve SQL uyumlulugu sahada dikkatle test edilmelidir.
 
-## 18. Git Durumu
+### 22.6 Eski programlar
 
-Son commitler:
+Gercek sahada eski kantar programi halen kullaniliyorsa yeni program kurulumu mesai disi ve yedek alinarak yapilmalidir.
 
-```text
-60cef33 feat: add exempt flow and scale ticket preview
-1eb0413 feat: support fee-exempt weighings
-be22de9 feat: record payment type on exit
-f6633f2 refactor: build exit rows with dashboard builder
-76351f8 refactor: build entry rows with dashboard builder
-382a856 refactor: extract dashboard visit helpers
-8bf9531 refactor: extract dashboard formatting helpers
-81abad7 refactor: split dashboard row loading steps
-```
+## 23. Manuel Prova Listesi
 
-Bu dosya yazilirken calisma agacinda commitlenmemis degisiklikler vardi. Bunlar son oturumdaki su isleri kapsar:
+Yeni oturumda veya yeni build sonrasinda su akislari elle denenmeli:
 
-- Cikis tarihi/saatine gore bekleme kolonunun anlik yenilenmesi.
-- Acik islem varken sol giris formundan ayni plakanin tekrar yeni kayit gibi islenmemesi.
-- Firma guncelle penceresi.
-- Kantar fisi formatinin tek tartim ve dolu-bos diye ayrilmasi.
-- Fis No alanina `IslemNo` basilmaya baslanmasi.
-- 2. Tartim Bekleyenler ve Kesin Cikis Yapanlar listelerine sag tik kantar fisi alma secenekleri.
-- Kantar fisi testleri.
+1. Admin login.
+2. Memur login; Ayarlar gizli mi?
+3. Tartimli giris ve ayni gun cikis.
+4. Tartimli giris, cikis, ikinci tartim icin tekrar gelis.
+5. Icerideyken ikinci tartim.
+6. Tartimsiz giris ve tartimsiz cikis.
+7. Tartimsiz giris, sonradan tartim, sonra ikinci tartim.
+8. Muaf giris ve muaf cikis.
+9. Bekleme ucreti icin manuel eski tarih/saat denemesi.
+10. Firma guncelle.
+11. Kayit duzelt / plaka duzelt.
+12. Gunluk tahsilat listeleme.
+13. PDF olarak disa aktar.
+14. Kantar fisi goster.
+15. Kantar fisi yazdir.
+16. Iki bilgisayar ortak SQL liste yenileme.
+17. COM port kilo okuma.
 
-Baska oturuma gecmeden once tavsiye:
+## 24. Yeni Oturumda Bana Projeyi Nasil Tanitirsin
 
-```powershell
-git status --short
-git add .
-git commit -m "feat: improve receipt access and open-visit safeguards"
-```
-
-Push icin henuz remote olmadigi daha once gorulmustu. Remote eklenirse push yapilabilir.
-
-## 19. Son Eklenen/Kritik Dosyalar
-
-Son donemde eklenen veya onemli hale gelen dosyalar:
+Yeni Codex oturumunda su metni yazmak yeterli olur:
 
 ```text
-src\KantarPro.Desktop\FirmaUpdateWindow.xaml
-src\KantarPro.Desktop\FirmaUpdateWindow.xaml.cs
-tests\KantarPro.Application.Tests\KantarFisFormatterTests.cs
-docs\PROJE_DEVAM_REHBERI.md
+Bu repo KantarPro gumruk kantar otomasyon projesi. Once docs/PROJE_DEVAM_REHBERI.md dosyasini oku. Sonra git status, derleme ve testleri calistir. Projenin is mantigini bu dosyaya gore devam ettirecegiz.
 ```
 
-## 20. Bilinen Hassas Noktalar
+Sonra yeni istegi yazabilirsin.
 
-### 20.1 Kantar fisi numarasi
+## 25. Degistirme Yaparken Kurallar
 
-Su an `IslemNo` fis numarasi olarak kullaniliyor. Tartimsiz islemler de `IslemNo` aldigi icin fislerde numara atlamasi gibi gorunebilir. Idareye sorulacak.
+- Once mevcut akisi oku.
+- Is mantigini UI icine gommemeye calis.
+- Kritik is kurali Application servisinde olsun.
+- Her yeni davranisa test ekle.
+- Veritabani degisikligi gerekiyorsa `EnsureDatabaseSchema()` ve EF mapping kontrol edilsin.
+- Kullaniciya ait mevcut degisiklikleri geri alma.
+- Derleme ve test almadan tamamlandi deme.
+- Gercek sahaya gecmeden once iki bilgisayarli prova tekrar edilmeli.
 
-Alternatif:
+## 26. Kisa Hafiza Ozeti
 
-- `IslemNo`: tum islemler icin.
-- `KantarFisNo`: sadece fis basilan tartimli islemler icin.
+KantarPro artik su noktadadir:
 
-### 20.2 Manuel tarih/saat alanlari
+- Calisan WPF masaustu uygulamasi var.
+- SQL Server Express ile calisiyor.
+- Iki bilgisayarli sunucu/istemci mimarisi test edildi.
+- Gercek kantar indikatorunden COM5 ile kilo okuma test edildi.
+- OKI ML5720 yazici icin ham metin kantar fisi basimi test edildi.
+- Admin/Memur login eklendi.
+- Gunluk tahsilat ve PDF disari aktarim eklendi.
+- Dolu-bos, tartimsiz, muaf, bekleme, tahsilat ve fis akislari testlerle korunuyor.
 
-Test icin giris ve cikis tarih/saatleri elle degistirilebiliyor.
-
-Nihai surumde:
-
-- Cikis tarihi/saat alanlari kaldirilabilir veya sadece yetkili kullaniciya acilabilir.
-- Saat bilgisinin COM/kantar cihazindan veya sistem saatinden gelmesi netlestirilmeli.
-
-### 20.3 Yazdirma
-
-Kantar fisi su an onizleme metni uretir. Gercek OKI 5720 yazdirma baglantisi henuz tam entegre degil.
-
-Ileride:
-
-- Yazici secimi.
-- Direkt yazdirma.
-- Kopya sayisi.
-- Yazdirildi bilgisi.
-- Tekrar yazdirma logu.
-
-eklenebilir.
-
-### 20.4 SQL Server versiyonu
-
-README eski SQL Server 2008 Express uyumundan bahsediyor. Kullanici bilgisayarinda SQL Server 2022 Express pathleri de goruldu. Connection string ve script uyumlulugu kontrol edilmeli.
-
-### 20.5 MainWindow buyuklugu
-
-Refaktor basladi ancak `MainWindow.xaml.cs` halen buyuk. Yeni buyuk ozellik eklenirken once ilgili sorumluluk ayri partial class veya servis haline getirilmeli.
-
-## 21. Devam Ederken Oncelikli Kontrol Listesi
-
-Yeni oturumda once su adimlar uygulanmali:
-
-1. Bu dosyayi oku.
-2. `git status --short` calistir.
-3. Commitlenmemis degisiklikleri incele.
-4. Derleme calistir.
-5. Testleri calistir.
-6. Uygulamayi acip temel senaryolari manuel dene.
-7. Yeni istek gelirse once mevcut is mantigini bozmadan kucuk ve testli ilerle.
-
-## 22. Manuel Test Senaryo Listesi
-
-Yeni oturumda elle denenmesi iyi olacak akislari:
-
-### 22.1 Tartimli giris ve ayni gun cikis
-
-- Plaka gir.
-- Tart ve Kaydet.
-- Cikis Yap.
-- Odeme turu sec.
-- Kesin cikis veya ikinci tartim bekleyen mantigini kontrol et.
-
-### 22.2 Ilk tartim, cikis, sonra ikinci tartim
-
-- Arac tartimli girsin.
-- Cikis yapsin.
-- Alt listede ikinci tartim bekleyenlere dussun.
-- Ayni plaka tekrar girilince dolu-bos formu acilsin.
-- Kilo al, kaydet.
-- Cikis yap.
-- Kesin cikisa dussun.
-- Kantar fisi dolu-bos formatinda olsun.
-
-### 22.3 Icerideyken ikinci tartim
-
-- Arac tartimli girsin.
-- Cikis yapmadan sag tik Tart.
-- Dolu-bos formu acilsin.
-- Ikinci tartim kaydedilsin.
-- Cikis yapinca kesin cikis olsun.
-
-### 22.4 Tartimsiz giris
-
-- Tartmadan Kaydet.
-- Cikis Yap.
-- Kantar fisi almaya calisinca uyarisi gelsin.
-
-### 22.5 Tartimsiz girip sonradan tartim
-
-- Tartmadan Kaydet.
-- Sag tik Tart.
-- Tek tartim fisi alinabilsin.
-- Cikis sonrasi ikinci tartim bekleme mantigi dogru calissin.
-
-### 22.6 Muaf arac
-
-- Muaf sec.
-- Neden yazmadan kaydetmeyi dene, izin vermemeli.
-- Neden yazip kaydet.
-- Cikis yap.
-- Odeme turu sormamali.
-- Gunluk hasilatta uygun gosterilmeli.
-
-### 22.7 Bekleme ucreti
-
-- Giris tarihi eski tarih yap.
-- Cikis tarihi daha ileri tarih yap.
-- Bekleme ve toplam kolonlari anlik degissin.
-- Cikis yapinca ayni tutar tahsil edilsin.
-
-### 22.8 Firma guncelle
-
-- Firma bos kayit yap.
-- Sag tik Firma Guncelle.
-- Firma yaz.
-- Liste ve veritabani guncellensin.
-
-### 22.9 Ayni plaka icerideyken tekrar kayit
-
-- Plaka giris yapsin.
-- Cikis yapmadan sol formdan ayni plakayi tekrar kaydetmeyi dene.
-- Yeni kayit acmamali.
-- Uyari vermeli.
-
-## 23. Uygulama Icindeki Onemli Ekranlar
-
-### 23.1 Giris-Cikis Islemleri
-
-Ana operasyon ekranidir.
-
-Kullanici gunluk olarak en cok bu ekranda calisir.
-
-### 23.2 Gunluk Hasilat
-
-Idare/muhasebe icin tahsilat dokumudur.
-
-Tarih araligina gore cikis/tahsilat kayitlarini listeler.
-
-### 23.3 Ayarlar
-
-Ucretleri guncellemek icindir:
-
-- Giris-cikis ucreti.
-- Tartim ucreti.
-- Bekleme ucreti.
-
-Yeni fiyatlar sonraki tahsilatlarda kullanilir.
-
-## 24. Kodlama Ilkeleri
-
-Projeye devam ederken:
-
-- Is kurali mumkunse `Application` katmaninda olmali.
-- WPF code-behind sadece ekran baglama ve kullanici etkilesimi icin kullanilmali.
-- Yeni is mantigi testle desteklenmeli.
-- MainWindow daha fazla sismezse iyi olur; partial class veya servis cikarmak tercih edilmeli.
-- Mevcut testler bozulmadan ilerlenmeli.
-- Veritabani degisikligi gerekiyorsa migration/script dokumani eklenmeli.
-
-## 25. Kisa Ozet
-
-Bu proje su anda calisan bir WPF prototipinden, sahada kullanilabilecek daha ciddi bir kantar otomasyonuna evriliyor.
-
-En kritik is mantigi:
-
-- Arac sahaya girer.
-- Tartimli/tartimsiz/muaf olabilir.
-- Ucretler tahakkuk eder.
-- Cikis sirasinda tahsilat alinir.
-- Dolu-bos tartimlar eslestirilir.
-- Ikinci tartim bekleyenler ve kesin cikis yapanlar ayrilir.
-- Gunluk hasilat tahsilata gore izlenir.
-- Kantar fisi sadece tartimli kayitlara verilir.
-
-Yeni oturumda bu dosya okunursa, sohbet gecmisine ihtiyac olmadan proje mantigi devam ettirilebilir.
+Bu dosya yeni oturum icin ana baslangic noktasi olarak kabul edilmelidir.

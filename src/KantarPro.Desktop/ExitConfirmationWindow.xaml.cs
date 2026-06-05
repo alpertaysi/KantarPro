@@ -15,16 +15,18 @@ namespace KantarPro.Desktop
         private readonly bool _tartimIsteniyor;
         private readonly decimal? _agirlikKg;
         private readonly DateTime _cikisTarihi;
+        private readonly int _kullaniciId;
 
         private Islem _islem;
         private decimal _previewToplam;
 
-        public ExitConfirmationWindow(string plaka, bool tartimIsteniyor, decimal? agirlikKg, DateTime cikisTarihi)
+        public ExitConfirmationWindow(string plaka, bool tartimIsteniyor, decimal? agirlikKg, DateTime cikisTarihi, int kullaniciId)
         {
             _plaka = NormalizePlaka(plaka);
             _tartimIsteniyor = tartimIsteniyor;
             _agirlikKg = agirlikKg;
             _cikisTarihi = cikisTarihi;
+            _kullaniciId = kullaniciId;
 
             InitializeComponent();
             LoadPreview();
@@ -77,9 +79,8 @@ namespace KantarPro.Desktop
 
                 using (var context = KantarDbContextFactory.Create())
                 {
-                    var kullaniciId = EnsureAdminUser(context);
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, kullaniciId, ParseExitDateTime(), odemeTuru);
+                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, _kullaniciId, ParseExitDateTime(), odemeTuru);
                 }
 
                 DialogResult = true;

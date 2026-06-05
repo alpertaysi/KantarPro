@@ -98,6 +98,7 @@ namespace KantarPro.Desktop
                 LoadDashboardData();
                 ShowEntryPage();
                 MessageBox.Show("Dolu-bos tartim kaydi acildi. Arac cikis yaptiginda tahsilati tamamlanip kesin cikisa aktarilacak.", "Dolu-Bos Tartim");
+                AskAndPrintLatestKantarFisiForPlate(plaka);
             }
             catch (Exception ex)
             {

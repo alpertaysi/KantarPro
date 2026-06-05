@@ -6,6 +6,7 @@ namespace KantarPro.Desktop
     {
         public string FisTipi { get; private set; }
         public string Plaka { get; private set; }
+        public string Firma { get; private set; }
         public string FisNo { get; private set; }
         public string GirisTarihi { get; private set; }
         public string GirisSaati { get; private set; }
@@ -34,6 +35,7 @@ namespace KantarPro.Desktop
             {
                 FisTipi = doluBos ? "Dolu-Bos" : "Tek Tartim",
                 Plaka = Safe(row.Plaka),
+                Firma = Safe(row.FirmaAdi),
                 FisNo = FormatFisNo(row),
                 GirisTarihi = Safe(row.GirisTarihi),
                 GirisSaati = Safe(row.GirisSaati),
@@ -58,6 +60,7 @@ namespace KantarPro.Desktop
             {
                 FisTipi = "Tek Tartim",
                 Plaka = Safe(row.Plaka),
+                Firma = Safe(row.FirmaAdi),
                 FisNo = FirstNonEmpty(row.KantarFisNo, row.IslemNo),
                 GirisTarihi = FirstNonEmpty(row.IlkTartimTarihi, row.IlkGirisTarihi),
                 GirisSaati = FirstNonEmpty(row.IlkTartimSaati, row.IlkGirisSaati),

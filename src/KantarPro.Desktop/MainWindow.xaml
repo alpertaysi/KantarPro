@@ -146,7 +146,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Giriş-Çıkış İşlemleri" Style="{StaticResource PrimaryButton}" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AracGirisButton_Click" />
                         <Button Content="Günlük Tahsilat" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="GunlukHasilatButton_Click" />
-                        <Button Content="Ayarlar" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AyarlarButton_Click" />
+                        <Button x:Name="SettingsNavButton" Content="Ayarlar" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AyarlarButton_Click" />
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
@@ -434,12 +434,11 @@
                             <DatePicker x:Name="RevenueEndDatePicker" Style="{StaticResource RevenueDatePickerStyle}" SelectedDate="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay}" />
                         </StackPanel>
                         <Button Content="Listele" Width="120" MinHeight="40" Margin="0,16,8,0" Click="RevenueListButton_Click" />
-                        <Button Content="Rapor Dokumu" Width="140" MinHeight="40" Margin="0,16,8,0" Click="MenuButton_Click" />
-                        <Button Content="Excel'e Gonder" Width="140" MinHeight="40" Margin="0,16,0,0" Click="MenuButton_Click" />
+                        <Button Content="PDF Olarak Disa Aktar" Width="180" MinHeight="40" Margin="0,16,0,0" Click="RevenueExportPdfButton_Click" />
                     </StackPanel>
                 </Border>
 
-                <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0">
+                <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
                         <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="100" />
@@ -467,66 +466,24 @@
                         <DataGridTextColumn Header="Giris Ucreti" Binding="{Binding GirisCikisUcreti}" Width="110" />
                         <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="110" />
                         <DataGridTextColumn Header="Isgaliye Ucreti" Binding="{Binding BeklemeUcreti}" Width="110" />
-                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="*" />
+                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="125" />
                     </DataGrid.Columns>
                 </DataGrid>
 
                 <Border Grid.Row="2" Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="8" Margin="0,4,0,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="52" />
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="115" />
-                            <ColumnDefinition Width="115" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="200" />
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="95" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="*" MinWidth="140" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock x:Name="RevenueRowCountText" Grid.Column="0" Grid.ColumnSpan="9" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
-
-                        <Grid Grid.Column="9" Margin="0,0,8,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Giris:" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueEntryExitTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
-                        </Grid>
-
-                        <Grid Grid.Column="10" Margin="0,0,8,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Tartim:" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueWeighingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
-                        </Grid>
-
-                        <Grid Grid.Column="11" Margin="0,0,8,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Isgaliye:" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueWaitingTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" VerticalAlignment="Center" />
-                        </Grid>
-
-                        <Grid Grid.Column="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Toplam:" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <TextBlock x:Name="RevenueGrandTotalText" Grid.Column="1" Text="0,00 TL" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
-                        </Grid>
-                    </Grid>
+                    <DockPanel>
+                        <TextBlock x:Name="RevenueRowCountText" DockPanel.Dock="Left" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="Giris:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock x:Name="RevenueEntryExitTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
+                            <TextBlock Text="Tartim:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock x:Name="RevenueWeighingTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
+                            <TextBlock Text="Isgaliye:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock x:Name="RevenueWaitingTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
+                            <TextBlock Text="Toplam:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock x:Name="RevenueGrandTotalText" Text="0,00 TL" Width="105" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DockPanel>
                 </Border>
             </Grid>
 
@@ -546,84 +503,92 @@
                             <TextBlock Text="Ucretler ortak SQL veritabaninda, SQL/istasyon/COM bilgileri bu bilgisayarda saklanir." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
                         </StackPanel>
 
-                        <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="18" Margin="0,0,0,14">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="170" />
-                                    <ColumnDefinition Width="190" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                        <TabControl Grid.Row="1" Grid.RowSpan="3">
+                            <TabItem Header="Ucret Ayarlari">
+                                <StackPanel Background="#FFFFFF" Margin="18">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="190" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="Giris-Cikis Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsEntryExitFeeTextBox" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
-                                <TextBlock Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
+                                        <TextBlock Text="Giris-Cikis Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsEntryExitFeeTextBox" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
+                                        <TextBlock Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
 
-                                <TextBlock Grid.Row="1" Text="Tartim Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsWeighingFeeTextBox" Grid.Row="1" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="1" Text="Tartim Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsWeighingFeeTextBox" Grid.Row="1" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
 
-                                <TextBlock Grid.Row="2" Text="Bekleme Ucreti" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                <TextBox x:Name="SettingsWaitingFeeTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,0" TextAlignment="Right" />
-                                <TextBlock Grid.Row="2" Grid.Column="2" Text="TL" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
+                                        <TextBlock Grid.Row="2" Text="Bekleme Ucreti" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                        <TextBox x:Name="SettingsWaitingFeeTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,0" TextAlignment="Right" />
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="TL" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                                        <Button Content="Ucretleri Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveFeesButton_Click" />
+                                        <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </TabItem>
 
-                        <Border Grid.Row="2" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Padding="18" Margin="0,0,0,14">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="170" />
-                                    <ColumnDefinition Width="260" />
-                                    <ColumnDefinition Width="170" />
-                                    <ColumnDefinition Width="220" />
-                                </Grid.ColumnDefinitions>
+                            <TabItem Header="Baglanti Ayarlari">
+                                <StackPanel Background="#FFFFFF" Margin="18">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="260" />
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="220" />
+                                        </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="SQL Server / IP" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsSqlServerTextBox" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+                                        <TextBlock Text="SQL Server / IP" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsSqlServerTextBox" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
 
-                                <TextBlock Grid.Column="2" Text="Veritabani" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsDatabaseTextBox" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Column="2" Text="Veritabani" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsDatabaseTextBox" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
 
-                                <TextBlock Grid.Row="1" Text="Windows Baglantisi" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <CheckBox x:Name="SettingsWindowsAuthCheckBox" Grid.Row="1" Grid.Column="1" Content="Windows kullanicisi ile baglan" VerticalAlignment="Center" Margin="0,0,18,10" />
+                                        <TextBlock Grid.Row="1" Text="Windows Baglantisi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <CheckBox x:Name="SettingsWindowsAuthCheckBox" Grid.Row="1" Grid.Column="1" Content="Windows kullanicisi ile baglan" VerticalAlignment="Center" Margin="0,0,18,10" />
 
-                                <TextBlock Grid.Row="1" Grid.Column="2" Text="Istasyon Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <ComboBox x:Name="SettingsStationTypeComboBox" Grid.Row="1" Grid.Column="3" Height="34" FontSize="14" Padding="6,3" Margin="0,0,0,10">
-                                    <ComboBoxItem Content="Giris Kantari" />
-                                    <ComboBoxItem Content="Cikis Kantari" />
-                                </ComboBox>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Istasyon Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <ComboBox x:Name="SettingsStationTypeComboBox" Grid.Row="1" Grid.Column="3" Height="34" FontSize="14" Padding="6,3" Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Giris Kantari" />
+                                            <ComboBoxItem Content="Cikis Kantari" />
+                                        </ComboBox>
 
-                                <TextBlock Grid.Row="2" Text="SQL Kullanici" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsSqlUserTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
+                                        <TextBlock Grid.Row="2" Text="SQL Kullanici" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsSqlUserTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
 
-                                <TextBlock Grid.Row="2" Grid.Column="2" Text="SQL Sifre" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <TextBox x:Name="SettingsSqlPasswordTextBox" Grid.Row="2" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="SQL Sifre" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="SettingsSqlPasswordTextBox" Grid.Row="2" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
 
-                                <TextBlock Grid.Row="3" Text="Kantar COM Port" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                <ComboBox x:Name="SettingsComPortComboBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,18,10" IsEditable="False" />
+                                        <TextBlock Grid.Row="3" Text="Kantar COM Port" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <ComboBox x:Name="SettingsComPortComboBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,18,10" IsEditable="False" />
 
-                                <Button Grid.Row="3" Grid.Column="2" Content="Portlari Yenile" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsRefreshComPortsButton_Click" />
-                                <Button Grid.Row="3" Grid.Column="3" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,10" Click="SettingsTestConnectionButton_Click" />
-                                <TextBlock x:Name="SettingsConnectionInfoText" Grid.Row="4" Grid.ColumnSpan="4" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
-                            </Grid>
-                        </Border>
-
-                        <StackPanel Grid.Row="3" Orientation="Horizontal">
-                            <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Width="120" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveButton_Click" />
-                            <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
-                        </StackPanel>
+                                        <Button Grid.Row="3" Grid.Column="2" Content="Portlari Yenile" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsRefreshComPortsButton_Click" />
+                                        <Button Grid.Row="3" Grid.Column="3" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,10" Click="SettingsTestConnectionButton_Click" />
+                                        <TextBlock x:Name="SettingsConnectionInfoText" Grid.Row="4" Grid.ColumnSpan="4" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                                        <Button Content="Baglantiyi Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveConnectionButton_Click" />
+                                        <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
                     </Grid>
                     </ScrollViewer>
                 </Border>
