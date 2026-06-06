@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using System.Windows.Controls;
@@ -24,7 +24,7 @@ namespace KantarPro.Desktop
             var plaka = NormalizePlaka(DoluBosPlakaTextBox.Text);
             if (!SelectPendingWeighingRow(plaka))
             {
-                MessageBox.Show("Bu plaka icin bekleyen ilk tartim bulunamadi. Yeni ilk tartim olarak acilabilir.", "Dolu-Bos Tartim");
+                MessageBox.Show("Bu plaka için bekleyen ilk tartım bulunamadı. Yeni ilk tartım olarak açılabilir.", "Dolu-Boş Tartım");
                 DoluBosYeniIlkRadio.IsChecked = true;
                 return;
             }
@@ -97,12 +97,12 @@ namespace KantarPro.Desktop
                 CreateEntry(plaka, firma, DoluBosAciklamaTextBox.Text, true, ikinciKg, DateTime.Now, gelisTuru);
                 LoadDashboardData();
                 ShowEntryPage();
-                MessageBox.Show("Dolu-bos tartim kaydi acildi. Arac cikis yaptiginda tahsilati tamamlanip kesin cikisa aktarilacak.", "Dolu-Bos Tartim");
+                MessageBox.Show("Dolu-boş tartım kaydı açıldı. Araç çıkış yaptığında tahsilatı tamamlanıp kesin çıkışa aktarılacak.", "Dolu-Boş Tartım");
                 AskAndPrintLatestKantarFisiForPlate(plaka);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Dolu-bos tartim kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Dolu-boş tartım kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -387,3 +387,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

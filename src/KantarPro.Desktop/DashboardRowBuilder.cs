@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using KantarPro.Application.Services;
 using KantarPro.Domain;
@@ -238,3 +238,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

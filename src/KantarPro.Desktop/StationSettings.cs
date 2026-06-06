@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
@@ -11,6 +11,8 @@ namespace KantarPro.Desktop
     {
         public const string EntryStation = "Giris Kantari";
         public const string ExitStation = "Cikis Kantari";
+        public const string ReceiptPrintModeOki = "OKI Sürekli Form";
+        public const string ReceiptPrintModeLaserA5 = "Lazer A5";
 
         public string SqlServerAddress { get; set; }
         public string DatabaseName { get; set; }
@@ -19,6 +21,7 @@ namespace KantarPro.Desktop
         public string SqlPassword { get; set; }
         public string StationType { get; set; }
         public string ComPort { get; set; }
+        public string ReceiptPrintMode { get; set; }
 
         public static StationSettings CreateDefault()
         {
@@ -30,7 +33,8 @@ namespace KantarPro.Desktop
                 SqlUsername = "sa",
                 SqlPassword = "",
                 StationType = EntryStation,
-                ComPort = ""
+                ComPort = "",
+                ReceiptPrintMode = ReceiptPrintModeOki
             };
         }
 
@@ -91,6 +95,7 @@ namespace KantarPro.Desktop
             settings.SqlPassword = Decode(Get(values, "SqlPassword", ""));
             settings.StationType = Get(values, "StationType", settings.StationType);
             settings.ComPort = Get(values, "ComPort", settings.ComPort);
+            settings.ReceiptPrintMode = Get(values, "ReceiptPrintMode", settings.ReceiptPrintMode);
             return settings;
         }
 
@@ -110,7 +115,8 @@ namespace KantarPro.Desktop
                 "SqlUsername=" + (settings.SqlUsername ?? string.Empty).Trim(),
                 "SqlPassword=" + Encode(settings.SqlPassword ?? string.Empty),
                 "StationType=" + (settings.StationType ?? StationSettings.EntryStation),
-                "ComPort=" + (settings.ComPort ?? string.Empty).Trim()
+                "ComPort=" + (settings.ComPort ?? string.Empty).Trim(),
+                "ReceiptPrintMode=" + NormalizeReceiptPrintMode(settings.ReceiptPrintMode)
             };
             File.WriteAllLines(SettingsPath, lines, Encoding.UTF8);
         }
@@ -124,6 +130,13 @@ namespace KantarPro.Desktop
         {
             string value;
             return values.TryGetValue(key, out value) ? value : defaultValue;
+        }
+
+        private static string NormalizeReceiptPrintMode(string value)
+        {
+            return string.Equals(value, StationSettings.ReceiptPrintModeLaserA5, StringComparison.OrdinalIgnoreCase)
+                ? StationSettings.ReceiptPrintModeLaserA5
+                : StationSettings.ReceiptPrintModeOki;
         }
 
         private static string Encode(string value)
@@ -159,3 +172,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

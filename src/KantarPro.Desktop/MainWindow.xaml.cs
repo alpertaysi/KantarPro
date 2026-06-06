@@ -87,7 +87,7 @@ namespace KantarPro.Desktop
                     "Veritabani baglantisi kurulamadigi icin Ayarlar ekrani acildi. " +
                     "Bu bilgisayarin SQL ve istasyon bilgilerini girip Baglantiyi Test Et butonunu kullanin.\n\n" +
                     ex.Message,
-                    "Baglanti ayari gerekli",
+                    "Bağlantı ayarı gerekli",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
@@ -154,7 +154,7 @@ namespace KantarPro.Desktop
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
-            MessageBox.Show((button != null ? button.Content : "Menu") + " ekrani bir sonraki adimda baglanacak.", "Kantar Pro");
+            MessageBox.Show((button != null ? button.Content : "Menü") + " ekranı bir sonraki adımda bağlanacak.", "Kantar Pro");
         }
 
         private void AracGirisButton_Click(object sender, RoutedEventArgs e)
@@ -240,7 +240,7 @@ namespace KantarPro.Desktop
                 var firmaAdi = FirmaTextBox.Text;
                 var aciklama = AciklamaTextBox.Text;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
-                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giris tarihi");
+                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giriş tarihi");
 
                 if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi, muafMi, muafiyetNedeni))
                 {
@@ -257,7 +257,7 @@ namespace KantarPro.Desktop
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz, muafMi, muafiyetNedeni);
 
                 LoadDashboardData();
-                MessageBox.Show("Giris kaydi olusturuldu.", "Kantar Pro");
+                MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
                     AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -266,7 +266,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Giris kaydi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -283,7 +283,7 @@ namespace KantarPro.Desktop
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, DateTime.Now);
 
                 LoadDashboardData();
-                MessageBox.Show("Giris kaydi olusturuldu.", "Kantar Pro");
+                MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
                     AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -292,7 +292,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Giris kaydi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -313,12 +313,12 @@ namespace KantarPro.Desktop
                 var plaka = ExitPlakaTextBox.Text;
                 var tartimIsteniyor = ExitManuelTartimCheckBox.IsChecked == true;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(ExitAgirlikTextBox.Text) : (decimal?)null;
-                var cikisTarihi = ParseIslemTarihi(ExitCikisTarihiTextBox.Text, "Cikis tarihi");
+                var cikisTarihi = ParseIslemTarihi(ExitCikisTarihiTextBox.Text, "Çıkış tarihi");
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
                     LoadDashboardData();
-                    MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
+                    MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     if (tartimIsteniyor)
                     {
                         AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -328,7 +328,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Cikis islemi tamamlanamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -368,7 +368,7 @@ namespace KantarPro.Desktop
             }
             catch
             {
-                AutoRefreshStatusText.Text = "Oto yenileme basarisiz";
+                AutoRefreshStatusText.Text = "Oto yenileme başarısız";
             }
             finally
             {
@@ -427,12 +427,12 @@ namespace KantarPro.Desktop
                 var plaka = GetPlakaForOperation();
                 var tartimIsteniyor = false;
                 var agirlik = (decimal?)null;
-                var cikisTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
+                var cikisTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
                     LoadDashboardData();
-                    MessageBox.Show("Cikis islemi tamamlandi.", "Kantar Pro");
+                    MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     PlakaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
                     CikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
@@ -442,7 +442,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Cikis islemi tamamlanamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -458,7 +458,7 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Makbuz yazdirilacak satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Makbuz yazdırılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -470,7 +470,7 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Makbuzu gosterilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Makbuzu gösterilecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -481,7 +481,7 @@ namespace KantarPro.Desktop
         {
             if (row == null)
             {
-                MessageBox.Show("Kantar fisi yazdirilacak satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Kantar fişi yazdırılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -491,7 +491,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kantar fisi yazdirilamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kantar fişi yazdırılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -499,20 +499,14 @@ namespace KantarPro.Desktop
         {
             row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
             var rawText = KantarFisFormatter.BuildFromRow(row);
-            RawPrinterHelper.PrintTextWithDriver(
-                RawPrinterHelper.GetPreferredPrinterName(),
-                rawText,
-                "Kantar Fisi " + KantarFisPreviewData.FormatFisNo(row),
-                topMarginLines: 0,
-                leftMarginColumns: 2,
-                fontSize: 12.0f);
+            PrintReceiptText(rawText, "Kantar Fisi " + KantarFisPreviewData.FormatFisNo(row));
         }
 
         private void PrintPendingKantarFisi(PendingWeighingPrototypeRow row)
         {
             if (row == null)
             {
-                MessageBox.Show("Kantar fisi yazdirilacak satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Kantar fişi yazdırılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -520,18 +514,31 @@ namespace KantarPro.Desktop
             {
                 row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
                 var rawText = KantarFisFormatter.BuildFromPendingRow(row);
-                RawPrinterHelper.PrintTextWithDriver(
-                    RawPrinterHelper.GetPreferredPrinterName(),
-                    rawText,
-                    "Kantar Fisi " + (string.IsNullOrWhiteSpace(row.KantarFisNo) ? row.IslemNo : row.KantarFisNo),
-                    topMarginLines: 0,
-                    leftMarginColumns: 2,
-                    fontSize: 12.0f);
+                PrintReceiptText(rawText, "Kantar Fisi " + (string.IsNullOrWhiteSpace(row.KantarFisNo) ? row.IslemNo : row.KantarFisNo));
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kantar fisi yazdirilamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kantar fişi yazdırılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private static void PrintReceiptText(string rawText, string documentName)
+        {
+            var settings = StationSettingsStore.Load();
+            var printerName = RawPrinterHelper.GetPreferredPrinterName();
+            if (string.Equals(settings.ReceiptPrintMode, StationSettings.ReceiptPrintModeLaserA5, StringComparison.OrdinalIgnoreCase))
+            {
+                RawPrinterHelper.PrintA5TextWithDriver(printerName, rawText, documentName, 12.0f);
+                return;
+            }
+
+            RawPrinterHelper.PrintTextWithDriver(
+                printerName,
+                rawText,
+                documentName,
+                topMarginLines: 0,
+                leftMarginColumns: 2,
+                fontSize: 12.0f);
         }
 
         private void AskAndPrintLatestKantarFisiForPlate(string plaka)
@@ -568,7 +575,7 @@ namespace KantarPro.Desktop
         {
             if (row == null)
             {
-                MessageBox.Show("Kantar fisi gosterilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Kantar fişi gösterilecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -584,7 +591,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kantar fisi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kantar fişi oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -592,7 +599,7 @@ namespace KantarPro.Desktop
         {
             if (row == null)
             {
-                MessageBox.Show("Kantar fisi gosterilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Kantar fişi gösterilecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -608,7 +615,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kantar fisi olusturulamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kantar fişi oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -676,7 +683,7 @@ namespace KantarPro.Desktop
 
             if (target == null)
             {
-                throw new InvalidOperationException("Bu kayitta kantar tartimi yok. Tartimsiz girisler icin kantar fisi olusturulmaz.");
+                throw new InvalidOperationException("Bu kayıtta kantar tartımı yok. Tartımsız girişler için kantar fişi oluşturulmaz.");
             }
 
             return context.Tartimlar.First(x => x.TartimId == target.TartimId);
@@ -722,7 +729,7 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Duzeltilecek kayit satirini secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Düzeltilecek kayıt satırını seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -740,7 +747,7 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Firma bilgisi guncellenecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Firma bilgisi güncellenecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -763,11 +770,11 @@ namespace KantarPro.Desktop
                 }
 
                 LoadDashboardData();
-                MessageBox.Show("Firma bilgisi guncellendi.", "Kantar Pro");
+                MessageBox.Show("Firma bilgisi güncellendi.", "Kantar Pro");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Firma guncellenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Firma güncellenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -887,14 +894,14 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Tartim eklenecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Tartım eklenecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             try
             {
                 var agirlik = ParseAgirlik(AgirlikTextBox.Text);
-                var tartimTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
+                var tartimTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
 
                 using (var context = KantarDbContextFactory.Create())
                 {
@@ -905,7 +912,7 @@ namespace KantarPro.Desktop
                         .FirstOrDefault(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
                     if (openIslem != null && IsOpenVisitLinkedToCompletedKantarDosyasi(context, openIslem.IslemId))
                     {
-                        MessageBox.Show("Bu aracin dolu-bos tartimi tamamlandi. Kesin cikis yapilmadan yeni tartim eklenemez.", "Tartim eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show("Bu aracın dolu-boş tartımı tamamlandı. Kesin çıkış yapılmadan yeni tartım eklenemez.", "Tartım eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
@@ -929,7 +936,7 @@ namespace KantarPro.Desktop
                         doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForOpenVisit(openIslem), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi, dialog.Description);
 
                         LoadDashboardData();
-                        MessageBox.Show("Dolu-bos ikinci tartim eklendi.", "Kantar Pro");
+                        MessageBox.Show("Dolu-boş ikinci tartım eklendi.", "Kantar Pro");
                         AskAndPrintLatestKantarFisiForPlate(row.Plaka);
                         return;
                     }
@@ -952,7 +959,7 @@ namespace KantarPro.Desktop
                         doluBosServis.SonradanTartimEkle(row.Plaka, GetExpectedYukDurumuForPending(pendingRow), dialog.SecondWeightKg, doluBosKullaniciId, tartimTarihi, dialog.Description);
 
                         LoadDashboardData();
-                        MessageBox.Show("Dolu-bos ikinci tartim eklendi.", "Kantar Pro");
+                        MessageBox.Show("Dolu-boş ikinci tartım eklendi.", "Kantar Pro");
                         AskAndPrintLatestKantarFisiForPlate(row.Plaka);
                         return;
                     }
@@ -966,12 +973,12 @@ namespace KantarPro.Desktop
                 }
 
                 LoadDashboardData();
-                MessageBox.Show("Tartim eklendi.", "Kantar Pro");
+                MessageBox.Show("Tartım eklendi.", "Kantar Pro");
                 AskAndPrintLatestKantarFisiForPlate(row.Plaka);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Tartim eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Tartım eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1023,7 +1030,7 @@ namespace KantarPro.Desktop
                 var yeniFirma = (FirmaTextBox.Text ?? string.Empty).Trim();
                 if (string.IsNullOrWhiteSpace(yeniPlaka))
                 {
-                    throw new InvalidOperationException("Yeni plaka bos olamaz.");
+                    throw new InvalidOperationException("Yeni plaka boş olamaz.");
                 }
 
                 using (var context = KantarDbContextFactory.Create())
@@ -1052,7 +1059,7 @@ namespace KantarPro.Desktop
                                 x.IslemId != islem.IslemId);
                             if (hedefPlakadaAcikIslemVarMi)
                             {
-                                throw new InvalidOperationException("Yeni plaka ile iceride acik kayit var. Kayit duzeltilemez.");
+                                throw new InvalidOperationException("Yeni plaka ile içeride açık kayıt var. Kayıt düzeltilemez.");
                             }
 
                             var sonTartim = islem.Tartimlar.OrderBy(x => x.TartimTarihi).LastOrDefault();
@@ -1080,13 +1087,13 @@ namespace KantarPro.Desktop
                 }
 
                 LoadDashboardData();
-                MessageBox.Show("Kayit duzeltildi.", "Kantar Pro");
+                MessageBox.Show("Kayıt düzeltildi.", "Kantar Pro");
                 ClearDashboardEntryForm();
                 ClearPlateCorrectionMode();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kayit duzeltilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kayıt düzeltilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1102,7 +1109,7 @@ namespace KantarPro.Desktop
             var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
             if (row == null)
             {
-                MessageBox.Show("Tarihi degistirilecek satiri secin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Tarihi değiştirilecek satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -1170,11 +1177,11 @@ namespace KantarPro.Desktop
                 }
 
                 LoadDashboardData();
-                MessageBox.Show("Gelis tarihi guncellendi.", "Kantar Pro");
+                MessageBox.Show("Geliş tarihi güncellendi.", "Kantar Pro");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Gelis tarihi guncellenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Geliş tarihi güncellenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1200,11 +1207,11 @@ namespace KantarPro.Desktop
                     context.Database.Connection.Close();
                 }
 
-                SettingsConnectionInfoText.Text = "Baglanti basarili: " + settings.SqlServerAddress + " / " + settings.DatabaseName;
+                SettingsConnectionInfoText.Text = "Bağlantı başarılı: " + settings.SqlServerAddress + " / " + settings.DatabaseName;
             }
             catch (Exception ex)
             {
-                SettingsConnectionInfoText.Text = "Baglanti basarisiz: " + ex.Message;
+                SettingsConnectionInfoText.Text = "Bağlantı başarısız: " + ex.Message;
             }
         }
 
@@ -1229,9 +1236,9 @@ namespace KantarPro.Desktop
             try
             {
                 var stationSettings = ReadStationSettingsFromForm();
-                var girisCikis = ParseFee(SettingsEntryExitFeeTextBox.Text, "Giris-Cikis ucreti");
-                var tartim = ParseFee(SettingsWeighingFeeTextBox.Text, "Tartim ucreti");
-                var bekleme = ParseFee(SettingsWaitingFeeTextBox.Text, "Bekleme ucreti");
+                var girisCikis = ParseFee(SettingsEntryExitFeeTextBox.Text, "Giriş-Çıkış ücreti");
+                var tartim = ParseFee(SettingsWeighingFeeTextBox.Text, "Tartım ücreti");
+                var bekleme = ParseFee(SettingsWaitingFeeTextBox.Text, "Bekleme ücreti");
 
                 using (var context = new KantarDbContext(stationSettings.BuildConnectionString()))
                 {
@@ -1243,11 +1250,11 @@ namespace KantarPro.Desktop
                 StartScaleReader();
                 LoadFeeSettings();
                 LoadDashboardData();
-                MessageBox.Show("Ucret ayarlari kaydedildi.", "Ayarlar");
+                MessageBox.Show("Ücret ayarları kaydedildi.", "Ayarlar");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Ucret ayarlari kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Ücret ayarları kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1259,12 +1266,12 @@ namespace KantarPro.Desktop
                 StationSettingsStore.Save(stationSettings);
                 UpdateStationStatus();
                 StartScaleReader();
-                SettingsConnectionInfoText.Text = "Baglanti ayarlari kaydedildi.";
-                MessageBox.Show("Baglanti ayarlari kaydedildi.", "Ayarlar");
+                SettingsConnectionInfoText.Text = "Bağlantı ayarları kaydedildi.";
+                MessageBox.Show("Bağlantı ayarları kaydedildi.", "Ayarlar");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Baglanti ayarlari kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Bağlantı ayarları kaydedilemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1337,7 +1344,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giris tarihi");
+                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giriş tarihi");
                 if (dialog.Choice == EntrySaveChoice.WeighAndSave)
                 {
                     var agirlik = ParseAgirlik(AgirlikTextBox.Text);
@@ -1363,7 +1370,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Bekleyen tartim acilamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Bekleyen tartım açılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1389,7 +1396,7 @@ namespace KantarPro.Desktop
                 var acikIslemVarMi = context.Islemler.Any(x => x.Arac.Plaka == normalizedPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
                 if (acikIslemVarMi)
                 {
-                    throw new InvalidOperationException("Bu plaka icin iceride acik islem var. Yeni giris yapilamaz. Ikinci tartim icin listedeki satira sag tiklayip Tart secenegini kullanin veya Cikis Yap islemini tamamlayin.");
+                    throw new InvalidOperationException("Bu plaka için içeride açık işlem var. Yeni giriş yapılamaz. İkinci tartım için listedeki satıra sağ tıklayıp Tart seçeneğini kullanın veya Çıkış Yap işlemini tamamlayın.");
                 }
 
                 servis.GirisKaydet(plaka, firmaAdi, gelisTuru, tartimIsteniyor, agirlik, kullaniciId, islemTarihi, muafMi, muafiyetNedeni, aciklama);
@@ -1425,7 +1432,7 @@ namespace KantarPro.Desktop
 
             LoadDashboardData();
             ShowEntryPage();
-            MessageBox.Show("Ikinci tartim kaydedildi. Arac ust listedeki dolu-bos kaydina alindi.", "Dolu-Bos Tartim");
+            MessageBox.Show("İkinci tartım kaydedildi. Araç üst listedeki dolu-boş kaydına alındı.", "Dolu-Boş Tartım");
             AskAndPrintLatestKantarFisiForPlate(plaka);
             return true;
         }
@@ -1450,7 +1457,7 @@ namespace KantarPro.Desktop
             CreateEntry(pendingRow.Plaka, pendingRow.FirmaAdi, pendingRow.Aciklama, false, null, entryDate, gelisTuru);
             LoadDashboardData();
             ShowEntryPage();
-            MessageBox.Show("Bekleyen dolu-bos kaydi icin tartimsiz giris acildi. Arac cikis yaptiginda tahsilat ust listedeki kayittan alinacak.", "Dolu-Bos Tartim");
+            MessageBox.Show("Bekleyen dolu-boş kaydı için tartımsız giriş açıldı. Araç çıkış yaptığında tahsilat üst listedeki kayıttan alınacak.", "Dolu-Boş Tartım");
             return true;
         }
 
@@ -1596,7 +1603,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ucret ayarlari okunamadi: " + ex.Message, "Ayarlar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Ücret ayarları okunamadı: " + ex.Message, "Ayarlar", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -1610,6 +1617,7 @@ namespace KantarPro.Desktop
             SettingsSqlPasswordTextBox.Text = settings.SqlPassword;
             PopulateComPortOptions(settings.ComPort);
             SelectComboBoxItem(SettingsStationTypeComboBox, settings.StationType);
+            SelectComboBoxItem(SettingsReceiptPrintModeComboBox, settings.ReceiptPrintMode);
             SettingsConnectionInfoText.Text = "Yerel ayar dosyasi: " + StationSettingsStore.GetSettingsPath();
         }
 
@@ -1633,7 +1641,7 @@ namespace KantarPro.Desktop
             }
 
             SettingsConnectionInfoText.Text = portNames.Count == 0
-                ? "Bu bilgisayarda COM port bulunamadi. USB-RS232 ceviriciyi taktikdan sonra Portlari Yenile'ye basin."
+                ? "Bu bilgisayarda COM port bulunamadı. USB-RS232 çeviriciyi taktıktan sonra Portları Yenile'ye basın."
                 : "Bulunan COM portlar: " + string.Join(", ", portNames);
         }
 
@@ -1647,7 +1655,8 @@ namespace KantarPro.Desktop
                 SqlUsername = (SettingsSqlUserTextBox.Text ?? string.Empty).Trim(),
                 SqlPassword = SettingsSqlPasswordTextBox.Text ?? string.Empty,
                 StationType = GetSelectedComboBoxText(SettingsStationTypeComboBox),
-                ComPort = GetSelectedComboBoxText(SettingsComPortComboBox).Trim()
+                ComPort = GetSelectedComboBoxText(SettingsComPortComboBox).Trim(),
+                ReceiptPrintMode = GetSelectedComboBoxText(SettingsReceiptPrintModeComboBox)
             };
 
             if (string.IsNullOrWhiteSpace(settings.SqlServerAddress))
@@ -1668,6 +1677,11 @@ namespace KantarPro.Desktop
             if (settings.StationType != StationSettings.ExitStation)
             {
                 settings.StationType = StationSettings.EntryStation;
+            }
+
+            if (settings.ReceiptPrintMode != StationSettings.ReceiptPrintModeLaserA5)
+            {
+                settings.ReceiptPrintMode = StationSettings.ReceiptPrintModeOki;
             }
 
             return settings;
@@ -1830,18 +1844,18 @@ namespace KantarPro.Desktop
                         return;
                     }
 
-                    var bekleme = DateTime.Now.Date > islem.GirisTarihi.Date ? "Bekleme ucreti olusacak" : "Bekleme ucreti yok";
+                    var bekleme = DateTime.Now.Date > islem.GirisTarihi.Date ? "Bekleme ücreti olusacak" : "Bekleme ücreti yok";
                     ExitOpenEntryInfoText.Text =
                         "Plaka: " + islem.Arac.Plaka +
-                        "\nGiris: " + islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") +
-                        "\nGiris tartimi: " + FormatTartim(islem) +
+                        "\nGiriş: " + islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") +
+                        "\nGiriş tartımı: " + FormatTartim(islem) +
                         "\nTahsil edilecek: " + FormatKalanBorc(islem) +
                         "\n" + bekleme;
                 }
             }
             catch (Exception ex)
             {
-                ExitOpenEntryInfoText.Text = "Acik giris bilgisi okunamadi: " + ex.Message;
+                ExitOpenEntryInfoText.Text = "Açık giriş bilgisi okunamadı: " + ex.Message;
             }
         }
 
@@ -1923,7 +1937,7 @@ namespace KantarPro.Desktop
             var normalizedSaat = (saatText ?? string.Empty).Trim();
             if (!DateTime.TryParseExact(normalizedSaat, new[] { "HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm" }, CultureInfo.GetCultureInfo("tr-TR"), DateTimeStyles.None, out saat))
             {
-                throw new ArgumentException("Giris saati sa:dk veya sa:dk:sn formatinda olmalidir.");
+                throw new ArgumentException("Giriş saati sa:dk veya sa:dk:sn formatında olmalıdır.");
             }
 
             return tarih.Date.Add(saat.TimeOfDay);
@@ -1963,7 +1977,7 @@ namespace KantarPro.Desktop
 
             try
             {
-                ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
+                ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
             }
             catch
             {
@@ -1976,4 +1990,8 @@ namespace KantarPro.Desktop
 
     }
 }
+
+
+
+
 

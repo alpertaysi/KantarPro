@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using KantarPro.Domain;
 
 namespace KantarPro.Desktop
@@ -33,3 +33,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

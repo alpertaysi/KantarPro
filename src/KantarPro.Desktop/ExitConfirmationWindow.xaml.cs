@@ -56,9 +56,9 @@ namespace KantarPro.Desktop
                 ExitDateText.Text = _cikisTarihi.ToString("dd.MM.yyyy");
                 ExitTimeText.Text = _cikisTarihi.ToString("HH:mm:ss");
                 EntryExitFeeText.Text = FormatMoney(girisCikisToplam);
-                WeighingFeeLabel.Text = "Tahsil Edilecek Tartim (" + toplamTartimAdedi + " kez)";
+                WeighingFeeLabel.Text = "Tahsil Edilecek Tartım (" + toplamTartimAdedi + " kez)";
                 WeighingFeeText.Text = FormatMoney(tartimToplam);
-                WaitingFeeLabel.Text = "Isgaliye Ucreti      (" + beklemeAdedi + " kez)";
+                WaitingFeeLabel.Text = "İşgaliye Ücreti      (" + beklemeAdedi + " kez)";
                 WaitingFeeText.Text = FormatMoney(beklemeToplam);
                 TotalFeeText.Text = FormatMoney(_previewToplam);
                 InfoText.Text = BuildInfoText();
@@ -88,7 +88,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Cikis islemi tamamlanamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -111,8 +111,8 @@ namespace KantarPro.Desktop
         private string BuildInfoText()
         {
             var tartimText = _tartimIsteniyor
-                ? "Cikis tartimi eklenecek: " + _agirlikKg.GetValueOrDefault().ToString("N0") + " kg"
-                : "Cikis tartimi eklenmeyecek.";
+                ? "Çıkış tartımı eklenecek: " + _agirlikKg.GetValueOrDefault().ToString("N0") + " kg"
+                : "Çıkış tartımı eklenmeyecek.";
 
             return tartimText + "\nOnay sonrasi arac cikis listesine tasinir.";
         }
@@ -129,13 +129,13 @@ namespace KantarPro.Desktop
             DateTime tarih;
             if (!DateTime.TryParseExact((ExitDateText.Text ?? string.Empty).Trim(), "dd.MM.yyyy", CultureInfo.GetCultureInfo("tr-TR"), DateTimeStyles.None, out tarih))
             {
-                throw new ArgumentException("Cikis tarihi gg.aa.yyyy formatinda olmalidir.");
+                throw new ArgumentException("Çıkış tarihi gg.aa.yyyy formatında olmalıdır.");
             }
 
             DateTime saat;
             if (!DateTime.TryParseExact((ExitTimeText.Text ?? string.Empty).Trim(), new[] { "HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm" }, CultureInfo.GetCultureInfo("tr-TR"), DateTimeStyles.None, out saat))
             {
-                throw new ArgumentException("Cikis saati sa:dk veya sa:dk:sn formatinda olmalidir.");
+                throw new ArgumentException("Çıkış saati sa:dk veya sa:dk:sn formatında olmalıdır.");
             }
 
             return tarih.Date.Add(saat.TimeOfDay);
@@ -173,4 +173,7 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+
 

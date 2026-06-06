@@ -1,73 +1,217 @@
-<Window x:Class="KantarPro.Desktop.LoginWindow"
+﻿<Window x:Class="KantarPro.Desktop.LoginWindow"
+        Icon="Assets/kantarpro.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Kantar Pro Giris"
-        Width="430"
-        Height="330"
-        MinWidth="430"
-        MinHeight="330"
+        Title="Kantar Otomasyonu"
+        Width="980"
+        Height="620"
+        MinWidth="980"
+        MinHeight="620"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Background="#EEF2F5"
+        Background="#EAF2F8"
         FontFamily="Segoe UI">
-    <Border Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Margin="18" Padding="24">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#0F766E" />
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#0B5E58" />
+        <SolidColorBrush x:Key="TextBrush" Color="#0F172A" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#64748B" />
+        <Style x:Key="LoginInputStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="LoginPasswordStyle" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type PasswordBox}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PrimaryLoginButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="MinWidth" Value="116" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SecondaryLoginButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="MinWidth" Value="104" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#0F172A" />
+            <Setter Property="Background" Value="#F8FAFC" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E2E8F0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
-            <TextBlock Text="Kantar Pro"
-                       FontSize="24"
-                       FontWeight="SemiBold"
-                       Foreground="#0F172A" />
-            <TextBlock Grid.Row="1"
-                       Text="Programa devam etmek icin kullanici adi ve sifrenizi girin."
-                       Foreground="#64748B"
-                       Margin="0,6,0,18"
-                       TextWrapping="Wrap" />
+    <Grid Margin="28">
+        <Border Background="#FFFFFF"
+                BorderBrush="#D6E1EA"
+                BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.35*" />
+                    <ColumnDefinition Width="0.95*" />
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="2">
-                <TextBlock Text="Kullanici Adi" FontWeight="SemiBold" Margin="0,0,0,4" />
-                <TextBox x:Name="UsernameTextBox"
-                         Height="38"
-                         FontSize="16"
-                         Padding="8,4" />
-            </StackPanel>
+                <Grid Grid.Column="0" ClipToBounds="True">
+                    <Image Source="Assets/login-hero.png"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                    <Border Background="#66FFFFFF"
+                            VerticalAlignment="Bottom"
+                            Height="96">
+                        <StackPanel VerticalAlignment="Center" Margin="34,0">
+                            <TextBlock Text="Kantar Otomasyonu"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="#143A5A" />
+                            <TextBlock Text="Tartım, tahsilat ve saha hareketleri tek ekranda."
+                                       FontSize="13"
+                                       Foreground="#315B76"
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
 
-            <StackPanel Grid.Row="3" Margin="0,12,0,0">
-                <TextBlock Text="Sifre" FontWeight="SemiBold" Margin="0,0,0,4" />
-                <PasswordBox x:Name="PasswordBox"
-                             Height="38"
-                             FontSize="16"
-                             Padding="8,4"
-                             KeyDown="PasswordBox_KeyDown" />
-            </StackPanel>
+                <Border Grid.Column="1"
+                        Background="#F8FBFD"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1,0,0,0"
+                        Padding="42,44">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-            <TextBlock x:Name="InfoTextBlock"
-                       Grid.Row="4"
-                       Foreground="#B91C1C"
-                       Margin="0,12,0,0"
-                       TextWrapping="Wrap" />
+                        <StackPanel>
+                            <Image Source="Assets/ticaret-bakanligi-logo.png"
+                                   Width="190"
+                                   Height="64"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Left" />
 
-            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-                <Button Content="Vazgec"
-                        Width="96"
-                        MinHeight="36"
-                        Margin="0,0,8,0"
-                        Click="Cancel_Click" />
-                <Button Content="Giris Yap"
-                        Width="112"
-                        MinHeight="36"
-                        Foreground="White"
-                        Background="#0F766E"
-                        BorderBrush="#115E59"
-                        Click="Login_Click" />
-            </StackPanel>
-        </Grid>
-    </Border>
+                            <TextBlock Text="Giriş Paneli"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       Margin="0,24,0,0" />
+                            <TextBlock Text="Devam etmek için kullanıcı adı ve şifrenizi girin."
+                                       FontSize="14"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,0" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1"
+                                    VerticalAlignment="Top"
+                                    Margin="0,34,0,0">
+                            <TextBlock Text="Kullanıcı Adı"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       Margin="0,0,0,6" />
+                            <TextBox x:Name="UsernameTextBox"
+                                     Style="{StaticResource LoginInputStyle}" />
+
+                            <TextBlock Text="Şifre"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       Margin="0,18,0,6" />
+                            <PasswordBox x:Name="PasswordBox"
+                                         Style="{StaticResource LoginPasswordStyle}"
+                                         KeyDown="PasswordBox_KeyDown" />
+
+                            <Border x:Name="InfoBorder"
+                                    Background="#FEF2F2"
+                                    BorderBrush="#FCA5A5"
+                                    BorderThickness="1"
+                                    Margin="0,16,0,0"
+                                    Padding="12"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="InfoTextBlock"
+                                           Foreground="#991B1B"
+                                           TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+
+                        <Grid Grid.Row="2" Margin="0,28,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Content="İptal"
+                                    Style="{StaticResource SecondaryLoginButtonStyle}"
+                                    Margin="0,0,8,0"
+                                    Click="Cancel_Click" />
+                            <Button Grid.Column="1"
+                                    Content="Giriş"
+                                    Style="{StaticResource PrimaryLoginButtonStyle}"
+                                    Click="Login_Click" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>
+
+
+
+

@@ -22,7 +22,7 @@ namespace KantarPro.Application.Tests
                         {
                             SiraNo = 1,
                             IslemNo = "0001",
-                            IslemTipi = "Tek Tartim",
+                            IslemTipi = "Tek Tartım",
                             KantarFisNo = "0001",
                             OdemeTuru = "Nakit",
                             FirmaAdi = "DENEME FIRMA",
@@ -36,7 +36,7 @@ namespace KantarPro.Application.Tests
                             ToplamUcret = "732,00 TL"
                         }
                     },
-                    "Gunluk Tahsilat Dokumu",
+                    "Günlük Tahsilat Dökümü",
                     "366,00 TL",
                     "366,00 TL",
                     "0,00 TL",
@@ -51,6 +51,10 @@ namespace KantarPro.Application.Tests
                     Assert.AreEqual(4, stream.Read(signature, 0, signature.Length));
                     CollectionAssert.AreEqual(new byte[] { 0x25, 0x50, 0x44, 0x46 }, signature);
                 }
+
+                var content = File.ReadAllText(path);
+                StringAssert.Contains(content, "G\\374nl\\374k Tahsilat D\\366k\\374m\\374");
+                Assert.IsFalse(content.Contains("1.Tartim"));
             }
             finally
             {
@@ -74,9 +78,9 @@ namespace KantarPro.Application.Tests
                         {
                             SiraNo = 1,
                             IslemNo = "9999",
-                            IslemTipi = "Dolu-Bos",
+                            IslemTipi = "Dolu-Boş",
                             KantarFisNo = "9999",
-                            OdemeTuru = "Kredi Karti",
+                            OdemeTuru = "Kredi Kartı",
                             FirmaAdi = "COK UZUN FIRMA ADI ILE DENEME",
                             Plaka = "16UZUN001",
                             CikisTarihi = "05.06.2026",
@@ -88,7 +92,7 @@ namespace KantarPro.Application.Tests
                             ToplamUcret = "3.996,00 TL"
                         }
                     },
-                    "Gunluk Tahsilat Dokumu",
+                    "Günlük Tahsilat Dökümü",
                     "366,00 TL",
                     "366,00 TL",
                     "3.264,00 TL",

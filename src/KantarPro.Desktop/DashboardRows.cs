@@ -1,4 +1,4 @@
-namespace KantarPro.Desktop
+﻿namespace KantarPro.Desktop
 {
     public class VehicleMovementRow
     {
@@ -84,3 +84,6 @@ namespace KantarPro.Desktop
         public string Aciklama { get; set; }
     }
 }
+
+
+

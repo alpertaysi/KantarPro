@@ -107,6 +107,7 @@ BEGIN TRY
     (
         IslemId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Islemler PRIMARY KEY,
         IslemNo NVARCHAR(30) NOT NULL,
+        CikisNo NVARCHAR(20) NULL,
         AracId INT NOT NULL,
         GirisTarihi DATETIME NOT NULL,
         CikisTarihi DATETIME NULL,

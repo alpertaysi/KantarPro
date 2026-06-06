@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KantarPro.Desktop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -96,7 +96,7 @@ namespace KantarPro.Application.Tests
 
             var data = KantarFisPreviewData.FromVehicleRow(row, rawText);
 
-            Assert.AreEqual("Tek Tartim", data.FisTipi);
+            Assert.AreEqual("Tek Tartım", data.FisTipi);
             Assert.AreEqual("34TCL633", data.Plaka);
             Assert.AreEqual("0060", data.FisNo);
             Assert.AreEqual("31.05.2026", data.GirisTarihi);
@@ -127,7 +127,7 @@ namespace KantarPro.Application.Tests
 
             var data = KantarFisPreviewData.FromVehicleRow(row, rawText);
 
-            Assert.AreEqual("Dolu-Bos", data.FisTipi);
+            Assert.AreEqual("Dolu-Boş", data.FisTipi);
             Assert.AreEqual("02.06.2026", data.IkinciGirisTarihi);
             Assert.AreEqual("16:09:00", data.IkinciGirisSaati);
             Assert.AreEqual("9.500 kg", data.IkinciTartim);
@@ -233,3 +233,4 @@ namespace KantarPro.Application.Tests
         }
     }
 }
+

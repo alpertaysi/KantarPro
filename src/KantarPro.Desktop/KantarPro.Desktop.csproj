@@ -9,6 +9,7 @@
     <AssemblyName>KantarPro.Desktop</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <LangVersion>7.3</LangVersion>
+    <ApplicationIcon>Assets\kantarpro.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -107,6 +108,7 @@
     <Compile Include="DashboardFormat.cs" />
     <Compile Include="AutoRefreshPolicy.cs" />
     <Compile Include="DailyRevenuePdfExporter.cs" />
+    <Compile Include="DailyRevenueTextFormatter.cs" />
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="DashboardVisitInfo.cs" />
@@ -157,6 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\app-icon-source.png" />
+    <Resource Include="Assets\kantarpro.ico" />
+    <Resource Include="Assets\login-hero.png" />
+    <Resource Include="Assets\ticaret-bakanligi-logo.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.4.4" />

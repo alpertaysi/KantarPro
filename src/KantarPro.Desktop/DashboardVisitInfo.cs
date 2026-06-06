@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using KantarPro.Domain;
 using KantarPro.Domain.Entities;
 
@@ -14,23 +14,23 @@ namespace KantarPro.Desktop
                 if (ilkTartim != null)
                 {
                     return ilkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
-                        ? "Bos Tartim Yapildi"
-                        : "Dolu Tartim Yapildi";
+                        ? "Boş Tartım Yapıldı"
+                        : "Dolu Tartım Yapıldı";
                 }
 
                 if (islem.GelisTuru == KantarSabitleri.GelisTuru.Tartimsiz)
                 {
                     return islem.Durum == KantarSabitleri.IslemDurumu.CikisYapti
-                        ? "Tartimsiz cikis"
-                        : "Tartimsiz giris";
+                        ? "Tartımsız çıkış"
+                        : "Tartımsız giriş";
                 }
 
-                return "Cikis bekliyor";
+                return "Çıkış bekliyor";
             }
 
             if (dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.Tamamlandi)
             {
-                return "Dolu-bos tamamlandi";
+                return "Dolu-boş tamamlandı";
             }
 
             if (islem != null &&
@@ -40,8 +40,8 @@ namespace KantarPro.Desktop
                 dosya.KarsiTartim == null)
             {
                 return dosya.IlkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
-                    ? "Bos Tartim Yapildi"
-                    : "Dolu Tartim Yapildi";
+                    ? "Boş Tartım Yapıldı"
+                    : "Dolu Tartım Yapıldı";
             }
 
             return GetBeklenenTartimDurumu(dosya.IlkTartim);
@@ -51,7 +51,7 @@ namespace KantarPro.Desktop
         {
             return ilkTartim != null && ilkTartim.YukDurumu == KantarSabitleri.YukDurumu.Bos
                 ? "Dolu bekleniyor"
-                : "Bos bekleniyor";
+                : "Boş bekleniyor";
         }
 
         public static Tartim GetIlkTartim(Islem islem)
@@ -141,3 +141,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

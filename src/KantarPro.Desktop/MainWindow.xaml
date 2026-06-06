@@ -1,8 +1,9 @@
-<Window x:Class="KantarPro.Desktop.MainWindow"
+﻿<Window x:Class="KantarPro.Desktop.MainWindow"
+        Icon="Assets/kantarpro.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="Gumruk Kantar Otomasyon Sistemi"
+        Title="Gümrük Kantar Otomasyon Sistemi"
         Width="1320"
         Height="820"
         MinWidth="1180"
@@ -131,8 +132,8 @@
 
             <DockPanel Margin="0" Visibility="Collapsed">
                 <StackPanel>
-                    <TextBlock Text="Gumruk Kantar Otomasyon Sistemi" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                    <TextBlock Text="Bursa Tasfiye Isletme Mudurlugu - Giris ve cikis kantari ortak operasyon ekrani" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,4,0,0" />
+                    <TextBlock Text="Gümrük Kantar Otomasyon Sistemi" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                    <TextBlock Text="Bursa Tasfiye İşletme Müdürlüğü - Giriş ve çıkış kantarı ortak operasyon ekranı" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,4,0,0" />
                 </StackPanel>
                 <Border DockPanel.Dock="Right" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="14,9" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
@@ -150,9 +151,9 @@
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock x:Name="SqlStatusText" Text="SQL: Bagli" Foreground="#86EFAC" Margin="18,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="SqlStatusText" Text="SQL: Bağlı" Foreground="#86EFAC" Margin="18,0,12,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="ComStatusText" Text="COM: Beklemede" Foreground="#FCD34D" Margin="0,0,12,0" VerticalAlignment="Center" />
-                        <TextBlock x:Name="StationStatusText" Text="Giris Kantari" Foreground="#CBD5E1" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="StationStatusText" Text="Giriş Kantarı" Foreground="#CBD5E1" Margin="0,0,12,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="AutoRefreshStatusText" Text="Oto: -" Foreground="#94A3B8" VerticalAlignment="Center" />
                     </StackPanel>
                 </DockPanel>
@@ -178,7 +179,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="1.Arac" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,10" />
+                        <TextBlock Text="1. Araç" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,10" />
 
                         <Grid Grid.Row="1">
                             <Grid.RowDefinitions>
@@ -200,20 +201,20 @@
                             <TextBlock Text="Plaka No:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="PlakaTextBox" Grid.Column="1" CharacterCasing="Upper" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="1" Text="Giris Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBlock Grid.Row="1" Text="Giriş Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="GirisTarihiTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
                             <TextBox x:Name="GirisSaatiTextBox" Grid.Row="1" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="GirisSaatiTextBox_TextChanged" />
 
-                            <TextBlock Grid.Row="2" Text="Cikis Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBlock Grid.Row="2" Text="Çıkış Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" TextChanged="CikisTarihiTextBox_TextChanged" />
                             <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
                             <TextBox x:Name="CikisSaatiTextBox" Grid.Row="2" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="CikisSaatiTextBox_TextChanged" />
 
-                            <TextBlock Grid.Row="3" Text="Musteri Adi:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBlock Grid.Row="3" Text="Müşteri Adı:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="FirmaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="4" Text="Aciklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
+                            <TextBlock Grid.Row="4" Text="Açıklama:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="AciklamaTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
                             <Grid Grid.Row="5" Grid.ColumnSpan="4">
@@ -250,12 +251,12 @@
                                 <DataGrid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Tart" Click="EntryGridTartMenuItem_Click" />
-                                        <MenuItem Header="Kayit Duzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
-                                        <MenuItem Header="Firma Guncelle" Click="EntryGridFirmaGuncelleMenuItem_Click" />
+                                        <MenuItem Header="Kayıt Düzelt" Click="EntryGridPlakaDuzeltMenuItem_Click" />
+                                        <MenuItem Header="Firma Güncelle" Click="EntryGridFirmaGuncelleMenuItem_Click" />
                                         <MenuItem Header="Ücretten Muaf" Click="EntryGridMuafMenuItem_Click" />
                                         <Separator />
-                                        <MenuItem Header="Makbuz Yazdir" Click="EntryGridMakbuzYazdirMenuItem_Click" />
-                                        <MenuItem Header="Makbuz Goster" Click="EntryGridMakbuzGosterMenuItem_Click" />
+                                        <MenuItem Header="Makbuz Yazdır" Click="EntryGridMakbuzYazdirMenuItem_Click" />
+                                        <MenuItem Header="Makbuz Göster" Click="EntryGridMakbuzGosterMenuItem_Click" />
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
@@ -276,20 +277,20 @@
                                             </StackPanel>
                                         </DataGridTextColumn.Header>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="Son Tartim Tarihi" Binding="{Binding SonTartimTarihi}" Width="108" />
-                                    <DataGridTextColumn Header="Son Tartim Saati" Binding="{Binding SonTartimSaati}" Width="104" />
-                                    <DataGridTextColumn Header="Tartim" Binding="{Binding SonTartim}" Width="96" />
-                                    <DataGridTextColumn Header="Giris-Cikis" Binding="{Binding GirisCikisUcreti}" Width="92" />
-                                    <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="92" />
+                                    <DataGridTextColumn Header="Son Tartım Tarihi" Binding="{Binding SonTartimTarihi}" Width="108" />
+                                    <DataGridTextColumn Header="Son Tartım Saati" Binding="{Binding SonTartimSaati}" Width="104" />
+                                    <DataGridTextColumn Header="Tartım" Binding="{Binding SonTartim}" Width="96" />
+                                    <DataGridTextColumn Header="Giriş-Çıkış" Binding="{Binding GirisCikisUcreti}" Width="92" />
+                                    <DataGridTextColumn Header="Tartım Ücreti" Binding="{Binding TartimUcreti}" Width="92" />
                                     <DataGridTextColumn Header="Bekleme" Binding="{Binding BeklemeUcreti}" Width="82" />
                                     <DataGridTextColumn Header="Toplam" Binding="{Binding Ucret}" Width="92" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </ScrollViewer>
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
-                            <Button Content="Cikis Yap" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="14,4" FontSize="13" Margin="0,0,8,0" Click="CikisIsleminiTamamla_Click" />
+                            <Button Content="Çıkış Yap" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="14,4" FontSize="13" Margin="0,0,8,0" Click="CikisIsleminiTamamla_Click" />
                             <Button Content="Makbuz" MinHeight="34" Padding="14,4" FontSize="13" Margin="0,0,8,0" Click="KantarFisiYazdir_Click" />
-                            <Button Content="Menu" MinHeight="34" Padding="14,4" FontSize="13" Click="MenuButton_Click" />
+                            <Button Content="Menü" MinHeight="34" Padding="14,4" FontSize="13" Click="MenuButton_Click" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -301,8 +302,8 @@
                                 <DataGrid x:Name="PendingWeighingsGrid" ItemsSource="{Binding PendingWeighingsView}" SelectionChanged="PendingWeighingsGrid_SelectionChanged" MouseDoubleClick="PendingWeighingsGrid_MouseDoubleClick" PreviewMouseRightButtonDown="PendingWeighingsGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                     <DataGrid.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="Kantar Fisi Yazdir" Click="PendingGridMakbuzYazdirMenuItem_Click" />
-                                            <MenuItem Header="Kantar Fisi Goster" Click="PendingGridMakbuzGosterMenuItem_Click" />
+                                            <MenuItem Header="Kantar Fişi Yazdır" Click="PendingGridMakbuzYazdirMenuItem_Click" />
+                                            <MenuItem Header="Kantar Fişi Göster" Click="PendingGridMakbuzGosterMenuItem_Click" />
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
@@ -339,8 +340,8 @@
                                     <DataGrid x:Name="ExitVehiclesGrid" Grid.Row="0" ItemsSource="{Binding ExitVehiclesView}" SelectionChanged="ExitVehiclesGrid_SelectionChanged" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown" PreviewMouseRightButtonDown="ExitVehiclesGrid_PreviewMouseRightButtonDown" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28">
                                         <DataGrid.ContextMenu>
                                             <ContextMenu>
-                                                <MenuItem Header="Kantar Fisi Yazdir" Click="ExitGridMakbuzYazdirMenuItem_Click" />
-                                                <MenuItem Header="Kantar Fisi Goster" Click="ExitGridMakbuzGosterMenuItem_Click" />
+                                                <MenuItem Header="Kantar Fişi Yazdır" Click="ExitGridMakbuzYazdirMenuItem_Click" />
+                                                <MenuItem Header="Kantar Fişi Göster" Click="ExitGridMakbuzGosterMenuItem_Click" />
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
@@ -403,9 +404,9 @@
                 <Border Grid.Row="3" Grid.ColumnSpan="2" Background="#16202C" Padding="8" Margin="0,10,0,0">
                     <DockPanel LastChildFill="False">
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="Menu" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
+                            <Button Content="Menü" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
                             <Button Content="Makbuz" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="KantarFisiYazdir_Click" />
-                            <Button Content="Arastir" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
+                            <Button Content="Araştır" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
                             <Button Content="Yedekler" MinHeight="34" Padding="16,4" FontSize="13" Click="MenuButton_Click" />
                         </StackPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -426,24 +427,25 @@
                 <Border Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="10">
                     <StackPanel Orientation="Horizontal">
                         <StackPanel Margin="0,0,18,0">
-                            <TextBlock Text="Baslangic Tarihi" FontSize="12" Margin="0,0,0,4" />
+                            <TextBlock Text="Başlangıç Tarihi" FontSize="12" Margin="0,0,0,4" />
                             <DatePicker x:Name="RevenueStartDatePicker" Style="{StaticResource RevenueDatePickerStyle}" SelectedDate="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay}" />
                         </StackPanel>
                         <StackPanel Margin="0,0,18,0">
-                            <TextBlock Text="Bitis Tarihi" FontSize="12" Margin="0,0,0,4" />
+                            <TextBlock Text="Bitiş Tarihi" FontSize="12" Margin="0,0,0,4" />
                             <DatePicker x:Name="RevenueEndDatePicker" Style="{StaticResource RevenueDatePickerStyle}" SelectedDate="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay}" />
                         </StackPanel>
                         <Button Content="Listele" Width="120" MinHeight="40" Margin="0,16,8,0" Click="RevenueListButton_Click" />
-                        <Button Content="PDF Olarak Disa Aktar" Width="180" MinHeight="40" Margin="0,16,0,0" Click="RevenueExportPdfButton_Click" />
+                        <Button Content="PDF Olarak Dışa Aktar" Width="180" MinHeight="40" Margin="0,16,8,0" Click="RevenueExportPdfButton_Click" />
+                        <Button Content="OKI Döküm Yazdır" Width="160" MinHeight="40" Margin="0,16,0,0" Click="RevenuePrintOkiButton_Click" />
                     </StackPanel>
                 </Border>
 
                 <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Sira" Binding="{Binding SiraNo}" Width="52" />
-                        <DataGridTextColumn Header="Islem No" Binding="{Binding IslemNo}" Width="100" />
-                        <DataGridTextColumn Header="Islem Tipi" Binding="{Binding IslemTipi}" Width="115" />
-                        <DataGridTextColumn Header="Kantar Fis No" Binding="{Binding KantarFisNo}" Width="115" />
+                        <DataGridTextColumn Header="Sıra" Binding="{Binding SiraNo}" Width="52" />
+                        <DataGridTextColumn Header="İşlem No" Binding="{Binding IslemNo}" Width="100" />
+                        <DataGridTextColumn Header="İşlem Tipi" Binding="{Binding IslemTipi}" Width="115" />
+                        <DataGridTextColumn Header="Kantar Fiş No" Binding="{Binding KantarFisNo}" Width="115" />
                         <DataGridTextColumn Header="Ödeme Türü" Binding="{Binding OdemeTuru}" Width="110" />
                         <DataGridTextColumn Binding="{Binding FirmaAdi}" Width="200">
                             <DataGridTextColumn.Header>
@@ -461,24 +463,24 @@
                                 </StackPanel>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Cikis Tarihi" Binding="{Binding CikisTarihi}" Width="110" />
-                        <DataGridTextColumn Header="Cikis Saati" Binding="{Binding CikisSaati}" Width="95" />
-                        <DataGridTextColumn Header="Giris Ucreti" Binding="{Binding GirisCikisUcreti}" Width="110" />
-                        <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="110" />
-                        <DataGridTextColumn Header="Isgaliye Ucreti" Binding="{Binding BeklemeUcreti}" Width="110" />
-                        <DataGridTextColumn Header="Toplam Ucret" Binding="{Binding ToplamUcret}" Width="125" />
+                        <DataGridTextColumn Header="Çıkış Tarihi" Binding="{Binding CikisTarihi}" Width="110" />
+                        <DataGridTextColumn Header="Çıkış Saati" Binding="{Binding CikisSaati}" Width="95" />
+                        <DataGridTextColumn Header="Giriş Ücreti" Binding="{Binding GirisCikisUcreti}" Width="110" />
+                        <DataGridTextColumn Header="Tartım Ücreti" Binding="{Binding TartimUcreti}" Width="110" />
+                        <DataGridTextColumn Header="İşgaliye Ücreti" Binding="{Binding BeklemeUcreti}" Width="110" />
+                        <DataGridTextColumn Header="Toplam Ücret" Binding="{Binding ToplamUcret}" Width="125" />
                     </DataGrid.Columns>
                 </DataGrid>
 
                 <Border Grid.Row="2" Background="#D7DEEE" BorderBrush="#9AA9C0" BorderThickness="1" Padding="8" Margin="0,4,0,0">
                     <DockPanel>
-                        <TextBlock x:Name="RevenueRowCountText" DockPanel.Dock="Left" Text="Kayit: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock x:Name="RevenueRowCountText" DockPanel.Dock="Left" Text="Kayıt: 0" FontWeight="SemiBold" VerticalAlignment="Center" />
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="Giris:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="Giriş:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <TextBlock x:Name="RevenueEntryExitTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
-                            <TextBlock Text="Tartim:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="Tartım:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <TextBlock x:Name="RevenueWeighingTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
-                            <TextBlock Text="Isgaliye:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="İşgaliye:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <TextBlock x:Name="RevenueWaitingTotalText" Text="0,00 TL" Width="95" TextAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" />
                             <TextBlock Text="Toplam:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <TextBlock x:Name="RevenueGrandTotalText" Text="0,00 TL" Width="105" TextAlignment="Right" FontWeight="Bold" VerticalAlignment="Center" />
@@ -500,11 +502,11 @@
 
                         <StackPanel>
                             <TextBlock Text="Ayarlar" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                            <TextBlock Text="Ucretler ortak SQL veritabaninda, SQL/istasyon/COM bilgileri bu bilgisayarda saklanir." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
+                            <TextBlock Text="Ücretler ortak SQL veritabanında, SQL/istasyon/COM bilgileri bu bilgisayarda saklanır." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
                         </StackPanel>
 
                         <TabControl Grid.Row="1" Grid.RowSpan="3">
-                            <TabItem Header="Ucret Ayarlari">
+                            <TabItem Header="Ücret Ayarları">
                                 <StackPanel Background="#FFFFFF" Margin="18">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -518,26 +520,26 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Text="Giris-Cikis Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Text="Giriş-Çıkış Ücreti" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsEntryExitFeeTextBox" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
                                         <TextBlock Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
 
-                                        <TextBlock Grid.Row="1" Text="Tartim Ucreti" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Grid.Row="1" Text="Tartım Ücreti" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsWeighingFeeTextBox" Grid.Row="1" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,10" TextAlignment="Right" />
                                         <TextBlock Grid.Row="1" Grid.Column="2" Text="TL" VerticalAlignment="Center" Margin="0,0,0,10" />
 
-                                        <TextBlock Grid.Row="2" Text="Bekleme Ucreti" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                        <TextBlock Grid.Row="2" Text="Bekleme Ücreti" VerticalAlignment="Center" Margin="0,0,12,0" />
                                         <TextBox x:Name="SettingsWaitingFeeTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="15" FontWeight="SemiBold" Padding="8,4" Margin="0,0,8,0" TextAlignment="Right" />
                                         <TextBlock Grid.Row="2" Grid.Column="2" Text="TL" VerticalAlignment="Center" />
                                     </Grid>
                                     <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
-                                        <Button Content="Ucretleri Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveFeesButton_Click" />
+                                        <Button Content="Ücretleri Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveFeesButton_Click" />
                                         <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
                                     </StackPanel>
                                 </StackPanel>
                             </TabItem>
 
-                            <TabItem Header="Baglanti Ayarlari">
+                            <TabItem Header="Bağlantı Ayarları">
                                 <StackPanel Background="#FFFFFF" Margin="18">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -557,33 +559,71 @@
                                         <TextBlock Text="SQL Server / IP" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsSqlServerTextBox" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
 
-                                        <TextBlock Grid.Column="2" Text="Veritabani" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Grid.Column="2" Text="Veritabanı" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsDatabaseTextBox" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
 
-                                        <TextBlock Grid.Row="1" Text="Windows Baglantisi" VerticalAlignment="Center" Margin="0,0,12,10" />
-                                        <CheckBox x:Name="SettingsWindowsAuthCheckBox" Grid.Row="1" Grid.Column="1" Content="Windows kullanicisi ile baglan" VerticalAlignment="Center" Margin="0,0,18,10" />
+                                        <TextBlock Grid.Row="1" Text="Windows Bağlantısı" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <CheckBox x:Name="SettingsWindowsAuthCheckBox" Grid.Row="1" Grid.Column="1" Content="Windows kullanıcısı ile bağlan" VerticalAlignment="Center" Margin="0,0,18,10" />
 
-                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Istasyon Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="İstasyon Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <ComboBox x:Name="SettingsStationTypeComboBox" Grid.Row="1" Grid.Column="3" Height="34" FontSize="14" Padding="6,3" Margin="0,0,0,10">
-                                            <ComboBoxItem Content="Giris Kantari" />
-                                            <ComboBoxItem Content="Cikis Kantari" />
+                                            <ComboBoxItem Content="Giriş Kantarı" />
+                                            <ComboBoxItem Content="Çıkış Kantarı" />
                                         </ComboBox>
 
-                                        <TextBlock Grid.Row="2" Text="SQL Kullanici" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Grid.Row="2" Text="SQL Kullanıcı" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsSqlUserTextBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,18,10" />
 
-                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="SQL Sifre" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="SQL Şifre" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <TextBox x:Name="SettingsSqlPasswordTextBox" Grid.Row="2" Grid.Column="3" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
 
                                         <TextBlock Grid.Row="3" Text="Kantar COM Port" VerticalAlignment="Center" Margin="0,0,12,10" />
                                         <ComboBox x:Name="SettingsComPortComboBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,18,10" IsEditable="False" />
 
-                                        <Button Grid.Row="3" Grid.Column="2" Content="Portlari Yenile" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsRefreshComPortsButton_Click" />
-                                        <Button Grid.Row="3" Grid.Column="3" Content="Baglantiyi Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,10" Click="SettingsTestConnectionButton_Click" />
+                                        <Button Grid.Row="3" Grid.Column="2" Content="Portları Yenile" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,12,10" Click="SettingsRefreshComPortsButton_Click" />
+                                        <Button Grid.Row="3" Grid.Column="3" Content="Bağlantıyı Test Et" Width="150" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,10" Click="SettingsTestConnectionButton_Click" />
                                         <TextBlock x:Name="SettingsConnectionInfoText" Grid.Row="4" Grid.ColumnSpan="4" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
                                     </Grid>
                                     <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
-                                        <Button Content="Baglantiyi Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveConnectionButton_Click" />
+                                        <Button Content="Bağlantıyı Kaydet" Style="{StaticResource PrimaryButton}" Width="150" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveConnectionButton_Click" />
+                                        <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="Yazdırma Ayarları">
+                                <StackPanel Background="#FFFFFF" Margin="18">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="300" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="Kantar Fişi Tipi" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <ComboBox x:Name="SettingsReceiptPrintModeComboBox" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,18,10">
+                                            <ComboBoxItem Content="OKI Sürekli Form" />
+                                            <ComboBoxItem Content="Lazer A5" />
+                                        </ComboBox>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="OKI seçilirse sürekli forma ham metin basılır. Lazer A5 seçilirse aynı kantar fişi A5 sayfa düzeninde yazdırılır."
+                                                   Foreground="{StaticResource Muted}"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,0,10" />
+
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.ColumnSpan="3"
+                                                   Text="Günlük tahsilat dökümü PDF olarak dışa aktarılabilir veya OKI yazıcıya sütunlu ham metin olarak gönderilebilir."
+                                                   Foreground="{StaticResource Muted}"
+                                                   TextWrapping="Wrap" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                                        <Button Content="Yazdırma Ayarlarını Kaydet" Style="{StaticResource PrimaryButton}" Width="210" MinHeight="36" Padding="12,5" FontSize="13" Click="SettingsSaveConnectionButton_Click" />
                                         <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
                                     </StackPanel>
                                 </StackPanel>
@@ -603,14 +643,14 @@
                 <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="22" Margin="0,0,18,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <TextBlock Text="Arac Giris" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                            <TextBlock Text="Sahaya giren arac icin giris kaydi ve istege bagli ilk tartim olustur." Foreground="{StaticResource Muted}" Margin="0,4,0,18" />
+                            <TextBlock Text="Araç Giriş" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                            <TextBlock Text="Sahaya giren araç için giriş kaydı ve isteğe bağlı ilk tartım oluştur." Foreground="{StaticResource Muted}" Margin="0,4,0,18" />
 
                             <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="EntryPlakaTextBox" CharacterCasing="Upper" Margin="0,0,0,14" />
                             <TextBlock Text="Firma" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="EntryFirmaTextBox" Margin="0,0,0,14" />
-                            <TextBlock Text="Aciklama" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                            <TextBlock Text="Açıklama" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="EntryAciklamaTextBox" Height="70" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,14" />
 
                             <Grid Margin="0,0,0,14">
@@ -618,8 +658,8 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="EntryTartimIsteniyorCheckBox" Content="Giris tartimi yapilmayacak" FontSize="15" Margin="0,0,12,0" />
-                                <CheckBox x:Name="EntryManuelTartimCheckBox" Grid.Column="1" Content="Manuel tartim" FontSize="15" />
+                                <CheckBox x:Name="EntryTartimIsteniyorCheckBox" Content="Giriş tartımı yapılmayacak" FontSize="15" Margin="0,0,12,0" />
+                                <CheckBox x:Name="EntryManuelTartimCheckBox" Grid.Column="1" Content="Manuel tartım" FontSize="15" />
                             </Grid>
 
                             <Grid Margin="0,0,0,18">
@@ -628,7 +668,7 @@
                                     <ColumnDefinition Width="92" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Margin="0,0,10,0">
-                                    <TextBlock Text="Giris Agirligi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                                    <TextBlock Text="Giriş Ağırlığı" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                                     <TextBox x:Name="EntryAgirlikTextBox" Text="0" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
@@ -637,14 +677,14 @@
                                 </StackPanel>
                             </Grid>
 
-                            <Button Content="Giris Kaydini Tamamla" Style="{StaticResource PrimaryButton}" MinHeight="54" Margin="0,0,0,10" Click="EntryPageGirisKaydiOlustur_Click" />
+                            <Button Content="Giriş Kaydını Tamamla" Style="{StaticResource PrimaryButton}" MinHeight="54" Margin="0,0,0,10" Click="EntryPageGirisKaydiOlustur_Click" />
                             <Button Content="Formu Temizle" MinHeight="48" Margin="0,0,0,18" Click="EntryFormTemizle_Click" />
 
                             <Border Background="#F8FAFC" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="14">
                                 <StackPanel>
                                     <TextBlock Text="Tahakkuk Ozeti" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                    <TextBlock Text="Giris-Cikis ucreti her giriste otomatik eklenir." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
-                                    <TextBlock Text="Tartim seciliyse tartim ucreti de eklenir." Foreground="{StaticResource Muted}" />
+                                    <TextBlock Text="Giriş-Çıkış ucreti her giriste otomatik eklenir." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
+                                    <TextBlock Text="Tartım seciliyse tartim ucreti de eklenir." Foreground="{StaticResource Muted}" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -659,7 +699,7 @@
                         </Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,14">
                             <StackPanel>
-                                <TextBlock Text="Bugunku Girisler / Icerideki Araclar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                <TextBlock Text="Bugünkü Girişler / İçerideki Araçlar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
                                 <TextBlock Text="Liste SQL veritabanindan yenilenir." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
                             </StackPanel>
                             <Button DockPanel.Dock="Right" Content="Yenile" Width="110" Click="RefreshButton_Click" />
@@ -683,13 +723,13 @@
                                         </StackPanel>
                                     </DataGridTextColumn.Header>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
-                                <DataGridTextColumn Header="Giris Saati" Binding="{Binding Saat}" Width="90" />
-                                <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />
-                                <DataGridTextColumn Header="2. Tartim" Binding="{Binding IkinciTartim}" Width="105" />
+                                <DataGridTextColumn Header="Giriş Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
+                                <DataGridTextColumn Header="Giriş Saati" Binding="{Binding Saat}" Width="90" />
+                                <DataGridTextColumn Header="1. Tartım" Binding="{Binding Tartim}" Width="105" />
+                                <DataGridTextColumn Header="2. Tartım" Binding="{Binding IkinciTartim}" Width="105" />
                                 <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="85" />
-                                <DataGridTextColumn Header="Giris-Cikis" Binding="{Binding GirisCikisUcreti}" Width="95" />
-                                <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="95" />
+                                <DataGridTextColumn Header="Giriş-Çıkış" Binding="{Binding GirisCikisUcreti}" Width="95" />
+                                <DataGridTextColumn Header="Tartım Ücreti" Binding="{Binding TartimUcreti}" Width="95" />
                                 <DataGridTextColumn Header="Bekleme" Binding="{Binding BeklemeUcreti}" Width="85" />
                                 <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="115" />
                             </DataGrid.Columns>
@@ -707,20 +747,20 @@
                 <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="22" Margin="0,0,18,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <TextBlock Text="Arac Cikis" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                            <TextBlock Text="Araç Çıkış" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
                             <TextBlock Text="Icerideki arac icin cikis kaydi, cikis tartimi ve bekleme ucretini tamamla." Foreground="{StaticResource Muted}" Margin="0,4,0,18" />
 
                             <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="ExitPlakaTextBox" CharacterCasing="Upper" Margin="0,0,0,12" />
 
-                            <TextBlock Text="Cikis Tarihi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                            <TextBlock Text="Çıkış Tarihi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="ExitCikisTarihiTextBox" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Margin="0,0,0,12" />
 
-                            <Button Content="Acik Girisi Bul" Margin="0,0,0,16" Click="ExitFindVehicle_Click" />
+                            <Button Content="Açık Girişi Bul" Margin="0,0,0,16" Click="ExitFindVehicle_Click" />
 
                             <Border Background="#F8FAFC" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="14" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="Acik Giris Bilgisi" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                    <TextBlock Text="Açık Giriş Bilgisi" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
                                     <TextBlock x:Name="ExitOpenEntryInfoText" Text="Liste secimi yap veya plaka girip acik girisi bul." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
                                 </StackPanel>
                             </Border>
@@ -730,7 +770,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="ExitManuelTartimCheckBox" Content="Manuel tartim" FontSize="15" />
+                                <CheckBox x:Name="ExitManuelTartimCheckBox" Content="Manuel tartım" FontSize="15" />
                             </Grid>
 
                             <Grid Margin="0,0,0,18">
@@ -739,7 +779,7 @@
                                     <ColumnDefinition Width="92" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Margin="0,0,10,0">
-                                    <TextBlock Text="Cikis Agirligi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                                    <TextBlock Text="Çıkış Ağırlığı" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                                     <TextBox x:Name="ExitAgirlikTextBox" Text="0" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
@@ -748,14 +788,14 @@
                                 </StackPanel>
                             </Grid>
 
-                            <Button Content="Cikis Islemini Tamamla" Style="{StaticResource PrimaryButton}" MinHeight="54" Margin="0,0,0,10" Click="ExitPageCikisTamamla_Click" />
+                            <Button Content="Çıkış İşlemini Tamamla" Style="{StaticResource PrimaryButton}" MinHeight="54" Margin="0,0,0,10" Click="ExitPageCikisTamamla_Click" />
                             <Button Content="Formu Temizle" MinHeight="48" Margin="0,0,0,18" Click="ExitFormTemizle_Click" />
 
                             <Border Background="#F8FAFC" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="14">
                                 <StackPanel>
                                     <TextBlock Text="Tahakkuk Notu" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                    <TextBlock Text="Cikis tartimi seciliyse tartim ucreti eklenir." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
-                                    <TextBlock Text="Giris gununden sonra cikista bekleme ucreti eklenir." Foreground="{StaticResource Muted}" />
+                                    <TextBlock Text="Çıkış tartımı seçiliyse tartım ücreti eklenir." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
+                                    <TextBlock Text="Giriş gününden sonra çıkışta bekleme ücreti eklenir." Foreground="{StaticResource Muted}" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -776,8 +816,8 @@
                             </Grid.RowDefinitions>
                             <DockPanel Margin="0,0,0,14">
                                 <StackPanel>
-                                    <TextBlock Text="Icerideki Araclar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                    <TextBlock Text="Cikis yapilacak araci listeden sec." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
+                                    <TextBlock Text="İçerideki Araçlar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                    <TextBlock Text="Çıkış yapılacak aracı listeden seç." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
                                 </StackPanel>
                                 <Button DockPanel.Dock="Right" Content="Yenile" Width="110" Click="RefreshButton_Click" />
                             </DockPanel>
@@ -800,12 +840,12 @@
                                             </StackPanel>
                                         </DataGridTextColumn.Header>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
-                                    <DataGridTextColumn Header="Giris Saati" Binding="{Binding Saat}" Width="90" />
-                                    <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />
-                                    <DataGridTextColumn Header="2. Tartim" Binding="{Binding IkinciTartim}" Width="105" />
+                                    <DataGridTextColumn Header="Giriş Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
+                                    <DataGridTextColumn Header="Giriş Saati" Binding="{Binding Saat}" Width="90" />
+                                    <DataGridTextColumn Header="1. Tartım" Binding="{Binding Tartim}" Width="105" />
+                                    <DataGridTextColumn Header="2. Tartım" Binding="{Binding IkinciTartim}" Width="105" />
                                     <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="85" />
-                                    <DataGridTextColumn Header="Ucret" Binding="{Binding Ucret}" Width="95" />
+                                    <DataGridTextColumn Header="Ücret" Binding="{Binding Ucret}" Width="95" />
                                     <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="115" />
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -819,7 +859,7 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <DockPanel Margin="0,0,0,12">
-                                <TextBlock Text="Bugun Cikis Yapan Araclar" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
+                                <TextBlock Text="Bugün Çıkış Yapan Araçlar" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
                             </DockPanel>
                             <DataGrid Grid.Row="1" ItemsSource="{Binding ExitVehiclesView}" PreviewTextInput="ExitVehiclesGrid_PreviewTextInput" PreviewKeyDown="ExitVehiclesGrid_PreviewKeyDown">
                                 <DataGrid.Columns>
@@ -839,13 +879,13 @@
                                             </StackPanel>
                                         </DataGridTextColumn.Header>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="Giris Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
-                                    <DataGridTextColumn Header="Cikis Saati" Binding="{Binding Saat}" Width="90" />
-                                    <DataGridTextColumn Header="1. Tartim" Binding="{Binding Tartim}" Width="105" />
-                                    <DataGridTextColumn Header="2. Tartim" Binding="{Binding IkinciTartim}" Width="105" />
+                                    <DataGridTextColumn Header="Giriş Tarihi" Binding="{Binding GirisTarihi}" Width="95" />
+                                    <DataGridTextColumn Header="Çıkış Saati" Binding="{Binding Saat}" Width="90" />
+                                    <DataGridTextColumn Header="1. Tartım" Binding="{Binding Tartim}" Width="105" />
+                                    <DataGridTextColumn Header="2. Tartım" Binding="{Binding IkinciTartim}" Width="105" />
                                     <DataGridTextColumn Header="Net" Binding="{Binding NetAgirlik}" Width="85" />
-                                    <DataGridTextColumn Header="Giris-Cikis" Binding="{Binding GirisCikisUcreti}" Width="95" />
-                                    <DataGridTextColumn Header="Tartim Ucreti" Binding="{Binding TartimUcreti}" Width="95" />
+                                    <DataGridTextColumn Header="Giriş-Çıkış" Binding="{Binding GirisCikisUcreti}" Width="95" />
+                                    <DataGridTextColumn Header="Tartım Ücreti" Binding="{Binding TartimUcreti}" Width="95" />
                                     <DataGridTextColumn Header="Bekleme" Binding="{Binding BeklemeUcreti}" Width="85" />
                                     <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="105" />
                                 </DataGrid.Columns>
@@ -864,18 +904,18 @@
                 <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="22" Margin="0,0,18,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <TextBlock Text="Dolu-Bos Tartim" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                            <TextBlock Text="Dolu-Boş Tartım" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
                             <TextBlock Text="Ayni plakanin eski ilk tartimini kullan veya yeni ilk tartim ac." Foreground="{StaticResource Muted}" Margin="0,4,0,18" />
 
                             <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="DoluBosPlakaTextBox" CharacterCasing="Upper" Text="06DMS294" Margin="0,0,0,12" />
 
-                            <Button Content="Bekleyen Ilk Tartimlari Bul" Style="{StaticResource PrimaryButton}" Margin="0,0,0,16" Click="DoluBosBekleyenBul_Click" />
+                            <Button Content="Bekleyen Ilk Tartımlari Bul" Style="{StaticResource PrimaryButton}" Margin="0,0,0,16" Click="DoluBosBekleyenBul_Click" />
 
                             <Border Background="#F8FAFC" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="14" Margin="0,0,0,16">
                                 <StackPanel>
                                     <TextBlock Text="Secim Karari" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                    <RadioButton x:Name="DoluBosEskiTartimRadio" Content="Eski ilk tartimi kullan" IsChecked="True" FontSize="15" Margin="0,10,0,6" />
+                                    <RadioButton x:Name="DoluBosEskiTartimRadio" Content="Eski ilk tartımı kullan" IsChecked="True" FontSize="15" Margin="0,10,0,6" />
                                     <RadioButton x:Name="DoluBosYeniIlkRadio" Content="Yeni ilk tartim olarak ac" FontSize="15" Margin="0,0,0,0" />
                                 </StackPanel>
                             </Border>
@@ -883,13 +923,13 @@
                             <TextBlock Text="Firma" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="DoluBosFirmaTextBox" Text="Yeni Firma / Nakliye" Margin="0,0,0,12" />
 
-                            <TextBlock Text="Aciklama" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
-                            <TextBox x:Name="DoluBosAciklamaTextBox" Height="70" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" AcceptsReturn="True" Text="Sonradan bos tartim" Margin="0,0,0,16" />
+                            <TextBlock Text="Açıklama" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                            <TextBox x:Name="DoluBosAciklamaTextBox" Height="70" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" AcceptsReturn="True" Text="Sonradan boş tartım" Margin="0,0,0,16" />
 
                             <Border Background="#FFFBEB" BorderBrush="#FCD34D" BorderThickness="1" CornerRadius="6" Padding="14">
                                 <StackPanel>
-                                    <TextBlock Text="Ucret Kuralı" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                    <TextBlock Text="Bu geliste Giris-Cikis ve Tartim ucreti tahakkuk eder." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
+                                    <TextBlock Text="Ücret Kuralı" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                    <TextBlock Text="Bu gelişte Giriş-Çıkış ve Tartım ücreti tahakkuk eder." Foreground="{StaticResource Muted}" Margin="0,8,0,2" />
                                     <TextBlock Text="Ayni gun cikarsa bekleme ucreti eklenmez." Foreground="{StaticResource Muted}" />
                                 </StackPanel>
                             </Border>
@@ -911,7 +951,7 @@
                             </Grid.RowDefinitions>
                             <DockPanel Margin="0,0,0,14">
                                 <StackPanel>
-                                    <TextBlock Text="Bekleyen Ilk Tartimlar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                    <TextBlock Text="Bekleyen Ilk Tartımlar" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
                                     <TextBlock Text="Ayni plakada birden fazla eski tartim varsa operator dogru satiri secer." Foreground="{StaticResource Muted}" Margin="0,3,0,0" />
                                 </StackPanel>
                             </DockPanel>
@@ -920,10 +960,10 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Plaka" Binding="{Binding Plaka}" Width="90" />
                                     <DataGridTextColumn Header="Firma" Binding="{Binding FirmaAdi}" Width="170" />
-                                    <DataGridTextColumn Header="Ilk Tarih" Binding="{Binding IlkTartimTarihi}" Width="95" />
+                                    <DataGridTextColumn Header="İlk Tarih" Binding="{Binding IlkTartimTarihi}" Width="95" />
                                     <DataGridTextColumn Header="Saat" Binding="{Binding IlkTartimSaati}" Width="75" />
                                     <DataGridTextColumn Header="1.KG" Binding="{Binding IlkAgirlik}" Width="90" />
-                                    <DataGridTextColumn Header="Aciklama" Binding="{Binding Aciklama}" Width="220" />
+                                    <DataGridTextColumn Header="Açıklama" Binding="{Binding Aciklama}" Width="220" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
@@ -937,7 +977,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Margin="0,0,18,0">
-                                <TextBlock Text="Secilen Eski Ilk Tartim" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,12" />
+                                <TextBlock Text="Secilen Eski Ilk Tartım" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,12" />
 
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
@@ -960,7 +1000,7 @@
                                         <ColumnDefinition Width="130" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Ilk Tartim" Foreground="{StaticResource Muted}" />
+                                    <TextBlock Text="Ilk Tartım" Foreground="{StaticResource Muted}" />
                                     <TextBox x:Name="DoluBosIlkTartimTextBox" Grid.Column="1" Text="24.03.2026 10:42:58" IsReadOnly="True" />
                                 </Grid>
                                 <Grid>
@@ -974,7 +1014,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Bugunku Tartim" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,12" />
+                                <TextBlock Text="Bugunku Tartım" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" Margin="0,0,0,12" />
 
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
@@ -1018,7 +1058,7 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Button Content="Kaydet" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" Click="DoluBosPrototypeButton_Click" />
-                                    <Button Grid.Column="1" Content="Fis Yazdir" Margin="8,0,0,0" Click="DoluBosPrototypeButton_Click" />
+                                    <Button Grid.Column="1" Content="Fiş Yazdır" Margin="8,0,0,0" Click="DoluBosPrototypeButton_Click" />
                                 </Grid>
                             </StackPanel>
                         </Grid>
@@ -1028,3 +1068,13 @@
         </Grid>
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
+
+

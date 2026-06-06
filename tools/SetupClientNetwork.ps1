@@ -1,10 +1,10 @@
-$ErrorActionPreference = "Stop"
-
 param(
     [string]$EthernetAlias = "Ethernet",
     [string]$ClientIp = "192.168.50.2",
     [int]$PrefixLength = 24
 )
+
+$ErrorActionPreference = "Stop"
 
 Write-Host "KantarPro istemci ag ayarlari yapiliyor..." -ForegroundColor Cyan
 

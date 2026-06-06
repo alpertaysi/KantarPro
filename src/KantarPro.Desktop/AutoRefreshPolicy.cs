@@ -1,4 +1,4 @@
-namespace KantarPro.Desktop
+﻿namespace KantarPro.Desktop
 {
     public static class AutoRefreshPolicy
     {
@@ -8,3 +8,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

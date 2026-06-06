@@ -1,4 +1,5 @@
-<Window x:Class="KantarPro.Desktop.ModernMessageBox"
+﻿<Window x:Class="KantarPro.Desktop.ModernMessageBox"
+        Icon="Assets/kantarpro.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Kantar Pro"
@@ -90,3 +91,7 @@
         </Grid>
     </Border>
 </Window>
+
+
+
+

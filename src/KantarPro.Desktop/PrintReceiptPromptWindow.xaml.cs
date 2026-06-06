@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace KantarPro.Desktop
 {
@@ -25,3 +25,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

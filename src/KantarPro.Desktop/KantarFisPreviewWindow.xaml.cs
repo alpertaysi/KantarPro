@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 
@@ -17,8 +17,11 @@ namespace KantarPro.Desktop
 
         private void LoadPreview()
         {
-            ReceiptTypeTextBlock.Text = "Fis Tipi: " + ValueOrDash(_data.FisTipi);
-            ContinuousFormNoteTextBlock.Text = _data.SurekliFormNotu;
+            var settings = StationSettingsStore.Load();
+            ReceiptTypeTextBlock.Text = "Fiş Tipi: " + ValueOrDash(_data.FisTipi);
+            ContinuousFormNoteTextBlock.Text = string.Equals(settings.ReceiptPrintMode, StationSettings.ReceiptPrintModeLaserA5, StringComparison.OrdinalIgnoreCase)
+                ? "Lazer A5 modunda aynı fiş metni A5 sayfa düzeninde yazdırılır."
+                : _data.SurekliFormNotu;
             ReceiptTextBox.Text = _data.RawText;
         }
 
@@ -30,7 +33,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Kantar fisi yazdirilamadi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(ex.Message, "Kantar fişi yazdırılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -41,7 +44,18 @@ namespace KantarPro.Desktop
 
         private void PrintCurrentReceipt()
         {
+            var settings = StationSettingsStore.Load();
             var printerName = RawPrinterHelper.GetPreferredPrinterName();
+            if (string.Equals(settings.ReceiptPrintMode, StationSettings.ReceiptPrintModeLaserA5, StringComparison.OrdinalIgnoreCase))
+            {
+                RawPrinterHelper.PrintA5TextWithDriver(
+                    printerName,
+                    _data.RawText,
+                    "Kantar Fisi " + ValueOrDash(_data.FisNo),
+                    ParseFontSize(DriverFontSizeTextBox.Text));
+                return;
+            }
+
             RawPrinterHelper.PrintTextWithDriver(
                 printerName,
                 _data.RawText,
@@ -65,3 +79,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

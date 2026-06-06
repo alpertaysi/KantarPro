@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -32,7 +32,7 @@ namespace KantarPro.Desktop
             string grandTotal)
         {
             _rows = (rows ?? Enumerable.Empty<DailyRevenueRow>()).ToList();
-            _title = string.IsNullOrWhiteSpace(title) ? "Gunluk Tahsilat Dokumu" : title;
+            _title = string.IsNullOrWhiteSpace(title) ? "Günlük Tahsilat Dökümü" : title;
             _entryTotal = entryTotal ?? "0,00 TL";
             _weighingTotal = weighingTotal ?? "0,00 TL";
             _waitingTotal = waitingTotal ?? "0,00 TL";
@@ -43,7 +43,7 @@ namespace KantarPro.Desktop
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
-                throw new InvalidOperationException("PDF dosya yolu secilmedi.");
+                throw new InvalidOperationException("PDF dosya yolu seçilmedi.");
             }
 
             var directory = Path.GetDirectoryName(filePath);
@@ -82,7 +82,7 @@ namespace KantarPro.Desktop
                 {
                     var totals = string.Format(
                         CultureInfo.InvariantCulture,
-                        "Giris: {0}   Tartim: {1}   Isgaliye: {2}   Toplam: {3}",
+                        "Giriş: {0}   Tartım: {1}   İşgaliye: {2}   Toplam: {3}",
                         _entryTotal,
                         _weighingTotal,
                         _waitingTotal,
@@ -99,25 +99,24 @@ namespace KantarPro.Desktop
 
         private static IList<ReportColumn> BuildColumns()
         {
-            var baseWidths = new[] { 28, 45, 64, 50, 58, 105, 62, 62, 58, 62, 67, 67, 72, 72 };
+            var baseWidths = new[] { 30, 48, 70, 54, 62, 120, 70, 68, 64, 75, 75, 82, 82 };
             var scale = (PageWidth - LeftMargin - RightMargin) / baseWidths.Sum();
             var widths = baseWidths.Select(x => (float)Math.Floor(x * scale)).ToArray();
             return new[]
             {
-                new ReportColumn("Sira", widths[0], x => x.SiraNo.ToString(CultureInfo.InvariantCulture)),
-                new ReportColumn("Islem", widths[1], x => x.IslemNo),
+                new ReportColumn("Sıra", widths[0], x => x.SiraNo.ToString(CultureInfo.InvariantCulture)),
+                new ReportColumn("İşlem", widths[1], x => x.IslemNo),
                 new ReportColumn("Tip", widths[2], x => x.IslemTipi),
-                new ReportColumn("Fis", widths[3], x => x.KantarFisNo),
-                new ReportColumn("Odeme", widths[4], x => x.OdemeTuru),
+                new ReportColumn("Fiş", widths[3], x => x.KantarFisNo),
+                new ReportColumn("Ödeme", widths[4], x => x.OdemeTuru),
                 new ReportColumn("Firma", widths[5], x => x.FirmaAdi),
                 new ReportColumn("Plaka", widths[6], x => x.Plaka),
-                new ReportColumn("Cikis T.", widths[7], x => x.CikisTarihi),
-                new ReportColumn("Cikis S.", widths[8], x => x.CikisSaati),
-                new ReportColumn("1.Tartim", widths[9], x => x.IlkTartim),
-                new ReportColumn("Giris", widths[10], x => x.GirisCikisUcreti),
-                new ReportColumn("Tartim", widths[11], x => x.TartimUcreti),
-                new ReportColumn("Isgaliye", widths[12], x => x.BeklemeUcreti),
-                new ReportColumn("Toplam", widths[13], x => x.ToplamUcret)
+                new ReportColumn("Çıkış T.", widths[7], x => x.CikisTarihi),
+                new ReportColumn("Çıkış S.", widths[8], x => x.CikisSaati),
+                new ReportColumn("Giriş", widths[9], x => x.GirisCikisUcreti),
+                new ReportColumn("Tartım", widths[10], x => x.TartimUcreti),
+                new ReportColumn("İşgaliye", widths[11], x => x.BeklemeUcreti),
+                new ReportColumn("Toplam", widths[12], x => x.ToplamUcret)
             };
         }
 
@@ -150,7 +149,7 @@ namespace KantarPro.Desktop
 
         private static void DrawText(StringBuilder content, string text, int size, float x, float y, bool bold)
         {
-            content.AppendFormat(CultureInfo.InvariantCulture, "BT /{0} {1} Tf {2:0.##} {3:0.##} Td ({4}) Tj ET\n", bold ? "F2" : "F1", size, x, y, EscapePdfText(ToPdfText(text)));
+            content.AppendFormat(CultureInfo.InvariantCulture, "BT /{0} {1} Tf {2:0.##} {3:0.##} Td ({4}) Tj ET\n", bold ? "F2" : "F1", size, x, y, EscapePdfText(text));
         }
 
         private static void WritePdf(string filePath, IList<string> pages)
@@ -160,8 +159,9 @@ namespace KantarPro.Desktop
 
             objects.Add("<< /Type /Catalog /Pages 2 0 R >>");
             objects.Add("");
-            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
-            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding 5 0 R >>");
+            objects.Add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding 5 0 R >>");
+            objects.Add("<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [208 /Gbreve 221 /Idotaccent 222 /Scedilla 240 /gbreve 253 /dotlessi 254 /scedilla] >>");
 
             foreach (var page in pages)
             {
@@ -223,24 +223,30 @@ namespace KantarPro.Desktop
 
         private static string EscapePdfText(string text)
         {
-            return (text ?? "").Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
-        }
-
-        private static string ToPdfText(string text)
-        {
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrWhiteSpace(text))
             {
                 return "";
             }
 
-            return text
-                .Replace('ç', 'c').Replace('Ç', 'C')
-                .Replace('ğ', 'g').Replace('Ğ', 'G')
-                .Replace('ı', 'i').Replace('İ', 'I')
-                .Replace('ö', 'o').Replace('Ö', 'O')
-                .Replace('ş', 's').Replace('Ş', 'S')
-                .Replace('ü', 'u').Replace('Ü', 'U')
-                .Replace('₺', 'T');
+            var bytes = Encoding.GetEncoding(1254).GetBytes(text.Replace("₺", "T"));
+            var builder = new StringBuilder(bytes.Length);
+            foreach (var b in bytes)
+            {
+                if (b == 40 || b == 41 || b == 92)
+                {
+                    builder.Append('\\').Append((char)b);
+                }
+                else if (b < 32 || b > 126)
+                {
+                    builder.Append('\\').Append(Convert.ToString(b, 8).PadLeft(3, '0'));
+                }
+                else
+                {
+                    builder.Append((char)b);
+                }
+            }
+
+            return builder.ToString();
         }
 
         private sealed class ReportColumn
@@ -260,3 +266,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

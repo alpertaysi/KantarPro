@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Text;
 
@@ -16,7 +16,7 @@ namespace KantarPro.Desktop
             var birinciTartim = CleanWeight(row.Tartim);
             if (string.IsNullOrWhiteSpace(birinciTartim) || IsNoWeighingText(birinciTartim))
             {
-                throw new InvalidOperationException("Bu kayitta kantar tartimi yok. Tartimsiz girisler icin kantar fisi olusturulmaz.");
+                throw new InvalidOperationException("Bu kayıtta kantar tartımı yok. Tartımsız girişler için kantar fişi oluşturulmaz.");
             }
 
             var ikinciTartim = CleanWeight(row.IkinciTartim);
@@ -59,7 +59,7 @@ namespace KantarPro.Desktop
             var birinciTartim = CleanWeight(row.IlkAgirlik);
             if (string.IsNullOrWhiteSpace(birinciTartim) || IsNoWeighingText(birinciTartim))
             {
-                throw new InvalidOperationException("Bu kayitta kantar tartimi yok. Tartimsiz girisler icin kantar fisi olusturulmaz.");
+                throw new InvalidOperationException("Bu kayıtta kantar tartımı yok. Tartımsız girişler için kantar fişi oluşturulmaz.");
             }
 
             var fisRow = new VehicleMovementRow
@@ -188,3 +188,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
 namespace KantarPro.Desktop
@@ -30,7 +30,7 @@ namespace KantarPro.Desktop
                     AccentBar.Background = Brush("#0F766E");
                     IconCircle.Background = Brush("#DCFCE7");
                     IconText.Foreground = Brush("#047857");
-                    IconText.Text = "✓";
+                    IconText.Text = "âœ“";
                     break;
                 case ModernMessageKind.Warning:
                     AccentBar.Background = Brush("#D97706");
@@ -65,3 +65,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

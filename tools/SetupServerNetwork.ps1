@@ -2,6 +2,7 @@ param(
     [string]$EthernetAlias = "Ethernet",
     [string]$ServerIp = "192.168.50.1",
     [int]$PrefixLength = 24,
+    [string]$SqlInstanceName = "SQLEXPRESS",
     [string]$DatabaseName = "KantarPro",
     [string]$SqlLogin = "kantar_app",
     [string]$SqlPassword = ""
@@ -10,6 +11,43 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "KantarPro sunucu ag ayarlari yapiliyor..." -ForegroundColor Cyan
+
+function Get-SqlInstanceId {
+    param([string]$InstanceName)
+
+    $paths = @(
+        "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SQL Server\Instance Names\SQL"
+    )
+
+    foreach ($path in $paths) {
+        if (Test-Path $path) {
+            $value = (Get-ItemProperty -Path $path -Name $InstanceName -ErrorAction SilentlyContinue).$InstanceName
+            if (-not [string]::IsNullOrWhiteSpace($value)) {
+                return $value
+            }
+        }
+    }
+
+    throw "SQL instance bulunamadi: $InstanceName. SQL Server Express instance adini kontrol edin."
+}
+
+function Get-SqlTcpRoot {
+    param([string]$InstanceId)
+
+    $paths = @(
+        "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$InstanceId\MSSQLServer\SuperSocketNetLib\Tcp",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SQL Server\$InstanceId\MSSQLServer\SuperSocketNetLib\Tcp"
+    )
+
+    foreach ($path in $paths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    throw "SQL TCP/IP registry yolu bulunamadi: $InstanceId"
+}
 
 if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
     $securePass = Read-Host "SQL kullanicisi icin sifre girin" -AsSecureString
@@ -29,7 +67,9 @@ if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
 }
 
 $serverName = $env:COMPUTERNAME
-$sqlTcpRoot = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQLServer\SuperSocketNetLib\Tcp"
+$sqlInstanceId = Get-SqlInstanceId -InstanceName $SqlInstanceName
+$sqlTcpRoot = Get-SqlTcpRoot -InstanceId $sqlInstanceId
+$sqlServiceName = if ($SqlInstanceName -eq "MSSQLSERVER") { "MSSQLSERVER" } else { "MSSQL`$$SqlInstanceName" }
 
 $adapter = Get-NetAdapter -Name $EthernetAlias -ErrorAction Stop
 if ($adapter.Status -ne "Up") {
@@ -54,7 +94,7 @@ if (-not (Get-NetFirewallRule -DisplayName "KantarPro SQL Server 1433" -ErrorAct
     New-NetFirewallRule -DisplayName "KantarPro SQL Server 1433" -Direction Inbound -Protocol TCP -LocalPort 1433 -Action Allow | Out-Null
 }
 
-Restart-Service -Name "MSSQL`$SQLEXPRESS" -Force
+Restart-Service -Name $sqlServiceName -Force
 
 Add-Type -AssemblyName System.Data
 $masterConnectionString = "Server=tcp:$serverName,1433;Database=master;Integrated Security=True;Encrypt=False;Connect Timeout=15"
@@ -76,7 +116,7 @@ finally {
     $connection.Close()
 }
 
-Restart-Service -Name "MSSQL`$SQLEXPRESS" -Force
+Restart-Service -Name $sqlServiceName -Force
 Start-Sleep -Seconds 3
 
 $appConnectionString = "Server=tcp:$serverName,1433;Database=master;Integrated Security=True;Encrypt=False;Connect Timeout=15"
@@ -97,7 +137,16 @@ BEGIN
     BEGIN
         CREATE USER [$SqlLogin] FOR LOGIN [$SqlLogin];
     END;
-    ALTER ROLE [db_owner] ADD MEMBER [$SqlLogin];
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.database_role_members drm
+        INNER JOIN sys.database_principals r ON r.principal_id = drm.role_principal_id
+        INNER JOIN sys.database_principals m ON m.principal_id = drm.member_principal_id
+        WHERE r.name = N'db_owner' AND m.name = N'$SqlLogin'
+    )
+    BEGIN
+        EXEC sp_addrolemember N'db_owner', N'$SqlLogin';
+    END;
 END;
 "@
     $command.ExecuteNonQuery() | Out-Null

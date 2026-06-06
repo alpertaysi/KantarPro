@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 
@@ -49,7 +49,7 @@ namespace KantarPro.Desktop
             decimal secondWeight;
             if (!TryParseWeight(SecondWeightTextBox.Text, out secondWeight) || secondWeight <= 0)
             {
-                MessageBox.Show("2.KG icin gecerli agirlik girin.", "Dolu-Bos Tartim", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("2.KG için geçerli ağırlık girin.", "Dolu-Boş Tartım", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -95,3 +95,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

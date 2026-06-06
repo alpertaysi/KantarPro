@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace KantarPro.Desktop
 {
@@ -20,7 +20,7 @@ namespace KantarPro.Desktop
 
         public bool DoluBosMu
         {
-            get { return string.Equals(FisTipi, "Dolu-Bos", StringComparison.OrdinalIgnoreCase); }
+            get { return string.Equals(FisTipi, "Dolu-Boş", StringComparison.OrdinalIgnoreCase); }
         }
 
         public static KantarFisPreviewData FromVehicleRow(VehicleMovementRow row, string rawText)
@@ -33,7 +33,7 @@ namespace KantarPro.Desktop
             var doluBos = HasValue(row.IkinciTartim) && HasValue(row.NetAgirlik);
             return new KantarFisPreviewData
             {
-                FisTipi = doluBos ? "Dolu-Bos" : "Tek Tartim",
+                FisTipi = doluBos ? "Dolu-Boş" : "Tek Tartım",
                 Plaka = Safe(row.Plaka),
                 Firma = Safe(row.FirmaAdi),
                 FisNo = FormatFisNo(row),
@@ -45,7 +45,7 @@ namespace KantarPro.Desktop
                 IkinciTartim = Safe(row.IkinciTartim),
                 Net = Safe(row.NetAgirlik),
                 RawText = rawText ?? "",
-                SurekliFormNotu = "OKI 5720 surekli form icin ham metin sabit genislikli uretilir."
+                SurekliFormNotu = "OKI 5720 sürekli form için ham metin sabit genişlikli üretilir."
             };
         }
 
@@ -58,7 +58,7 @@ namespace KantarPro.Desktop
 
             return new KantarFisPreviewData
             {
-                FisTipi = "Tek Tartim",
+                FisTipi = "Tek Tartım",
                 Plaka = Safe(row.Plaka),
                 Firma = Safe(row.FirmaAdi),
                 FisNo = FirstNonEmpty(row.KantarFisNo, row.IslemNo),
@@ -70,7 +70,7 @@ namespace KantarPro.Desktop
                 IkinciTartim = "",
                 Net = "",
                 RawText = rawText ?? "",
-                SurekliFormNotu = "OKI 5720 surekli form icin ham metin sabit genislikli uretilir."
+                SurekliFormNotu = "OKI 5720 sürekli form için ham metin sabit genişlikli üretilir."
             };
         }
 
@@ -135,3 +135,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

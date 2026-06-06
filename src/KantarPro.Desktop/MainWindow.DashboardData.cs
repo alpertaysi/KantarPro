@@ -37,7 +37,7 @@ namespace KantarPro.Desktop
             {
                 if (showErrorMessage)
                 {
-                    MessageBox.Show("Ana ekran verileri okunamadi: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Ana ekran verileri okunamadı: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -181,4 +181,7 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+
 

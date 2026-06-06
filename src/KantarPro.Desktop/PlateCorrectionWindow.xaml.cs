@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace KantarPro.Desktop
 {
@@ -20,7 +20,7 @@ namespace KantarPro.Desktop
             var value = (NewPlateTextBox.Text ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(value))
             {
-                MessageBox.Show("Yeni plaka bos olamaz.", "Plaka Duzelt", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Yeni plaka boş olamaz.", "Plaka Düzelt", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -34,3 +34,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

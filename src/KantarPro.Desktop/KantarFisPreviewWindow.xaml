@@ -1,7 +1,8 @@
-<Window x:Class="KantarPro.Desktop.KantarFisPreviewWindow"
+﻿<Window x:Class="KantarPro.Desktop.KantarFisPreviewWindow"
+        Icon="Assets/kantarpro.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Kantar Fisi"
+        Title="Kantar Fişi"
         Width="720"
         Height="560"
         MinWidth="620"
@@ -27,7 +28,7 @@
 
         <DockPanel Margin="0,0,0,12">
             <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Kantar Fisi"
+                <TextBlock Text="Kantar Fişi"
                            FontSize="22"
                            FontWeight="SemiBold"
                            Foreground="#0F172A" />
@@ -77,11 +78,11 @@
                      Text="12"
                      Width="44"
                      Height="32"
-                     ToolTip="Yazdirma font boyutu."
+                     ToolTip="Yazdırma font boyutu."
                      VerticalContentAlignment="Center"
                      TextAlignment="Center"
                      Margin="0,0,12,0" />
-            <Button Content="Yazdir"
+            <Button Content="Yazdır"
                     Style="{StaticResource ModernButtonStyle}"
                     Click="Print_Click" />
             <Button Content="Kapat"
@@ -90,3 +91,8 @@
         </StackPanel>
     </Grid>
 </Window>
+
+
+
+
+

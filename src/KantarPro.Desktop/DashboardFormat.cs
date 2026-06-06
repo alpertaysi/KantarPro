@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using KantarPro.Domain.Entities;
 
 namespace KantarPro.Desktop
@@ -47,7 +47,7 @@ namespace KantarPro.Desktop
 
         public static string SonTartim(Tartim tartim)
         {
-            return tartim == null ? "Tartim Yok" : tartim.AgirlikKg.ToString("N0") + " kg";
+            return tartim == null ? "Tartım Yok" : tartim.AgirlikKg.ToString("N0") + " kg";
         }
 
         public static string TartimDegeri(Tartim tartim)
@@ -56,3 +56,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

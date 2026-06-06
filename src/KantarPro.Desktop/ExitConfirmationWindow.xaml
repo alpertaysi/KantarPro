@@ -1,7 +1,8 @@
-<Window x:Class="KantarPro.Desktop.ExitConfirmationWindow"
+﻿<Window x:Class="KantarPro.Desktop.ExitConfirmationWindow"
+        Icon="Assets/kantarpro.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Arac Cikis Islemleri"
+        Title="Araç Çıkış İşlemleri"
         Width="420"
         Height="560"
         ResizeMode="NoResize"
@@ -47,7 +48,7 @@
                            Foreground="#0B274C"
                            Margin="0,0,0,8" />
 
-                <GroupBox Grid.Row="1" Header="Giris - Cikis Tarih/Saat" BorderBrush="#9AA9C0" Margin="0,0,0,12">
+                <GroupBox Grid.Row="1" Header="Giriş - Çıkış Tarih/Saat" BorderBrush="#9AA9C0" Margin="0,0,0,12">
                     <Grid Margin="10,8,10,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="96" />
@@ -62,19 +63,19 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="Giris Bilgileri" VerticalAlignment="Center" />
+                        <TextBlock Text="Giriş Bilgileri" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" />
                         <TextBox x:Name="EntryDateText" Grid.Column="2" />
                         <TextBox x:Name="EntryTimeText" Grid.Column="4" />
 
-                        <TextBlock Grid.Row="2" Text="Cikis Bilgileri" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" Text="Çıkış Bilgileri" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text=":" VerticalAlignment="Center" />
                         <TextBox x:Name="ExitDateText" Grid.Row="2" Grid.Column="2" IsReadOnly="False" />
                         <TextBox x:Name="ExitTimeText" Grid.Row="2" Grid.Column="4" IsReadOnly="False" />
                     </Grid>
                 </GroupBox>
 
-                <GroupBox Grid.Row="2" Header="Ucret Bilgileri" BorderBrush="#9AA9C0" Margin="0,0,0,8">
+                <GroupBox Grid.Row="2" Header="Ücret Bilgileri" BorderBrush="#9AA9C0" Margin="0,0,0,8">
                     <Grid Margin="10,8,10,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="158" />
@@ -90,17 +91,17 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="Giris / Cikis Ucreti" VerticalAlignment="Center" />
+                        <TextBlock Text="Giriş / Çıkış Ücreti" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" />
                         <TextBox x:Name="EntryExitFeeText" Grid.Column="2" />
                         <TextBlock Grid.Column="3" Text="TL" VerticalAlignment="Center" Margin="6,0,0,0" />
 
-                        <TextBlock Grid.Row="2" x:Name="WeighingFeeLabel" Text="Toplam Tart Ucreti" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" x:Name="WeighingFeeLabel" Text="Toplam Tartım Ücreti" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text=":" VerticalAlignment="Center" />
                         <TextBox x:Name="WeighingFeeText" Grid.Row="2" Grid.Column="2" />
                         <TextBlock Grid.Row="2" Grid.Column="3" Text="TL" VerticalAlignment="Center" Margin="6,0,0,0" />
 
-                        <TextBlock Grid.Row="4" x:Name="WaitingFeeLabel" Text="Isgaliye Ucreti" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="4" x:Name="WaitingFeeLabel" Text="İşgaliye Ücreti" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="4" Grid.Column="1" Text=":" VerticalAlignment="Center" />
                         <TextBox x:Name="WaitingFeeText" Grid.Row="4" Grid.Column="2" />
                         <TextBlock Grid.Row="4" Grid.Column="3" Text="TL" VerticalAlignment="Center" Margin="6,0,0,0" />
@@ -115,7 +116,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="28" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Toplam Ucret" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Text="Toplam Ücret" FontWeight="SemiBold" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text=":" FontWeight="SemiBold" VerticalAlignment="Center" />
                         <TextBox x:Name="TotalFeeText" Grid.Column="2" FontSize="18" FontWeight="Bold" Foreground="#B00000" />
                         <TextBlock Grid.Column="3" Text="TL" VerticalAlignment="Center" Margin="6,0,0,0" />
@@ -135,10 +136,15 @@
                         <ColumnDefinition Width="8" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="1" Content="Arac Cikis Yap" Click="ConfirmExit_Click" />
-                    <Button Grid.Column="3" Content="Iptal" Click="Cancel_Click" />
+                    <Button Grid.Column="1" Content="Araç Çıkış Yap" Click="ConfirmExit_Click" />
+                    <Button Grid.Column="3" Content="İptal" Click="Cancel_Click" />
                 </Grid>
             </Grid>
         </Border>
     </Grid>
 </Window>
+
+
+
+
+

@@ -54,7 +54,7 @@ namespace KantarPro.Desktop
                 var rows = DailyRevenueView.Cast<DailyRevenueRow>().ToList();
                 if (rows.Count == 0)
                 {
-                    MessageBox.Show("PDF olusturmak icin once tahsilat listesini doldurun.", "Gunluk Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("PDF oluşturmak için önce tahsilat listesini doldurun.", "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -76,18 +76,53 @@ namespace KantarPro.Desktop
 
                 var exporter = new DailyRevenuePdfExporter(
                     rows,
-                    "Gunluk Tahsilat Dokumu (" + baslangic + " - " + bitis + ")",
+                    "Günlük Tahsilat Dokumu (" + baslangic + " - " + bitis + ")",
                     RevenueEntryExitTotalText.Text,
                     RevenueWeighingTotalText.Text,
                     RevenueWaitingTotalText.Text,
                     RevenueGrandTotalText.Text);
 
                 exporter.Export(dialog.FileName);
-                MessageBox.Show("Gunluk tahsilat PDF dosyasi olusturuldu.", "Gunluk Tahsilat");
+                MessageBox.Show("Günlük tahsilat PDF dosyası oluşturuldu.", "Günlük Tahsilat");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("PDF olusturulamadi: " + ex.Message, "Gunluk Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("PDF oluşturulamadı: " + ex.Message, "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void RevenuePrintOkiButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var rows = DailyRevenueView.Cast<DailyRevenueRow>().ToList();
+                if (rows.Count == 0)
+                {
+                    MessageBox.Show("Yazdırmak için önce tahsilat listesini doldurun.", "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var baslangic = RevenueStartDatePicker.SelectedDate.GetValueOrDefault(DateTime.Today).ToString("dd.MM.yyyy");
+                var bitis = RevenueEndDatePicker.SelectedDate.GetValueOrDefault(DateTime.Today).ToString("dd.MM.yyyy");
+                var rawText = DailyRevenueTextFormatter.Build(
+                    rows,
+                    baslangic + " - " + bitis,
+                    RevenueEntryExitTotalText.Text,
+                    RevenueWeighingTotalText.Text,
+                    RevenueWaitingTotalText.Text,
+                    RevenueGrandTotalText.Text);
+
+                RawPrinterHelper.PrintTextWithDriver(
+                    RawPrinterHelper.GetPreferredPrinterName(),
+                    rawText,
+                    "Gunluk Tahsilat " + DateTime.Today.ToString("yyyyMMdd"),
+                    topMarginLines: 0,
+                    leftMarginColumns: 0,
+                    fontSize: 9.0f);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Günlük tahsilat dökümü yazdırılamadı: " + ex.Message, "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -99,7 +134,7 @@ namespace KantarPro.Desktop
                 var bitis = RevenueEndDatePicker.SelectedDate.GetValueOrDefault(baslangic).Date;
                 if (bitis < baslangic)
                 {
-                    throw new InvalidOperationException("Bitis tarihi baslangic tarihinden once olamaz.");
+                    throw new InvalidOperationException("Bitiş tarihi başlangıç tarihinden önce olamaz.");
                 }
 
                 var bitisExclusive = bitis.AddDays(1);
@@ -214,7 +249,7 @@ namespace KantarPro.Desktop
                         });
                     }
 
-                    RevenueRowCountText.Text = "Kayit: " + DailyRevenueRows.Count;
+                    RevenueRowCountText.Text = "Kayıt: " + DailyRevenueRows.Count;
                     RevenueEntryExitTotalText.Text = DashboardFormat.Para(girisToplam);
                     RevenueWeighingTotalText.Text = DashboardFormat.Para(tartimToplam);
                     RevenueWaitingTotalText.Text = DashboardFormat.Para(beklemeToplam);
@@ -224,7 +259,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Gunluk hasilat okunamadi: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Günlük hasılat okunamadı: " + ex.Message, "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -240,7 +275,7 @@ namespace KantarPro.Desktop
                 return "Muaf Tartim";
             }
 
-            return ikinciTartim != null ? "Dolu-Bos" : "Tek Tartim";
+            return ikinciTartim != null ? "Dolu-Boş" : "Tek Tartım";
         }
 
         private static string FormatRevenueKantarFisNo(Tartim ilkTartim, Tartim ikinciTartim)
@@ -279,11 +314,11 @@ namespace KantarPro.Desktop
                     "Plaka: " + row.Plaka + Environment.NewLine +
                     "Firma: " + (string.IsNullOrWhiteSpace(row.FirmaAdi) ? "-" : row.FirmaAdi) + Environment.NewLine +
                     "Durum: " + row.Durum + Environment.NewLine +
-                    "Aciklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine + Environment.NewLine +
+                    "Açıklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine + Environment.NewLine +
                     "Saha Hareketleri" + Environment.NewLine +
-                    "Giris: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
+                    "Giriş: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
                     "Cikis: " + DashboardFormat.BosDeger(row.CikisTarihi + " " + row.CikisSaati) + Environment.NewLine + Environment.NewLine +
-                    "Ucret Dokumu" + Environment.NewLine +
+                    "Ücret Dökümü" + Environment.NewLine +
                     "Giris-Cikis: " + DashboardFormat.BosDeger(row.GirisCikisUcreti) + Environment.NewLine +
                     "Tartim: " + DashboardFormat.BosDeger(row.TartimUcreti) + Environment.NewLine +
                     "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
@@ -299,7 +334,7 @@ namespace KantarPro.Desktop
                 "Durum: " + row.Durum + Environment.NewLine + Environment.NewLine +
                 "Dolu Hareket" + Environment.NewLine +
                 "Gelis: " + DashboardFormat.BosDeger(row.GirisTarihi + " " + row.GirisSaati) + Environment.NewLine +
-                "Aciklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine +
+                "Açıklama: " + DashboardFormat.BosDeger(GetIslemNotlari(row.IslemId)) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(row.IlkTartimTarihi + " " + row.IlkTartimSaati) + " | " + DashboardFormat.BosDeger(row.Tartim) + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(row.DoluCikisTarihi + " " + row.DoluCikisSaati) + Environment.NewLine + Environment.NewLine +
                 "Bos Hareket" + Environment.NewLine +
@@ -307,7 +342,7 @@ namespace KantarPro.Desktop
                 "Tartim: " + DashboardFormat.BosDeger(row.IkinciTartim) + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(row.CikisTarihi + " " + row.CikisSaati) + Environment.NewLine +
                 "Net: " + DashboardFormat.BosDeger(row.NetAgirlik) + Environment.NewLine + Environment.NewLine +
-                "Ucret Dokumu" + Environment.NewLine +
+                "Ücret Dökümü" + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(row.GirisCikisUcreti) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(row.TartimUcreti) + Environment.NewLine +
                 "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
@@ -469,7 +504,7 @@ namespace KantarPro.Desktop
                 "Gelis: " + DashboardFormat.BosDeger(islem != null ? islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(islem != null && islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(tartim != null ? tartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + tartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "Aciklama: " + DashboardFormat.BosDeger(islem != null ? islem.Notlar : "") + Environment.NewLine +
+                "Açıklama: " + DashboardFormat.BosDeger(islem != null ? islem.Notlar : "") + Environment.NewLine +
                 "Muafiyet: " + DashboardFormat.BosDeger(islem != null && islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis) : "") + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(islem != null ? FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim) : "") + Environment.NewLine +
@@ -488,9 +523,9 @@ namespace KantarPro.Desktop
             return
                 "Gelis: " + islem.GirisTarihi.ToString("dd.MM.yyyy HH:mm:ss") + Environment.NewLine +
                 "Cikis: " + DashboardFormat.BosDeger(islem.CikisTarihi.HasValue ? islem.CikisTarihi.Value.ToString("dd.MM.yyyy HH:mm:ss") : "") + Environment.NewLine +
-                "1. Tartim: " + DashboardFormat.BosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "2. Tartim: " + DashboardFormat.BosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
-                "Aciklama: " + DashboardFormat.BosDeger(islem.Notlar) + Environment.NewLine +
+                "1. Tartım: " + DashboardFormat.BosDeger(ilkTartim != null ? ilkTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ilkTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "2. Tartım: " + DashboardFormat.BosDeger(ikinciTartim != null ? ikinciTartim.TartimTarihi.ToString("dd.MM.yyyy HH:mm:ss") + " | " + ikinciTartim.AgirlikKg.ToString("N0") + " kg" : "") + Environment.NewLine +
+                "Açıklama: " + DashboardFormat.BosDeger(islem.Notlar) + Environment.NewLine +
                 "Muafiyet: " + DashboardFormat.BosDeger(islem.MuafMi ? islem.MuafiyetNedeni : "") + Environment.NewLine +
                 "Giris-Cikis: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.GirisCikis)) + Environment.NewLine +
                 "Tartim: " + DashboardFormat.BosDeger(FormatUcretKalemi(islem, KantarSabitleri.UcretKodu.Tartim)) + Environment.NewLine +
@@ -654,7 +689,7 @@ namespace KantarPro.Desktop
 
             if (girisTartimi != null)
             {
-                return "Giris: " + girisTartimi.AgirlikKg.ToString("N0") + " kg";
+                return "Giriş: " + girisTartimi.AgirlikKg.ToString("N0") + " kg";
             }
 
             var sonradanTartim = islem.Tartimlar
@@ -664,7 +699,7 @@ namespace KantarPro.Desktop
 
             if (sonradanTartim != null)
             {
-                return "Dolu-Bos: " + sonradanTartim.AgirlikKg.ToString("N0") + " kg";
+                return "Dolu-Boş: " + sonradanTartim.AgirlikKg.ToString("N0") + " kg";
             }
 
             return "Tartimi Yok";
@@ -798,7 +833,7 @@ namespace KantarPro.Desktop
         {
             try
             {
-                return ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Cikis tarihi");
+                return ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
             }
             catch
             {
@@ -1011,7 +1046,7 @@ namespace KantarPro.Desktop
                 IlkTartimSaati = "10:42:58",
                 IlkAgirlik = "16500",
                 YukDurumu = KantarSabitleri.YukDurumu.Dolu,
-                Aciklama = "X firma dolu cikis sonrasi bekleyen tartim"
+                Aciklama = "X firma dolu çıkış sonrası bekleyen tartım"
             });
             PendingWeighings.Add(new PendingWeighingPrototypeRow
             {
@@ -1021,7 +1056,7 @@ namespace KantarPro.Desktop
                 IlkTartimSaati = "09:15:21",
                 IlkAgirlik = "18200",
                 YukDurumu = KantarSabitleri.YukDurumu.Dolu,
-                Aciklama = "Ayni plaka farkli firma ornegi"
+                Aciklama = "Aynı plaka farklı firma örneği"
             });
             PendingWeighings.Add(new PendingWeighingPrototypeRow
             {
@@ -1031,9 +1066,12 @@ namespace KantarPro.Desktop
                 IlkTartimSaati = "14:08:33",
                 IlkAgirlik = "21480",
                 YukDurumu = KantarSabitleri.YukDurumu.Dolu,
-                Aciklama = "Tek bekleyen tartim ornegi"
+                Aciklama = "Tek bekleyen tartım örneği"
             });
         }
     }
 }
+
+
+
 

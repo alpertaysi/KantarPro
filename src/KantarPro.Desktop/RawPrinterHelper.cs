@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
@@ -68,7 +68,7 @@ namespace KantarPro.Desktop
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                throw new InvalidOperationException("Yazdirilacak kantar fisi metni bos.");
+                throw new InvalidOperationException("Yazdırılacak kantar fişi metni boş.");
             }
 
             IntPtr printerHandle;
@@ -87,14 +87,14 @@ namespace KantarPro.Desktop
 
                 if (StartDocPrinter(printerHandle, 1, docInfo) == 0)
                 {
-                    ThrowWin32("Yazdirma isi baslatilamadi");
+                    ThrowWin32("Yazdırma işi başlatılamadı");
                 }
 
                 try
                 {
                     if (!StartPagePrinter(printerHandle))
                     {
-                        ThrowWin32("Yazdirma sayfasi baslatilamadi");
+                        ThrowWin32("Yazdırma sayfası başlatılamadı");
                     }
 
                     try
@@ -131,7 +131,7 @@ namespace KantarPro.Desktop
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                throw new InvalidOperationException("Yazdirilacak kantar fisi metni bos.");
+                throw new InvalidOperationException("Yazdırılacak kantar fişi metni boş.");
             }
 
             fontSize = Math.Max(8.0f, Math.Min(16.0f, fontSize));
@@ -152,6 +152,38 @@ namespace KantarPro.Desktop
                     var x = Math.Max(0, Math.Min(40, leftMarginColumns)) * 8;
                     var y = Math.Max(0, Math.Min(20, topMarginLines)) * font.GetHeight(args.Graphics);
                     args.Graphics.DrawString(NormalizeLineEndings(text), font, Brushes.Black, (float)x, (float)y);
+                    args.HasMorePages = false;
+                };
+
+                document.Print();
+            }
+        }
+
+        public static void PrintA5TextWithDriver(string printerName, string text, string documentName, float fontSize)
+        {
+            if (string.IsNullOrWhiteSpace(printerName))
+            {
+                throw new InvalidOperationException("Yazıcı bulunamadı. Windows'ta lazer yazıcının kurulu olduğunu kontrol edin.");
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new InvalidOperationException("Yazdırılacak kantar fişi metni boş.");
+            }
+
+            fontSize = Math.Max(8.0f, Math.Min(14.0f, fontSize));
+            using (var document = new PrintDocument())
+            using (var font = new Font("Courier New", fontSize, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                document.DocumentName = string.IsNullOrWhiteSpace(documentName) ? "Kantar Fişi A5" : documentName;
+                document.PrinterSettings.PrinterName = printerName;
+                document.DefaultPageSettings.PaperSize = new PaperSize("A5", 583, 827);
+                document.DefaultPageSettings.Margins = new Margins(35, 35, 35, 35);
+                document.OriginAtMargins = true;
+
+                document.PrintPage += (sender, args) =>
+                {
+                    args.Graphics.DrawString(NormalizeLineEndings(text), font, Brushes.Black, 0, 0);
                     args.HasMorePages = false;
                 };
 
@@ -233,3 +265,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+

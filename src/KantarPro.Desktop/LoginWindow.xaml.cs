@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using KantarPro.Application.Services;
@@ -33,6 +33,9 @@ namespace KantarPro.Desktop
         {
             try
             {
+                InfoBorder.Visibility = Visibility.Collapsed;
+                InfoTextBlock.Text = "";
+
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var servis = new KullaniciServisi(new KantarUnitOfWork(context));
@@ -46,8 +49,10 @@ namespace KantarPro.Desktop
             catch (Exception ex)
             {
                 InfoTextBlock.Text = ex.Message;
+                InfoBorder.Visibility = Visibility.Visible;
+                UsernameTextBox.Clear();
                 PasswordBox.Clear();
-                PasswordBox.Focus();
+                UsernameTextBox.Focus();
             }
         }
 
@@ -58,3 +63,6 @@ namespace KantarPro.Desktop
         }
     }
 }
+
+
+
