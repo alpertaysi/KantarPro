@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,6 +25,7 @@ namespace KantarPro.Desktop
         public ObservableCollection<DailyTransactionRow> DailyTransactions { get; private set; }
         public ObservableCollection<DailyRevenueRow> DailyRevenueRows { get; private set; }
         public ObservableCollection<PendingWeighingPrototypeRow> PendingWeighings { get; private set; }
+        public ObservableCollection<UserManagementRow> Users { get; private set; }
         public ICollectionView EntryVehiclesView { get; private set; }
         public ICollectionView ExitVehiclesView { get; private set; }
         public ICollectionView DailyRevenueView { get; private set; }
@@ -44,6 +46,10 @@ namespace KantarPro.Desktop
         private KantarSerialReader _scaleReader;
         private decimal? _lastScaleWeightKg;
         private KullaniciOturumu _currentUser;
+        private DispatcherTimer _connectionCheckTimer;
+        private bool _connectionCheckInProgress;
+        private int _connectionLostCount;
+        private bool _connectionWarningShown;
 
         public MainWindow()
         {
@@ -52,6 +58,7 @@ namespace KantarPro.Desktop
             DailyTransactions = new ObservableCollection<DailyTransactionRow>();
             DailyRevenueRows = new ObservableCollection<DailyRevenueRow>();
             PendingWeighings = new ObservableCollection<PendingWeighingPrototypeRow>();
+            Users = new ObservableCollection<UserManagementRow>();
             EntryVehiclesView = CollectionViewSource.GetDefaultView(EntryVehicles);
             ExitVehiclesView = CollectionViewSource.GetDefaultView(ExitVehicles);
             DailyRevenueView = CollectionViewSource.GetDefaultView(DailyRevenueRows);
@@ -79,6 +86,7 @@ namespace KantarPro.Desktop
 
                 LoadPendingWeighingPrototypeData();
                 ShowEntryPage();
+                Dispatcher.BeginInvoke(new Action(CheckStaleOpenVisitsOnStartup), DispatcherPriority.ApplicationIdle);
             }
             catch (Exception ex)
             {
@@ -114,6 +122,8 @@ namespace KantarPro.Desktop
             var autoRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
             autoRefreshTimer.Tick += (sender, args) => TryAutoRefreshDashboard();
             autoRefreshTimer.Start();
+
+            StartConnectionMonitor();
         }
 
         private void AuthenticateCurrentUser()
@@ -180,6 +190,98 @@ namespace KantarPro.Desktop
         private void AyarlarButton_Click(object sender, RoutedEventArgs e)
         {
             ShowSettingsPage();
+        }
+
+        private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentUser == null)
+            {
+                MessageBox.Show("Oturum bilgisi bulunamadı.", "Şifre Değiştir", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var window = new ChangePasswordWindow(_currentUser) { Owner = this };
+            window.ShowDialog();
+        }
+
+        private void AddUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentUser == null || !_currentUser.AdminMi)
+            {
+                MessageBox.Show("Kullanıcı ekleme yetkisi sadece admin kullanıcılara açıktır.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var roleItem = NewUserRoleComboBox.SelectedItem as ComboBoxItem;
+                var role = roleItem != null ? Convert.ToString(roleItem.Content) : KullaniciRolleri.Memur;
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var servis = new KullaniciServisi(new KantarUnitOfWork(context));
+                    servis.KullaniciEkle(NewUserNameTextBox.Text, NewUserFullNameTextBox.Text, role, NewUserPasswordBox.Password);
+                }
+
+                App.LogOperation(_currentUser.KullaniciAdi, "Kullanici eklendi", "Yeni kullanici: " + NewUserNameTextBox.Text);
+                MessageBox.Show("Kullanıcı başarıyla eklendi.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
+                ClearNewUserForm();
+                LoadUsers();
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Kullanici ekleme", ex);
+                MessageBox.Show(ex.Message, "Kullanıcı eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewUserPasswordBox.Clear();
+                NewUserPasswordBox.Focus();
+            }
+        }
+
+        private void ClearNewUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearNewUserForm();
+        }
+
+        private void DeleteUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentUser == null || !_currentUser.AdminMi)
+            {
+                MessageBox.Show("Kullanıcı silme yetkisi sadece admin kullanıcılara açıktır.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var selectedUser = UsersGrid.SelectedItem as UserManagementRow;
+            if (selectedUser == null)
+            {
+                MessageBox.Show("Silinecek kullanıcıyı listeden seçin.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var servis = new KullaniciServisi(new KantarUnitOfWork(context));
+                    servis.KullaniciSil(selectedUser.KullaniciId, _currentUser.KullaniciId);
+                }
+
+                App.LogOperation(_currentUser.KullaniciAdi, "Kullanici silindi", "Pasife alinan kullanici: " + selectedUser.KullaniciAdi);
+                MessageBox.Show("Kullanıcı silindi. Geçmiş işlemler korunarak hesap pasife alındı.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadUsers();
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Kullanici silme", ex);
+                MessageBox.Show(ex.Message, "Kullanıcı silinemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ClearNewUserForm()
+        {
+            NewUserNameTextBox.Text = string.Empty;
+            NewUserFullNameTextBox.Text = string.Empty;
+            NewUserRoleComboBox.SelectedIndex = 0;
+            NewUserPasswordBox.Clear();
+            NewUserNameTextBox.Focus();
         }
 
         private void TartVeKaydet_Click(object sender, RoutedEventArgs e)
@@ -397,6 +499,41 @@ namespace KantarPro.Desktop
             return System.Windows.Application.Current.Windows.OfType<Window>().Any(x => x != this && x.IsVisible);
         }
 
+        private void CheckStaleOpenVisitsOnStartup()
+        {
+            try
+            {
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    const int staleOpenVisitDays = 10;
+                    var staleVisits = servis.SuresiGecmisAcikZiyaretleriGetir(DateTime.Now, TimeSpan.FromDays(staleOpenVisitDays));
+                    if (staleVisits.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var details = string.Join(
+                        "\n",
+                        staleVisits.Take(8).Select(x => "- " + x.Arac.Plaka + " / " + x.GirisTarihi.ToString("dd.MM.yyyy HH:mm")));
+                    if (staleVisits.Count > 8)
+                    {
+                        details += "\n- ...";
+                    }
+
+                    MessageBox.Show(
+                        staleOpenVisitDays + " günü aşmasına rağmen çıkışı yapılmamış açık saha ziyaretleri var. Lütfen gerçekten içeride olup olmadıklarını kontrol edin.\n\n" + details,
+                        "Açık işlem kontrolü",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Eski acik ziyaret kontrolu", ex);
+            }
+        }
+
         private static string GetSelectedPlate(DataGrid grid)
         {
             var row = grid != null ? grid.SelectedItem as VehicleMovementRow : null;
@@ -500,6 +637,66 @@ namespace KantarPro.Desktop
             row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
             var rawText = KantarFisFormatter.BuildFromRow(row);
             PrintReceiptText(rawText, "Kantar Fisi " + KantarFisPreviewData.FormatFisNo(row));
+        }
+
+        private void StartConnectionMonitor()
+        {
+            _connectionCheckTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+            _connectionCheckTimer.Tick += (sender, args) => CheckDatabaseConnectionAsync();
+            _connectionCheckTimer.Start();
+            CheckDatabaseConnectionAsync();
+        }
+
+        private async void CheckDatabaseConnectionAsync()
+        {
+            if (_connectionCheckInProgress)
+            {
+                return;
+            }
+
+            _connectionCheckInProgress = true;
+            try
+            {
+                var isConnected = await Task.Run(() => KantarDbContextFactory.TestConnection());
+                UpdateDatabaseConnectionStatus(isConnected);
+            }
+            finally
+            {
+                _connectionCheckInProgress = false;
+            }
+        }
+
+        private void UpdateDatabaseConnectionStatus(bool isConnected)
+        {
+            if (ConnectionStatusDot == null || ConnectionStatusText == null)
+            {
+                return;
+            }
+
+            if (isConnected)
+            {
+                _connectionLostCount = 0;
+                _connectionWarningShown = false;
+                ConnectionStatusDot.Fill = new SolidColorBrush(Color.FromRgb(34, 197, 94));
+                ConnectionStatusText.Text = "Bağlantı: bağlı";
+                ConnectionStatusText.Foreground = new SolidColorBrush(Color.FromRgb(134, 239, 172));
+                return;
+            }
+
+            _connectionLostCount++;
+            ConnectionStatusDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+            ConnectionStatusText.Text = "Bağlantı: koptu";
+            ConnectionStatusText.Foreground = new SolidColorBrush(Color.FromRgb(252, 165, 165));
+
+            if (_connectionLostCount >= 3 && !_connectionWarningShown)
+            {
+                _connectionWarningShown = true;
+                MessageBox.Show(
+                    "SQL bağlantısı kesildi. Ağ kablosunu, SQL Server hizmetini ve bağlantı ayarlarını kontrol edin.",
+                    "Bağlantı uyarısı",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         private void PrintPendingKantarFisi(PendingWeighingPrototypeRow row)
@@ -1566,6 +1763,47 @@ namespace KantarPro.Desktop
             {
                 LoadFeeSettings();
             }
+
+            LoadUsers();
+        }
+
+        private void LoadUsers()
+        {
+            Users.Clear();
+            if (_currentUser == null || !_currentUser.AdminMi)
+            {
+                return;
+            }
+
+            try
+            {
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var users = context.Kullanicilar
+                        .OrderBy(x => x.KullaniciAdi)
+                        .ToList();
+
+                    foreach (var user in users)
+                    {
+                        Users.Add(new UserManagementRow
+                        {
+                            KullaniciId = user.KullaniciId,
+                            KullaniciAdi = user.KullaniciAdi,
+                            AdSoyad = user.AdSoyad,
+                            Rol = user.Rol,
+                            Aktif = user.AktifMi ? "Aktif" : "Pasif",
+                            SonGirisTarihi = user.SonGirisTarihi.HasValue
+                                ? user.SonGirisTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                : "-"
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Kullanici listesi okuma", ex);
+                MessageBox.Show("Kullanıcı listesi okunamadı: " + ex.Message, "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void ClearEntryPageForm()
@@ -1711,6 +1949,7 @@ namespace KantarPro.Desktop
                 _scaleReader = new KantarSerialReader();
                 _scaleReader.WeightReceived += ScaleReader_WeightReceived;
                 _scaleReader.ReadError += ScaleReader_ReadError;
+                _scaleReader.ConnectionStatusChanged += ScaleReader_ConnectionStatusChanged;
                 _scaleReader.Start(settings.ComPort);
                 ComStatusText.Text = _scaleReader.IsOpen
                     ? "COM: " + settings.ComPort + " dinleniyor"
@@ -1733,6 +1972,7 @@ namespace KantarPro.Desktop
 
             _scaleReader.WeightReceived -= ScaleReader_WeightReceived;
             _scaleReader.ReadError -= ScaleReader_ReadError;
+            _scaleReader.ConnectionStatusChanged -= ScaleReader_ConnectionStatusChanged;
             _scaleReader.Dispose();
             _scaleReader = null;
         }
@@ -1759,6 +1999,18 @@ namespace KantarPro.Desktop
                 var settings = StationSettingsStore.Load();
                 ComStatusText.Text = "COM: " + settings.ComPort + " okuma hatasi";
                 SettingsConnectionInfoText.Text = "COM okuma hatasi: " + message;
+                App.LogError("COM okuma hatasi", new InvalidOperationException(message));
+            }));
+        }
+
+        private void ScaleReader_ConnectionStatusChanged(object sender, string message)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var settings = StationSettingsStore.Load();
+                ComStatusText.Text = "COM: " + settings.ComPort + " " + message;
+                SettingsConnectionInfoText.Text = message;
+                App.LogInfo("COM: " + message);
             }));
         }
 
@@ -1774,6 +2026,11 @@ namespace KantarPro.Desktop
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
+            if (_connectionCheckTimer != null)
+            {
+                _connectionCheckTimer.Stop();
+            }
+
             StopScaleReader();
         }
 

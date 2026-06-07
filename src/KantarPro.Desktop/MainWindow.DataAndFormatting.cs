@@ -988,6 +988,15 @@ namespace KantarPro.Desktop
                     "IF COL_LENGTH('dbo.Islemler', 'CikisNo') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD CikisNo NVARCHAR(20) NULL");
                 context.Database.ExecuteSqlCommand(
+                    "IF OBJECT_ID(N'dbo.CK_Islemler_CikisNo_Format', N'C') IS NULL " +
+                    "AND NOT EXISTS (SELECT 1 FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' AND CikisNo NOT LIKE N'[0-9][0-9][0-9][0-9]') " +
+                    "ALTER TABLE dbo.Islemler WITH CHECK ADD CONSTRAINT CK_Islemler_CikisNo_Format " +
+                    "CHECK (CikisNo IS NULL OR CikisNo = N'' OR CikisNo LIKE N'[0-9][0-9][0-9][0-9]')");
+                context.Database.ExecuteSqlCommand(
+                    "IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_Islemler_CikisNo' AND object_id = OBJECT_ID(N'dbo.Islemler')) " +
+                    "AND NOT EXISTS (SELECT CikisNo FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' GROUP BY CikisNo HAVING COUNT(*) > 1) " +
+                    "CREATE UNIQUE INDEX UX_Islemler_CikisNo ON dbo.Islemler(CikisNo) WHERE CikisNo IS NOT NULL AND CikisNo <> N''");
+                context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'MuafMi') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD MuafMi BIT NOT NULL CONSTRAINT DF_Islemler_MuafMi DEFAULT (0)");
                 context.Database.ExecuteSqlCommand(

@@ -199,6 +199,24 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void SuresiGecmisAcikZiyaretleriGetir_SadeceEskiIceridekileriDondurur()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var kontrolTarihi = new DateTime(2026, 6, 7, 16, 0, 0);
+
+            var eski = servis.GirisKaydet("16 OLD 001", "Firma Eski", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, kontrolTarihi.AddHours(-3));
+            servis.GirisKaydet("16 NEW 001", "Firma Yeni", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, kontrolTarihi.AddMinutes(-30));
+            var cikmis = servis.GirisKaydet("16 OUT 001", "Firma Cikti", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, kontrolTarihi.AddHours(-4));
+            servis.CikisYap(cikmis.Arac.Plaka, false, null, 1, kontrolTarihi.AddHours(-2));
+
+            var sonuc = servis.SuresiGecmisAcikZiyaretleriGetir(kontrolTarihi, TimeSpan.FromHours(2));
+
+            Assert.AreEqual(1, sonuc.Count);
+            Assert.AreSame(eski, sonuc.Single());
+        }
+
+        [TestMethod]
         public void CikisYap_OdemeTuruSecilirseTahsilatlaraYazar()
         {
             var uow = new InMemoryUnitOfWork();

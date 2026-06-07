@@ -30,7 +30,7 @@ namespace KantarPro.Desktop
                     AccentBar.Background = Brush("#0F766E");
                     IconCircle.Background = Brush("#DCFCE7");
                     IconText.Foreground = Brush("#047857");
-                    IconText.Text = "âœ“";
+                    IconText.Text = "\u2713";
                     break;
                 case ModernMessageKind.Warning:
                     AccentBar.Background = Brush("#D97706");

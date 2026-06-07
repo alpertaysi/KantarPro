@@ -38,6 +38,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="LoginComboStyle" TargetType="{x:Type ComboBox}">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
         <Style x:Key="LoginPasswordStyle" TargetType="{x:Type PasswordBox}">
             <Setter Property="Height" Value="44" />
             <Setter Property="FontSize" Value="16" />
@@ -151,7 +160,7 @@
                                        FontWeight="Bold"
                                        Foreground="{StaticResource TextBrush}"
                                        Margin="0,24,0,0" />
-                            <TextBlock Text="Devam etmek için kullanıcı adı ve şifrenizi girin."
+                            <TextBlock Text="Kullanıcıyı seçip şifrenizi girin."
                                        FontSize="14"
                                        Foreground="{StaticResource MutedBrush}"
                                        TextWrapping="Wrap"
@@ -161,14 +170,15 @@
                         <StackPanel Grid.Row="1"
                                     VerticalAlignment="Top"
                                     Margin="0,34,0,0">
-                            <TextBlock Text="Kullanıcı Adı"
+                            <TextBlock Text="Kullanıcı"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextBrush}"
                                        Margin="0,0,0,6" />
-                            <TextBox x:Name="UsernameTextBox"
-                                     Style="{StaticResource LoginInputStyle}" />
+                            <ComboBox x:Name="UserComboBox"
+                                      Style="{StaticResource LoginComboStyle}"
+                                      DisplayMemberPath="DisplayName" />
 
-                            <TextBlock Text="Şifre"
+                            <TextBlock Text="Şifre"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextBrush}"
                                        Margin="0,18,0,6" />

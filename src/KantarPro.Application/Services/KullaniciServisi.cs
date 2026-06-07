@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using KantarPro.Application.Abstractions;
@@ -95,6 +96,133 @@ namespace KantarPro.Application.Services
                 AdSoyad = kullanici.AdSoyad,
                 Rol = kullanici.Rol
             };
+        }
+
+        public void ParolaDegistir(int kullaniciId, string mevcutParola, string yeniParola)
+        {
+            if (string.IsNullOrWhiteSpace(mevcutParola))
+            {
+                throw new InvalidOperationException("Mevcut sifre girilmelidir.");
+            }
+
+            if (string.IsNullOrWhiteSpace(yeniParola) || yeniParola.Trim().Length < 6)
+            {
+                throw new InvalidOperationException("Yeni sifre en az 6 karakter olmalidir.");
+            }
+
+            var kullanici = _unitOfWork.Kullanicilar.SingleOrDefault(x => x.KullaniciId == kullaniciId && x.AktifMi);
+            if (kullanici == null)
+            {
+                throw new InvalidOperationException("Kullanici bulunamadi.");
+            }
+
+            if (!VerifyPassword(mevcutParola, kullanici.ParolaHash))
+            {
+                throw new InvalidOperationException("Mevcut sifre hatali.");
+            }
+
+            kullanici.ParolaHash = HashPassword(yeniParola.Trim());
+            _unitOfWork.SaveChanges();
+        }
+
+        public Kullanici KullaniciEkle(string kullaniciAdi, string adSoyad, string rol, string parola)
+        {
+            kullaniciAdi = (kullaniciAdi ?? string.Empty).Trim();
+            adSoyad = (adSoyad ?? string.Empty).Trim();
+            rol = NormalizeRol(rol);
+
+            if (string.IsNullOrWhiteSpace(kullaniciAdi))
+            {
+                throw new InvalidOperationException("Kullanici adi girilmelidir.");
+            }
+
+            if (string.IsNullOrWhiteSpace(adSoyad))
+            {
+                throw new InvalidOperationException("Ad soyad girilmelidir.");
+            }
+
+            if (string.IsNullOrWhiteSpace(parola) || parola.Trim().Length < 6)
+            {
+                throw new InvalidOperationException("Sifre en az 6 karakter olmalidir.");
+            }
+
+            if (_unitOfWork.Kullanicilar.Query().Any(x => x.KullaniciAdi == kullaniciAdi))
+            {
+                throw new InvalidOperationException("Bu kullanici adi zaten kullaniliyor.");
+            }
+
+            var kullanici = new Kullanici
+            {
+                KullaniciAdi = kullaniciAdi,
+                ParolaHash = HashPassword(parola.Trim()),
+                AdSoyad = adSoyad,
+                Rol = rol,
+                AktifMi = true
+            };
+
+            _unitOfWork.Kullanicilar.Add(kullanici);
+            _unitOfWork.SaveChanges();
+            return kullanici;
+        }
+
+        public IList<Kullanici> KullanicilariListele(bool sadeceAktif)
+        {
+            var query = _unitOfWork.Kullanicilar.Query();
+            if (sadeceAktif)
+            {
+                query = query.Where(x => x.AktifMi);
+            }
+
+            return query
+                .OrderBy(x => x.KullaniciAdi)
+                .ToList();
+        }
+
+        public void KullaniciSil(int silinecekKullaniciId, int yapanKullaniciId)
+        {
+            if (silinecekKullaniciId == yapanKullaniciId)
+            {
+                throw new InvalidOperationException("Kullanici kendi hesabini silemez.");
+            }
+
+            var kullanici = _unitOfWork.Kullanicilar.SingleOrDefault(x => x.KullaniciId == silinecekKullaniciId);
+            if (kullanici == null)
+            {
+                throw new InvalidOperationException("Kullanici bulunamadi.");
+            }
+
+            if (!kullanici.AktifMi)
+            {
+                return;
+            }
+
+            if (string.Equals(kullanici.Rol, KullaniciRolleri.Admin, StringComparison.OrdinalIgnoreCase))
+            {
+                var aktifAdminSayisi = _unitOfWork.Kullanicilar.Query()
+                    .Count(x => x.AktifMi && x.Rol == KullaniciRolleri.Admin);
+                if (aktifAdminSayisi <= 1)
+                {
+                    throw new InvalidOperationException("Son aktif admin kullanicisi silinemez.");
+                }
+            }
+
+            kullanici.AktifMi = false;
+            _unitOfWork.SaveChanges();
+        }
+
+        private static string NormalizeRol(string rol)
+        {
+            if (string.Equals(rol, KullaniciRolleri.Admin, StringComparison.OrdinalIgnoreCase))
+            {
+                return KullaniciRolleri.Admin;
+            }
+
+            if (string.Equals(rol, KullaniciRolleri.Memur, StringComparison.OrdinalIgnoreCase))
+            {
+                return KullaniciRolleri.Memur;
+            }
+
+            throw new InvalidOperationException("Kullanici rolu Admin veya Memur olmalidir.");
         }
 
         public static string HashPassword(string password)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using KantarPro.Application.Abstractions;
 using KantarPro.Domain;
@@ -149,6 +150,20 @@ namespace KantarPro.Application.Services
         public Islem AcikZiyaretiGetir(string plaka)
         {
             return AcikZiyaretBul(plaka);
+        }
+
+        public IList<Islem> SuresiGecmisAcikZiyaretleriGetir(DateTime kontrolTarihi, TimeSpan esikSure)
+        {
+            if (esikSure <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("Esik sure pozitif olmalidir.", nameof(esikSure));
+            }
+
+            var sinir = kontrolTarihi.Subtract(esikSure);
+            return _unitOfWork.Islemler.Query()
+                .Where(x => x.Durum == KantarSabitleri.IslemDurumu.Iceride && x.GirisTarihi <= sinir)
+                .OrderBy(x => x.GirisTarihi)
+                .ToList();
         }
 
         public Arac FirmaAdiniGuncelle(string plaka, string yeniFirmaAdi, int? kullaniciId = null)

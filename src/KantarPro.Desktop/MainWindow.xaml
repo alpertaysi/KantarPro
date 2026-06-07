@@ -147,10 +147,13 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Giriş-Çıkış İşlemleri" Style="{StaticResource PrimaryButton}" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AracGirisButton_Click" />
                         <Button Content="Günlük Tahsilat" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="GunlukHasilatButton_Click" />
+                        <Button Content="Şifre Değiştir" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="ChangePasswordButton_Click" />
                         <Button x:Name="SettingsNavButton" Content="Ayarlar" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AyarlarButton_Click" />
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse x:Name="ConnectionStatusDot" Width="9" Height="9" Fill="#94A3B8" Margin="18,0,5,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="ConnectionStatusText" Text="Bağlantı: kontrol" Foreground="#CBD5E1" Margin="0,0,12,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="SqlStatusText" Text="SQL: Bağlı" Foreground="#86EFAC" Margin="18,0,12,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="ComStatusText" Text="COM: Beklemede" Foreground="#FCD34D" Margin="0,0,12,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="StationStatusText" Text="Giriş Kantarı" Foreground="#CBD5E1" Margin="0,0,12,0" VerticalAlignment="Center" />
@@ -627,6 +630,104 @@
                                         <Button Content="Yenile" Width="100" MinHeight="36" Padding="12,5" FontSize="13" Margin="8,0,0,0" Click="SettingsRefreshButton_Click" />
                                     </StackPanel>
                                 </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="Kullanıcı">
+                                <Grid Background="#FFFFFF" Margin="18" MinWidth="1120">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="470" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                    <TextBlock Text="Kullanıcı Yönetimi" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                    <TextBlock Text="Admin yeni memur veya admin hesabı açabilir. Memurlar kendi şifrelerini üst menüdeki Şifre Değiştir butonundan değiştirir."
+                                               Foreground="{StaticResource Muted}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,6,0,18" />
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150" />
+                                            <ColumnDefinition Width="260" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="Kullanıcı Adı" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="NewUserNameTextBox" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+
+                                        <TextBlock Grid.Row="1" Text="Ad Soyad" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <TextBox x:Name="NewUserFullNameTextBox" Grid.Row="1" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" Margin="0,0,0,10" />
+
+                                        <TextBlock Grid.Row="2" Text="Rol" VerticalAlignment="Center" Margin="0,0,12,10" />
+                                        <ComboBox x:Name="NewUserRoleComboBox" Grid.Row="2" Grid.Column="1" Height="34" FontSize="14" Padding="6,3" Margin="0,0,0,10" SelectedIndex="0">
+                                            <ComboBoxItem Content="Memur" />
+                                            <ComboBoxItem Content="Admin" />
+                                        </ComboBox>
+
+                                        <TextBlock Grid.Row="3" Text="Geçici Şifre" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                        <PasswordBox x:Name="NewUserPasswordBox" Grid.Row="3" Grid.Column="1" Height="34" FontSize="14" Padding="8,4" />
+
+                                        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,18,0,0">
+                                            <Button Content="Kullanıcı Ekle"
+                                                    Style="{StaticResource PrimaryButton}"
+                                                    Width="140"
+                                                    MinHeight="36"
+                                                    Padding="12,5"
+                                                    FontSize="13"
+                                                    Click="AddUserButton_Click" />
+                                            <Button Content="Temizle"
+                                                    Width="95"
+                                                    MinHeight="36"
+                                                    Padding="12,5"
+                                                    FontSize="13"
+                                                    Margin="8,0,0,0"
+                                                    Click="ClearNewUserButton_Click" />
+                                        </StackPanel>
+                                    </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Tanımlı Kullanıcılar" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
+                                        <TextBlock Text="Oturum açarken kullanıcı adını burada göründüğü gibi yazın."
+                                                   Foreground="{StaticResource Muted}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,6,0,12" />
+                                        <DataGrid x:Name="UsersGrid"
+                                                  ItemsSource="{Binding Users}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserAddRows="False"
+                                                  IsReadOnly="True"
+                                                  AlternatingRowBackground="#D1D5DB"
+                                                  RowBackground="#F8FAFC"
+                                                  FontSize="13"
+                                                  RowHeight="28"
+                                                  MinHeight="220"
+                                                  MaxHeight="360">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Kullanıcı Adı" Binding="{Binding KullaniciAdi}" Width="150" />
+                                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="220" />
+                                                <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="95" />
+                                                <DataGridTextColumn Header="Durum" Binding="{Binding Aktif}" Width="85" />
+                                                <DataGridTextColumn Header="Son Giriş" Binding="{Binding SonGirisTarihi}" Width="160" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                                            <Button Content="Kullanıcı Sil"
+                                                    Width="130"
+                                                    MinHeight="36"
+                                                    Padding="12,5"
+                                                    FontSize="13"
+                                                    Click="DeleteUserButton_Click" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
                             </TabItem>
                         </TabControl>
                     </Grid>

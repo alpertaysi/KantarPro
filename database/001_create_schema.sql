@@ -120,6 +120,7 @@ BEGIN TRY
         MuafMi BIT NOT NULL CONSTRAINT DF_Islemler_MuafMi DEFAULT (0),
         MuafiyetNedeni NVARCHAR(250) NULL,
         Notlar NVARCHAR(500) NULL,
+        CONSTRAINT CK_Islemler_CikisNo_Format CHECK (CikisNo IS NULL OR CikisNo = N'' OR CikisNo LIKE N'[0-9][0-9][0-9][0-9]'),
         CONSTRAINT CK_Islemler_ToplamTahakkuk CHECK (ToplamTahakkuk >= 0),
         CONSTRAINT CK_Islemler_ToplamTahsilat CHECK (ToplamTahsilat >= 0),
         CONSTRAINT FK_Islemler_Araclar FOREIGN KEY (AracId) REFERENCES dbo.Araclar(AracId),
@@ -128,6 +129,7 @@ BEGIN TRY
     );
 
     CREATE UNIQUE INDEX UX_Islemler_IslemNo ON dbo.Islemler(IslemNo);
+    CREATE UNIQUE INDEX UX_Islemler_CikisNo ON dbo.Islemler(CikisNo) WHERE CikisNo IS NOT NULL AND CikisNo <> N'';
     CREATE UNIQUE INDEX UX_Islemler_Iceride_Arac ON dbo.Islemler(AracId) WHERE Durum = N'Iceride';
     CREATE INDEX IX_Islemler_Durum_GirisTarihi ON dbo.Islemler(Durum, GirisTarihi);
 

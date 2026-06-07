@@ -30,9 +30,16 @@ namespace KantarPro.Desktop
         private readonly StringBuilder _buffer = new StringBuilder();
         private SerialPort _port;
         private System.Timers.Timer _pollTimer;
+        private System.Timers.Timer _reconnectTimer;
+        private string _configuredPortName;
+        private int _reconnectAttempts;
+        private bool _disposed;
+        private const int MaxReconnectAttempts = 5;
+        private const int ReconnectIntervalMilliseconds = 2000;
 
         public event EventHandler<ScaleWeightReceivedEventArgs> WeightReceived;
         public event EventHandler<string> ReadError;
+        public event EventHandler<string> ConnectionStatusChanged;
 
         public bool IsOpen
         {
@@ -53,7 +60,19 @@ namespace KantarPro.Desktop
                 return;
             }
 
-            _port = new SerialPort(portName.Trim(), 9600, Parity.None, 8, StopBits.One)
+            _configuredPortName = portName.Trim();
+            _reconnectAttempts = 0;
+            OpenConfiguredPort();
+        }
+
+        private void OpenConfiguredPort()
+        {
+            if (string.IsNullOrWhiteSpace(_configuredPortName))
+            {
+                return;
+            }
+
+            _port = new SerialPort(_configuredPortName, 9600, Parity.None, 8, StopBits.One)
             {
                 Encoding = Encoding.ASCII,
                 ReadTimeout = 500,
@@ -69,6 +88,13 @@ namespace KantarPro.Desktop
         }
 
         public void Stop()
+        {
+            _configuredPortName = null;
+            StopReconnectTimer();
+            ClosePort();
+        }
+
+        private void ClosePort()
         {
             lock (_syncRoot)
             {
@@ -105,6 +131,7 @@ namespace KantarPro.Desktop
 
         public void Dispose()
         {
+            _disposed = true;
             Stop();
         }
 
@@ -216,6 +243,85 @@ namespace KantarPro.Desktop
             catch (Exception ex)
             {
                 OnReadError(ex.Message);
+                ScheduleReconnect(ex.Message);
+            }
+        }
+
+        private void ScheduleReconnect(string reason)
+        {
+            if (_disposed || string.IsNullOrWhiteSpace(_configuredPortName))
+            {
+                return;
+            }
+
+            lock (_syncRoot)
+            {
+                if (_reconnectTimer != null || _reconnectAttempts >= MaxReconnectAttempts)
+                {
+                    return;
+                }
+            }
+
+            ClosePort();
+            OnConnectionStatusChanged("COM yeniden bağlanma bekliyor: " + reason);
+
+            lock (_syncRoot)
+            {
+                if (_reconnectTimer != null || _disposed)
+                {
+                    return;
+                }
+
+                _reconnectTimer = new System.Timers.Timer(ReconnectIntervalMilliseconds);
+                _reconnectTimer.Elapsed += ReconnectTimer_Elapsed;
+                _reconnectTimer.AutoReset = false;
+                _reconnectTimer.Start();
+            }
+        }
+
+        private void ReconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            StopReconnectTimer();
+
+            if (_disposed || string.IsNullOrWhiteSpace(_configuredPortName))
+            {
+                return;
+            }
+
+            _reconnectAttempts++;
+            try
+            {
+                OpenConfiguredPort();
+                OnConnectionStatusChanged(_configuredPortName + " yeniden bağlandı.");
+                _reconnectAttempts = 0;
+            }
+            catch (Exception ex)
+            {
+                OnReadError("COM yeniden bağlanma denemesi " + _reconnectAttempts + "/" + MaxReconnectAttempts + " başarısız: " + ex.Message);
+                if (_reconnectAttempts < MaxReconnectAttempts)
+                {
+                    ScheduleReconnect(ex.Message);
+                }
+                else
+                {
+                    OnConnectionStatusChanged("COM yeniden bağlanma denemeleri durduruldu.");
+                }
+            }
+        }
+
+        private void StopReconnectTimer()
+        {
+            lock (_syncRoot)
+            {
+                if (_reconnectTimer == null)
+                {
+                    return;
+                }
+
+                _reconnectTimer.Elapsed -= ReconnectTimer_Elapsed;
+                _reconnectTimer.Stop();
+                _reconnectTimer.Dispose();
+                _reconnectTimer = null;
             }
         }
 
@@ -231,6 +337,15 @@ namespace KantarPro.Desktop
         private void OnReadError(string message)
         {
             var handler = ReadError;
+            if (handler != null)
+            {
+                handler(this, message);
+            }
+        }
+
+        private void OnConnectionStatusChanged(string message)
+        {
+            var handler = ConnectionStatusChanged;
             if (handler != null)
             {
                 handler(this, message);

@@ -37,6 +37,7 @@
     <Compile Include="KullaniciServisiTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />
+    <Compile Include="StationSettingsStoreTests.cs" />
     <Compile Include="UcretAyarlariServisiTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

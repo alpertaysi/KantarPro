@@ -83,6 +83,16 @@
         public string YukDurumu { get; set; }
         public string Aciklama { get; set; }
     }
+
+    public class UserManagementRow
+    {
+        public int KullaniciId { get; set; }
+        public string KullaniciAdi { get; set; }
+        public string AdSoyad { get; set; }
+        public string Rol { get; set; }
+        public string Aktif { get; set; }
+        public string SonGirisTarihi { get; set; }
+    }
 }
 
 
