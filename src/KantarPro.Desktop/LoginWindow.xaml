@@ -4,9 +4,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Kantar Otomasyonu"
         Width="980"
-        Height="620"
+        Height="660"
         MinWidth="980"
-        MinHeight="620"
+        MinHeight="660"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="#EAF2F8"
@@ -140,7 +140,7 @@
                         Background="#F8FBFD"
                         BorderBrush="#E2E8F0"
                         BorderThickness="1,0,0,0"
-                        Padding="42,44">
+                        Padding="42,34">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -190,7 +190,8 @@
                                     Background="#FEF2F2"
                                     BorderBrush="#FCA5A5"
                                     BorderThickness="1"
-                                    Margin="0,16,0,0"
+                                    MinHeight="46"
+                                    Margin="0,14,0,0"
                                     Padding="12"
                                     Visibility="Collapsed">
                                 <TextBlock x:Name="InfoTextBlock"

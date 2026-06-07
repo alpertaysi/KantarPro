@@ -38,37 +38,30 @@ namespace KantarPro.Application.Services
 
         public void VarsayilanKullanicilariOlustur()
         {
-            var degisti = false;
-            if (!_unitOfWork.Kullanicilar.Query().Any(x => x.KullaniciAdi == "admin"))
+            if (_unitOfWork.Kullanicilar.Query().Any())
             {
-                _unitOfWork.Kullanicilar.Add(new Kullanici
-                {
-                    KullaniciAdi = "admin",
-                    ParolaHash = HashPassword("admin"),
-                    AdSoyad = "Admin Kullanici",
-                    Rol = KullaniciRolleri.Admin,
-                    AktifMi = true
-                });
-                degisti = true;
+                return;
             }
 
-            if (!_unitOfWork.Kullanicilar.Query().Any(x => x.KullaniciAdi == "memur"))
+            _unitOfWork.Kullanicilar.Add(new Kullanici
             {
-                _unitOfWork.Kullanicilar.Add(new Kullanici
-                {
-                    KullaniciAdi = "memur",
-                    ParolaHash = HashPassword("memur"),
-                    AdSoyad = "Memur Kullanici",
-                    Rol = KullaniciRolleri.Memur,
-                    AktifMi = true
-                });
-                degisti = true;
-            }
+                KullaniciAdi = "admin",
+                ParolaHash = HashPassword("admin"),
+                AdSoyad = "Admin Kullanıcı",
+                Rol = KullaniciRolleri.Admin,
+                AktifMi = true
+            });
 
-            if (degisti)
+            _unitOfWork.Kullanicilar.Add(new Kullanici
             {
-                _unitOfWork.SaveChanges();
-            }
+                KullaniciAdi = "memur",
+                ParolaHash = HashPassword("memur"),
+                AdSoyad = "Memur Kullanıcı",
+                Rol = KullaniciRolleri.Memur,
+                AktifMi = true
+            });
+
+            _unitOfWork.SaveChanges();
         }
 
         public KullaniciOturumu GirisYap(string kullaniciAdi, string parola)

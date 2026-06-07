@@ -23,6 +23,20 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void VarsayilanKullanicilariOlustur_TabloBosDegilseSilinenMemuruGeriGetirmez()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new KullaniciServisi(uow);
+            servis.VarsayilanKullanicilariOlustur();
+            var memur = uow.KullaniciListesi.Single(x => x.KullaniciAdi == "memur");
+            uow.KullaniciListesi.Remove(memur);
+
+            servis.VarsayilanKullanicilariOlustur();
+
+            Assert.IsFalse(uow.KullaniciListesi.Any(x => x.KullaniciAdi == "memur"));
+        }
+
+        [TestMethod]
         public void GirisYap_DogruSifreyle_OturumDondurur()
         {
             var uow = new InMemoryUnitOfWork();

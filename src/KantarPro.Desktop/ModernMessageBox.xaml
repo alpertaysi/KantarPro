@@ -76,17 +76,30 @@
                     BorderBrush="#E2E8F0"
                     BorderThickness="0,1,0,0"
                     Padding="14">
-                <Button Content="Tamam"
-                        Width="104"
-                        Height="34"
-                        HorizontalAlignment="Right"
-                        Background="#0F766E"
-                        BorderBrush="#115E59"
-                        Foreground="White"
-                        FontWeight="SemiBold"
-                        IsDefault="True"
-                        IsCancel="True"
-                        Click="OkButton_Click" />
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button x:Name="SecondaryButton"
+                            Content="Vazgeç"
+                            Width="104"
+                            Height="34"
+                            Margin="0,0,10,0"
+                            Background="#F8FAFC"
+                            BorderBrush="#CBD5E1"
+                            Foreground="#0F172A"
+                            FontWeight="SemiBold"
+                            IsCancel="True"
+                            Click="SecondaryButton_Click" />
+                    <Button x:Name="PrimaryButton"
+                            Content="Tamam"
+                            Width="104"
+                            Height="34"
+                            Background="#0F766E"
+                            BorderBrush="#115E59"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            IsDefault="True"
+                            Click="PrimaryButton_Click" />
+                </StackPanel>
             </Border>
         </Grid>
     </Border>

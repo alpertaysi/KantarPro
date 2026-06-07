@@ -260,6 +260,8 @@
                                         <Separator />
                                         <MenuItem Header="Makbuz Yazdır" Click="EntryGridMakbuzYazdirMenuItem_Click" />
                                         <MenuItem Header="Makbuz Göster" Click="EntryGridMakbuzGosterMenuItem_Click" />
+                                        <Separator />
+                                        <MenuItem Header="Kaydı Sil" Click="EntryGridKaydiSilMenuItem_Click" />
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
@@ -345,6 +347,8 @@
                                             <ContextMenu>
                                                 <MenuItem Header="Kantar Fişi Yazdır" Click="ExitGridMakbuzYazdirMenuItem_Click" />
                                                 <MenuItem Header="Kantar Fişi Göster" Click="ExitGridMakbuzGosterMenuItem_Click" />
+                                                <Separator />
+                                                <MenuItem Header="Kaydı Sil" Click="ExitGridKaydiSilMenuItem_Click" />
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
@@ -439,11 +443,17 @@
                         </StackPanel>
                         <Button Content="Listele" Width="120" MinHeight="40" Margin="0,16,8,0" Click="RevenueListButton_Click" />
                         <Button Content="PDF Olarak Dışa Aktar" Width="180" MinHeight="40" Margin="0,16,8,0" Click="RevenueExportPdfButton_Click" />
+                        <Button Content="Excel Olarak Dışa Aktar" Width="190" MinHeight="40" Margin="0,16,8,0" Click="RevenueExportExcelButton_Click" />
                         <Button Content="OKI Döküm Yazdır" Width="160" MinHeight="40" Margin="0,16,0,0" Click="RevenuePrintOkiButton_Click" />
                     </StackPanel>
                 </Border>
 
-                <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto">
+                <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" PreviewMouseRightButtonDown="DailyRevenueGrid_PreviewMouseRightButtonDown">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Kaydı Sil" Click="DailyRevenueGridKaydiSilMenuItem_Click" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sıra" Binding="{Binding SiraNo}" Width="52" />
                         <DataGridTextColumn Header="İşlem No" Binding="{Binding IslemNo}" Width="100" />
@@ -508,7 +518,7 @@
                             <TextBlock Text="Ücretler ortak SQL veritabanında, SQL/istasyon/COM bilgileri bu bilgisayarda saklanır." Foreground="{StaticResource Muted}" Margin="0,6,0,18" />
                         </StackPanel>
 
-                        <TabControl Grid.Row="1" Grid.RowSpan="3">
+                        <TabControl Grid.Row="1" Grid.RowSpan="3" HorizontalAlignment="Stretch">
                             <TabItem Header="Ücret Ayarları">
                                 <StackPanel Background="#FFFFFF" Margin="18">
                                     <Grid>
@@ -633,11 +643,11 @@
                             </TabItem>
 
                             <TabItem Header="Kullanıcı">
-                                <Grid Background="#FFFFFF" Margin="18" MinWidth="1120">
+                                <Grid Background="#FFFFFF" Margin="18" HorizontalAlignment="Stretch">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="470" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="430" />
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" MinWidth="760" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" HorizontalAlignment="Left">
@@ -693,9 +703,9 @@
                                     </Grid>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="2">
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Stretch">
                                         <TextBlock Text="Tanımlı Kullanıcılar" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Ink}" />
-                                        <TextBlock Text="Oturum açarken kullanıcı adını burada göründüğü gibi yazın."
+                                        <TextBlock Text="Oturum açarken bu listedeki kullanıcı seçilir; silinen kullanıcılar geçmiş işlemleri korunarak pasife alınır."
                                                    Foreground="{StaticResource Muted}"
                                                    TextWrapping="Wrap"
                                                    Margin="0,6,0,12" />
@@ -704,18 +714,27 @@
                                                   AutoGenerateColumns="False"
                                                   CanUserAddRows="False"
                                                   IsReadOnly="True"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch"
                                                   AlternatingRowBackground="#D1D5DB"
                                                   RowBackground="#F8FAFC"
                                                   FontSize="13"
                                                   RowHeight="28"
                                                   MinHeight="220"
-                                                  MaxHeight="360">
+                                                  MaxHeight="420"
+                                                  HorizontalScrollBarVisibility="Auto"
+                                                  PreviewMouseRightButtonDown="UsersGrid_PreviewMouseRightButtonDown">
+                                            <DataGrid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Kullanıcı Sil" Click="DeleteUserButton_Click" />
+                                                </ContextMenu>
+                                            </DataGrid.ContextMenu>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Kullanıcı Adı" Binding="{Binding KullaniciAdi}" Width="150" />
-                                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="220" />
-                                                <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="95" />
-                                                <DataGridTextColumn Header="Durum" Binding="{Binding Aktif}" Width="85" />
-                                                <DataGridTextColumn Header="Son Giriş" Binding="{Binding SonGirisTarihi}" Width="160" />
+                                                <DataGridTextColumn Header="Kullanıcı Adı" Binding="{Binding KullaniciAdi}" Width="180" />
+                                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="*" MinWidth="300" />
+                                                <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="120" />
+                                                <DataGridTextColumn Header="Durum" Binding="{Binding Aktif}" Width="110" />
+                                                <DataGridTextColumn Header="Son Giriş" Binding="{Binding SonGirisTarihi}" Width="190" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">

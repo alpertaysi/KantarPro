@@ -51,7 +51,7 @@ namespace KantarPro.Desktop
                 .Include(x => x.Arac)
                 .Include(x => x.Tartimlar)
                 .Include(x => x.Ucretler.Select(u => u.Ucret))
-                .Where(x => x.Durum == KantarSabitleri.IslemDurumu.Iceride)
+                .Where(x => !x.SilindiMi && x.Durum == KantarSabitleri.IslemDurumu.Iceride)
                 .OrderByDescending(x => x.GirisTarihi)
                 .Take(100)
                 .ToList();
@@ -71,7 +71,7 @@ namespace KantarPro.Desktop
                 .Include(x => x.Arac)
                 .Include(x => x.IlkTartim)
                 .Include(x => x.IlkTartim.Islem)
-                .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor && x.IlkTartim.Islem != null && !x.IlkTartim.Islem.SilindiMi)
                 .OrderByDescending(x => x.OlusturmaTarihi)
                 .Take(100)
                 .ToList();
@@ -100,6 +100,7 @@ namespace KantarPro.Desktop
             var dosyaPlaka = NormalizePlaka(dosya.Arac != null ? dosya.Arac.Plaka : null);
             var acikDonusVarMi = context.Islemler.Any(x =>
                 x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
+                !x.SilindiMi &&
                 (x.AracId == dosya.AracId || x.Arac.Plaka == dosyaPlaka));
             if (acikDonusVarMi)
             {
@@ -130,7 +131,7 @@ namespace KantarPro.Desktop
                 .Include(x => x.Arac)
                 .Include(x => x.Tartimlar)
                 .Include(x => x.Ucretler.Select(u => u.Ucret))
-                .Where(x => x.Durum == KantarSabitleri.IslemDurumu.CikisYapti)
+                .Where(x => !x.SilindiMi && x.Durum == KantarSabitleri.IslemDurumu.CikisYapti)
                 .OrderByDescending(x => x.Tartimlar
                     .Where(t => t.TartimTipi == KantarSabitleri.TartimTipi.Sonradan || t.TartimTipi == KantarSabitleri.TartimTipi.Cikis)
                     .Select(t => (DateTime?)t.TartimTarihi)
@@ -161,7 +162,7 @@ namespace KantarPro.Desktop
         {
             var gunluk = context.Islemler
                 .Include(x => x.Arac)
-                .Where(x => (x.GirisTarihi >= bugun && x.GirisTarihi < yarin) || (x.CikisTarihi >= bugun && x.CikisTarihi < yarin))
+                .Where(x => !x.SilindiMi && ((x.GirisTarihi >= bugun && x.GirisTarihi < yarin) || (x.CikisTarihi >= bugun && x.CikisTarihi < yarin)))
                 .OrderByDescending(x => x.GirisTarihi)
                 .Take(100)
                 .ToList();

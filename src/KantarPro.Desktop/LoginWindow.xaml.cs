@@ -57,7 +57,7 @@ namespace KantarPro.Desktop
                 .Select(x => new LoginUserOption
                 {
                     KullaniciAdi = x.KullaniciAdi,
-                    DisplayName = x.AdSoyad + " (" + x.KullaniciAdi + " - " + x.Rol + ")"
+                    DisplayName = GetDisplayName(x)
                 })
                 .ToList();
 
@@ -115,10 +115,27 @@ namespace KantarPro.Desktop
             Close();
         }
 
+        private static string GetDisplayName(Kullanici kullanici)
+        {
+            if (string.Equals(kullanici.KullaniciAdi, "admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Admin";
+            }
+
+            return string.IsNullOrWhiteSpace(kullanici.AdSoyad)
+                ? kullanici.KullaniciAdi
+                : kullanici.AdSoyad;
+        }
+
         private sealed class LoginUserOption
         {
             public string KullaniciAdi { get; set; }
             public string DisplayName { get; set; }
+
+            public override string ToString()
+            {
+                return DisplayName ?? string.Empty;
+            }
         }
     }
 }

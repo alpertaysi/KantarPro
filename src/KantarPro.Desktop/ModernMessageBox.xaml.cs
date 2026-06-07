@@ -13,13 +13,25 @@ namespace KantarPro.Desktop
 
     public partial class ModernMessageBox : Window
     {
+        private readonly MessageBoxButton _buttons;
+
+        public MessageBoxResult Result { get; private set; }
+
         public ModernMessageBox(string title, string message, ModernMessageKind kind)
+            : this(title, message, kind, MessageBoxButton.OK)
+        {
+        }
+
+        public ModernMessageBox(string title, string message, ModernMessageKind kind, MessageBoxButton buttons)
         {
             InitializeComponent();
+            _buttons = buttons;
+            Result = GetDefaultResult(buttons);
             Title = string.IsNullOrWhiteSpace(title) ? "Kantar Pro" : title;
             TitleText.Text = Title;
             MessageText.Text = message ?? string.Empty;
             ApplyKind(kind);
+            ApplyButtons(buttons);
         }
 
         private void ApplyKind(ModernMessageKind kind)
@@ -58,9 +70,69 @@ namespace KantarPro.Desktop
             return (SolidColorBrush)new BrushConverter().ConvertFromString(color);
         }
 
-        private void OkButton_Click(object sender, RoutedEventArgs e)
+        private static MessageBoxResult GetDefaultResult(MessageBoxButton buttons)
         {
+            switch (buttons)
+            {
+                case MessageBoxButton.YesNo:
+                    return MessageBoxResult.No;
+                case MessageBoxButton.OKCancel:
+                    return MessageBoxResult.Cancel;
+                case MessageBoxButton.YesNoCancel:
+                    return MessageBoxResult.Cancel;
+                default:
+                    return MessageBoxResult.OK;
+            }
+        }
+
+        private void ApplyButtons(MessageBoxButton buttons)
+        {
+            SecondaryButton.Visibility = Visibility.Collapsed;
+            SecondaryButton.IsCancel = false;
+            PrimaryButton.IsCancel = false;
+
+            switch (buttons)
+            {
+                case MessageBoxButton.YesNo:
+                    SecondaryButton.Visibility = Visibility.Visible;
+                    SecondaryButton.Content = "Vazgeç";
+                    PrimaryButton.Content = "Evet";
+                    SecondaryButton.IsCancel = true;
+                    break;
+                case MessageBoxButton.OKCancel:
+                    SecondaryButton.Visibility = Visibility.Visible;
+                    SecondaryButton.Content = "Vazgeç";
+                    PrimaryButton.Content = "Tamam";
+                    SecondaryButton.IsCancel = true;
+                    break;
+                case MessageBoxButton.YesNoCancel:
+                    SecondaryButton.Visibility = Visibility.Visible;
+                    SecondaryButton.Content = "Vazgeç";
+                    PrimaryButton.Content = "Evet";
+                    SecondaryButton.IsCancel = true;
+                    break;
+                default:
+                    PrimaryButton.Content = "Tamam";
+                    PrimaryButton.IsCancel = true;
+                    break;
+            }
+        }
+
+        private void PrimaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Result = _buttons == MessageBoxButton.YesNo || _buttons == MessageBoxButton.YesNoCancel
+                ? MessageBoxResult.Yes
+                : MessageBoxResult.OK;
             DialogResult = true;
+            Close();
+        }
+
+        private void SecondaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Result = _buttons == MessageBoxButton.YesNo
+                ? MessageBoxResult.No
+                : MessageBoxResult.Cancel;
+            DialogResult = false;
             Close();
         }
     }

@@ -112,6 +112,7 @@
     <Compile Include="DashboardFormat.cs" />
     <Compile Include="AutoRefreshPolicy.cs" />
     <Compile Include="DailyRevenuePdfExporter.cs" />
+    <Compile Include="DailyRevenueExcelExporter.cs" />
     <Compile Include="DailyRevenueTextFormatter.cs" />
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />

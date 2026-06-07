@@ -17,14 +17,14 @@ namespace KantarPro.Desktop
 
         public static MessageBoxResult Show(Window owner, string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon)
         {
-            var dialog = new ModernMessageBox(caption, messageBoxText, ToKind(messageBoxText, icon));
+            var dialog = new ModernMessageBox(caption, messageBoxText, ToKind(messageBoxText, icon), button);
             if (owner != null && owner.IsVisible && !ReferenceEquals(owner, dialog))
             {
                 dialog.Owner = owner;
             }
 
             dialog.ShowDialog();
-            return MessageBoxResult.OK;
+            return dialog.Result;
         }
 
         private static ModernMessageKind ToKind(string message, MessageBoxImage icon)

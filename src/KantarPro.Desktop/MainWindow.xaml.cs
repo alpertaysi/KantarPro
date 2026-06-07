@@ -1066,6 +1066,117 @@ namespace KantarPro.Desktop
             PendingWeighingsGrid.Focus();
         }
 
+        private void UsersGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var row = FindParent<DataGridRow>(e.OriginalSource as DependencyObject);
+            if (row == null)
+            {
+                return;
+            }
+
+            row.IsSelected = true;
+            UsersGrid.SelectedItem = row.Item;
+            UsersGrid.Focus();
+        }
+
+        private void DailyRevenueGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var row = FindParent<DataGridRow>(e.OriginalSource as DependencyObject);
+            if (row == null)
+            {
+                return;
+            }
+
+            row.IsSelected = true;
+            DailyRevenueGrid.SelectedItem = row.Item;
+            DailyRevenueGrid.Focus();
+        }
+
+        private void EntryGridKaydiSilMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
+            DeleteIslemFromLists(row != null ? row.IslemId : 0, row != null ? row.Plaka : null);
+        }
+
+        private void ExitGridKaydiSilMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = ExitVehiclesGrid.SelectedItem as VehicleMovementRow;
+            DeleteIslemFromLists(row != null ? row.IslemId : 0, row != null ? row.Plaka : null);
+        }
+
+        private void DailyRevenueGridKaydiSilMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var row = DailyRevenueGrid.SelectedItem as DailyRevenueRow;
+            DeleteIslemFromLists(row != null ? row.IslemId : 0, row != null ? row.Plaka : null);
+        }
+
+        private void DeleteIslemFromLists(int islemId, string plaka)
+        {
+            if (_currentUser == null || !_currentUser.AdminMi)
+            {
+                MessageBox.Show("Kayıt silme yetkisi sadece admin kullanıcılara açıktır.", "Kayıt Sil", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (islemId <= 0)
+            {
+                MessageBox.Show("Silinecek kayıt seçilemedi.", "Kayıt Sil", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var soru = string.IsNullOrWhiteSpace(plaka)
+                ? "Seçili kayıt listelerden ve raporlardan gizlenecek. Devam edilsin mi?"
+                : plaka + " plakalı kayıt listelerden ve raporlardan gizlenecek. Devam edilsin mi?";
+            if (MessageBox.Show(soru, "Kayıt Sil", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
+                    servis.IslemGizle(islemId, _currentUser.KullaniciId, "Admin tarafından listelerden silindi");
+                }
+
+                App.LogOperation(_currentUser.KullaniciAdi, "Islem silindi", "Listelerden gizlenen IslemId: " + islemId);
+                RemoveHiddenIslemFromVisibleRows(islemId);
+                LoadDashboardData(false);
+                if (DailyRevenueContent.Visibility == Visibility.Visible)
+                {
+                    LoadDailyRevenueData();
+                }
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Islem silme", ex);
+                MessageBox.Show("Kayıt silinemedi: " + ex.Message, "Kayıt Sil", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void RemoveHiddenIslemFromVisibleRows(int islemId)
+        {
+            RemoveRows(EntryVehicles, x => x.IslemId == islemId);
+            RemoveRows(ExitVehicles, x => x.IslemId == islemId);
+            RemoveRows(DailyRevenueRows, x => x.IslemId == islemId);
+
+            EntryVehiclesView.Refresh();
+            ExitVehiclesView.Refresh();
+            DailyRevenueView.Refresh();
+        }
+
+        private static void RemoveRows<T>(ObservableCollection<T> rows, Func<T, bool> predicate)
+        {
+            for (var i = rows.Count - 1; i >= 0; i--)
+            {
+                if (predicate(rows[i]))
+                {
+                    rows.RemoveAt(i);
+                }
+            }
+        }
+
         private void ExitGridMakbuzYazdirMenuItem_Click(object sender, RoutedEventArgs e)
         {
             PrintKantarFisi(ExitVehiclesGrid.SelectedItem as VehicleMovementRow);

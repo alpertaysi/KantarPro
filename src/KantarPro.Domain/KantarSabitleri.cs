@@ -7,6 +7,7 @@ namespace KantarPro.Domain
             public const string Iceride = "Iceride";
             public const string CikisYapti = "CikisYapti";
             public const string Iptal = "Iptal";
+            public const string Silindi = "Silindi";
         }
 
         public static class TartimTipi

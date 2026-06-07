@@ -91,6 +91,46 @@ namespace KantarPro.Desktop
             }
         }
 
+        private void RevenueExportExcelButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_currentUser == null || !_currentUser.AdminMi)
+                {
+                    MessageBox.Show("Excel dışa aktarma yetkisi sadece admin kullanıcılara açıktır.", "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var rows = DailyRevenueView.Cast<DailyRevenueRow>().ToList();
+                if (rows.Count == 0)
+                {
+                    MessageBox.Show("Excel oluşturmak için önce tahsilat listesini doldurun.", "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var dialog = new SaveFileDialog
+                {
+                    Title = "Günlük tahsilat Excel dosyası",
+                    Filter = "Excel CSV dosyası (*.csv)|*.csv",
+                    FileName = "GunlukTahsilat_" + DateTime.Today.ToString("yyyyMMdd") + ".csv",
+                    AddExtension = true,
+                    DefaultExt = ".csv"
+                };
+
+                if (dialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+
+                DailyRevenueExcelExporter.Export(dialog.FileName, rows);
+                MessageBox.Show("Günlük tahsilat Excel dosyası oluşturuldu.", "Günlük Tahsilat");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Excel oluşturulamadı: " + ex.Message, "Günlük Tahsilat", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         private void RevenuePrintOkiButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -146,6 +186,7 @@ namespace KantarPro.Desktop
                         .Include(x => x.Islem.Tartimlar)
                         .Where(x =>
                             x.TahsilEdildiMi &&
+                            !x.Islem.SilindiMi &&
                             x.Islem.CikisTarihi.HasValue &&
                             x.Islem.CikisTarihi.Value >= baslangic &&
                             x.Islem.CikisTarihi.Value < bitisExclusive)
@@ -186,6 +227,7 @@ namespace KantarPro.Desktop
 
                         DailyRevenueRows.Add(new DailyRevenueRow
                         {
+                            IslemId = islem.IslemId,
                             SiraNo = siraNo++,
                             IslemNo = !string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.CikisNo : (string.IsNullOrWhiteSpace(tahsilat.Key.TahsilatNo) ? islem.IslemNo : tahsilat.Key.TahsilatNo),
                             IslemTipi = FormatRevenueIslemTipi(islem, ilkTartim, ikinciTartim),
@@ -213,6 +255,7 @@ namespace KantarPro.Desktop
                         .Include(x => x.Tartimlar)
                         .Where(x =>
                             x.MuafMi &&
+                            !x.SilindiMi &&
                             x.CikisTarihi.HasValue &&
                             x.CikisTarihi.Value >= baslangic &&
                             x.CikisTarihi.Value < bitisExclusive)
@@ -227,6 +270,7 @@ namespace KantarPro.Desktop
  
                         DailyRevenueRows.Add(new DailyRevenueRow
                         {
+                            IslemId = islem.IslemId,
                             SiraNo = siraNo++,
                             IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
                             IslemTipi = FormatRevenueIslemTipi(islem, ilkTartim, ikinciTartim),
@@ -1005,6 +1049,9 @@ namespace KantarPro.Desktop
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'Notlar') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD Notlar NVARCHAR(500) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "IF COL_LENGTH('dbo.Islemler', 'SilindiMi') IS NULL " +
+                    "ALTER TABLE dbo.Islemler ADD SilindiMi BIT NOT NULL CONSTRAINT DF_Islemler_SilindiMi DEFAULT (0)");
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Tartimlar', 'YukDurumu') IS NULL " +
                     "ALTER TABLE dbo.Tartimlar ADD YukDurumu NVARCHAR(20) NULL");

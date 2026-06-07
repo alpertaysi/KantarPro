@@ -32,7 +32,7 @@ namespace KantarPro.Application.Services
         public Islem GirisKaydet(string plaka, string firmaAdi, string gelisTuru, bool tartimYap, decimal? agirlikKg, int kullaniciId, DateTime tarih, bool muafMi = false, string muafiyetNedeni = null, string notlar = null)
         {
             var arac = AracBulVeyaOlustur(plaka, firmaAdi, tarih);
-            if (_unitOfWork.Islemler.Query().Any(x => x.Arac.Plaka == arac.Plaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride))
+            if (_unitOfWork.Islemler.Query().Any(x => !x.SilindiMi && x.Arac.Plaka == arac.Plaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride))
             {
                 throw new InvalidOperationException("Bu plaka icin sahada acik ziyaret var.");
             }
@@ -130,7 +130,9 @@ namespace KantarPro.Application.Services
 
             var sinirSonu = kontrolTarihi.Date.AddDays(-gunSiniri).AddDays(1);
             var kapanacaklar = _unitOfWork.KantarDosyalari.Query()
-                .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor && x.OlusturmaTarihi < sinirSonu)
+                .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                            x.OlusturmaTarihi < sinirSonu &&
+                            (x.IlkTartim == null || x.IlkTartim.Islem == null || !x.IlkTartim.Islem.SilindiMi))
                 .ToList();
 
             foreach (var dosya in kapanacaklar)
@@ -161,9 +163,37 @@ namespace KantarPro.Application.Services
 
             var sinir = kontrolTarihi.Subtract(esikSure);
             return _unitOfWork.Islemler.Query()
-                .Where(x => x.Durum == KantarSabitleri.IslemDurumu.Iceride && x.GirisTarihi <= sinir)
+                .Where(x => !x.SilindiMi && x.Durum == KantarSabitleri.IslemDurumu.Iceride && x.GirisTarihi <= sinir)
                 .OrderBy(x => x.GirisTarihi)
                 .ToList();
+        }
+
+        public void IslemGizle(int islemId, int kullaniciId, string neden)
+        {
+            var islem = _unitOfWork.Islemler.SingleOrDefault(x => x.IslemId == islemId);
+            if (islem == null)
+            {
+                throw new InvalidOperationException("Silinecek işlem bulunamadı.");
+            }
+
+            if (islem.SilindiMi)
+            {
+                return;
+            }
+
+            islem.SilindiMi = true;
+            islem.Durum = KantarSabitleri.IslemDurumu.Silindi;
+
+            var temizNeden = NormalizeOptional(neden);
+            if (!string.IsNullOrWhiteSpace(temizNeden))
+            {
+                islem.Notlar = string.IsNullOrWhiteSpace(islem.Notlar)
+                    ? "Silme nedeni: " + temizNeden
+                    : islem.Notlar + Environment.NewLine + "Silme nedeni: " + temizNeden;
+            }
+
+            LogEkle(kullaniciId, islem, "IslemSilindi", "İşlem listelerden gizlendi: " + (islem.Arac != null ? islem.Arac.Plaka : islemId.ToString()));
+            _unitOfWork.SaveChanges();
         }
 
         public Arac FirmaAdiniGuncelle(string plaka, string yeniFirmaAdi, int? kullaniciId = null)
@@ -180,7 +210,7 @@ namespace KantarPro.Application.Services
             if (eskiFirmaAdi != arac.FirmaAdi)
             {
                 var acikZiyaret = _unitOfWork.Islemler.Query()
-                    .FirstOrDefault(x => x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                    .FirstOrDefault(x => !x.SilindiMi && x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
                 LogEkle(kullaniciId, acikZiyaret, "FirmaGuncelle", "Firma guncellendi: " + temizPlaka + ", " + (eskiFirmaAdi ?? "-") + " -> " + (arac.FirmaAdi ?? "-"));
             }
 
@@ -225,7 +255,7 @@ namespace KantarPro.Application.Services
             }
 
             var ziyaret = _unitOfWork.Islemler.Query()
-                .FirstOrDefault(x => x.Arac.Plaka == temizHataliPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                .FirstOrDefault(x => !x.SilindiMi && x.Arac.Plaka == temizHataliPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
             if (ziyaret == null)
             {
                 throw new InvalidOperationException("Hatali plaka icin acik saha ziyareti bulunamadi.");
@@ -249,6 +279,7 @@ namespace KantarPro.Application.Services
             {
                 var hedefPlakadaAcikIslemVarMi = _unitOfWork.Islemler.Query().Any(x =>
                     x.AracId == hedefArac.AracId &&
+                    !x.SilindiMi &&
                     x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
                     x.IslemId != ziyaret.IslemId);
                 if (hedefPlakadaAcikIslemVarMi)
@@ -259,7 +290,9 @@ namespace KantarPro.Application.Services
 
             var tartimlar = ziyaret.Tartimlar.OrderBy(x => x.TartimTarihi).ToList();
             var hedefBekleyenDosyalar = _unitOfWork.KantarDosyalari.Query()
-                .Where(x => x.Arac.Plaka == temizDogruPlaka && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                .Where(x => x.Arac.Plaka == temizDogruPlaka &&
+                            x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                            (x.IlkTartim == null || x.IlkTartim.Islem == null || !x.IlkTartim.Islem.SilindiMi))
                 .OrderByDescending(x => x.OlusturmaTarihi)
                 .ToList();
 
@@ -385,7 +418,9 @@ namespace KantarPro.Application.Services
         private void KantarDosyasinaBagla(Arac arac, Tartim tartim, DateTime tarih)
         {
             var bekleyenler = _unitOfWork.KantarDosyalari.Query()
-                .Where(x => x.Arac.Plaka == arac.Plaka && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                .Where(x => x.Arac.Plaka == arac.Plaka &&
+                            x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                            (x.IlkTartim == null || x.IlkTartim.Islem == null || !x.IlkTartim.Islem.SilindiMi))
                 .OrderByDescending(x => x.OlusturmaTarihi)
                 .ToList();
 
@@ -548,7 +583,7 @@ namespace KantarPro.Application.Services
         {
             var temizPlaka = NormalizePlaka(plaka);
             var ziyaret = _unitOfWork.Islemler.Query()
-                .FirstOrDefault(x => x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
+                .FirstOrDefault(x => !x.SilindiMi && x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.IslemDurumu.Iceride);
 
             if (ziyaret == null)
             {
@@ -562,7 +597,9 @@ namespace KantarPro.Application.Services
         {
             var temizPlaka = NormalizePlaka(plaka);
             var bekleyenler = _unitOfWork.KantarDosyalari.Query()
-                .Where(x => x.Arac.Plaka == temizPlaka && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
+                .Where(x => x.Arac.Plaka == temizPlaka &&
+                            x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
+                            (x.IlkTartim == null || x.IlkTartim.Islem == null || !x.IlkTartim.Islem.SilindiMi))
                 .OrderByDescending(x => x.OlusturmaTarihi)
                 .ToList();
 

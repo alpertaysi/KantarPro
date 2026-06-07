@@ -46,6 +46,7 @@
 
     public class DailyRevenueRow
     {
+        public int IslemId { get; set; }
         public int SiraNo { get; set; }
         public string IslemNo { get; set; }
         public string IslemTipi { get; set; }

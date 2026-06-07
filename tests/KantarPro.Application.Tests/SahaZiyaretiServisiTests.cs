@@ -45,6 +45,20 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void IslemGizle_IslemiSilindiIsaretlerVeLogYazar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var ziyaret = servis.GirisKaydet("16 SIL 001", "Silme Test", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 7, 9, 0, 0));
+
+            servis.IslemGizle(ziyaret.IslemId, 1, "Prova kaydi silindi");
+
+            Assert.IsTrue(ziyaret.SilindiMi);
+            Assert.AreEqual(KantarSabitleri.IslemDurumu.Silindi, ziyaret.Durum);
+            Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "IslemSilindi" && ReferenceEquals(x.Islem, ziyaret)));
+        }
+
+        [TestMethod]
         public void TahsilEdilenIlkZiyaretIkinciZiyaretToplaminaEklenmez()
         {
             var uow = new InMemoryUnitOfWork();

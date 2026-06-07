@@ -26,6 +26,7 @@ namespace KantarPro.Domain.Entities
         public bool MuafMi { get; set; }
         public string MuafiyetNedeni { get; set; }
         public string Notlar { get; set; }
+        public bool SilindiMi { get; set; }
 
         public virtual Arac Arac { get; set; }
         public virtual Kullanici GirisKullanici { get; set; }
