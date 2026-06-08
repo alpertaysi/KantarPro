@@ -1,6 +1,8 @@
 .vs/
 .superpowers/
+.codegraph/
 TestResults/
+artifacts/
 
 bin/
 obj/

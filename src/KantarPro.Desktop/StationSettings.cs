@@ -38,14 +38,15 @@ namespace KantarPro.Desktop
             };
         }
 
-        public string BuildConnectionString()
+        public string BuildConnectionString(int connectTimeoutSeconds = 3)
         {
             var builder = new SqlConnectionStringBuilder
             {
                 DataSource = string.IsNullOrWhiteSpace(SqlServerAddress) ? @".\SQLEXPRESS" : SqlServerAddress.Trim(),
                 InitialCatalog = string.IsNullOrWhiteSpace(DatabaseName) ? "KantarPro" : DatabaseName.Trim(),
                 MultipleActiveResultSets = true,
-                IntegratedSecurity = UseWindowsAuthentication
+                IntegratedSecurity = UseWindowsAuthentication,
+                ConnectTimeout = connectTimeoutSeconds
             };
 
             if (!UseWindowsAuthentication)

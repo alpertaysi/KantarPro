@@ -260,8 +260,8 @@
                                         <Separator />
                                         <MenuItem Header="Makbuz Yazdır" Click="EntryGridMakbuzYazdirMenuItem_Click" />
                                         <MenuItem Header="Makbuz Göster" Click="EntryGridMakbuzGosterMenuItem_Click" />
-                                        <Separator />
-                                        <MenuItem Header="Kaydı Sil" Click="EntryGridKaydiSilMenuItem_Click" />
+                                                    <Separator x:Name="EntryDeleteSeparator" />
+                                                    <MenuItem x:Name="EntryDeleteMenuItem" Header="Kaydı Sil" Click="EntryGridKaydiSilMenuItem_Click" />
                                     </ContextMenu>
                                 </DataGrid.ContextMenu>
                                 <DataGrid.Columns>
@@ -347,8 +347,8 @@
                                             <ContextMenu>
                                                 <MenuItem Header="Kantar Fişi Yazdır" Click="ExitGridMakbuzYazdirMenuItem_Click" />
                                                 <MenuItem Header="Kantar Fişi Göster" Click="ExitGridMakbuzGosterMenuItem_Click" />
-                                                <Separator />
-                                                <MenuItem Header="Kaydı Sil" Click="ExitGridKaydiSilMenuItem_Click" />
+                                                        <Separator x:Name="ExitDeleteSeparator" />
+                                                        <MenuItem x:Name="ExitDeleteMenuItem" Header="Kaydı Sil" Click="ExitGridKaydiSilMenuItem_Click" />
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
@@ -450,8 +450,8 @@
 
                 <DataGrid x:Name="DailyRevenueGrid" Grid.Row="1" ItemsSource="{Binding DailyRevenueView}" AlternatingRowBackground="#D1D5DB" RowBackground="#F8FAFC" FontSize="13" RowHeight="28" Margin="0,4,0,0" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Auto" PreviewMouseRightButtonDown="DailyRevenueGrid_PreviewMouseRightButtonDown">
                     <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Kaydı Sil" Click="DailyRevenueGridKaydiSilMenuItem_Click" />
+                                            <ContextMenu>
+                                                <MenuItem x:Name="DailyRevenueDeleteMenuItem" Header="Kaydı Sil" Click="DailyRevenueGridKaydiSilMenuItem_Click" />
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                     <DataGrid.Columns>
@@ -723,15 +723,16 @@
                                                   MinHeight="220"
                                                   MaxHeight="420"
                                                   HorizontalScrollBarVisibility="Auto"
+                                                  VerticalScrollBarVisibility="Auto"
                                                   PreviewMouseRightButtonDown="UsersGrid_PreviewMouseRightButtonDown">
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Header="Kullanıcı Sil" Click="DeleteUserButton_Click" />
+                                                    <MenuItem x:Name="UserDeleteMenuItem" Header="Kullanıcı Sil" Click="DeleteUserButton_Click" />
                                                 </ContextMenu>
                                             </DataGrid.ContextMenu>
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Kullanıcı Adı" Binding="{Binding KullaniciAdi}" Width="180" />
-                                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="*" MinWidth="300" />
+                                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="300" />
                                                 <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="120" />
                                                 <DataGridTextColumn Header="Durum" Binding="{Binding Aktif}" Width="110" />
                                                 <DataGridTextColumn Header="Son Giriş" Binding="{Binding SonGirisTarihi}" Width="190" />

@@ -158,7 +158,19 @@ namespace KantarPro.Desktop
             }
 
             SettingsNavButton.Visibility = _currentUser.AdminMi ? Visibility.Visible : Visibility.Collapsed;
+            ApplyAdminOnlyMenuVisibility(_currentUser.AdminMi);
             StationStatusText.Text = StationStatusText.Text + "   " + _currentUser.Rol + ": " + _currentUser.AdSoyad;
+        }
+
+        private void ApplyAdminOnlyMenuVisibility(bool adminMi)
+        {
+            var visibility = adminMi ? Visibility.Visible : Visibility.Collapsed;
+            EntryDeleteSeparator.Visibility = visibility;
+            EntryDeleteMenuItem.Visibility = visibility;
+            ExitDeleteSeparator.Visibility = visibility;
+            ExitDeleteMenuItem.Visibility = visibility;
+            DailyRevenueDeleteMenuItem.Visibility = visibility;
+            UserDeleteMenuItem.Visibility = visibility;
         }
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
@@ -265,6 +277,8 @@ namespace KantarPro.Desktop
                 }
 
                 App.LogOperation(_currentUser.KullaniciAdi, "Kullanici silindi", "Pasife alinan kullanici: " + selectedUser.KullaniciAdi);
+                Users.Remove(selectedUser);
+                UsersGrid.SelectedItem = null;
                 MessageBox.Show("Kullanıcı silindi. Geçmiş işlemler korunarak hesap pasife alındı.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadUsers();
             }
@@ -358,7 +372,7 @@ namespace KantarPro.Desktop
 
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz, muafMi, muafiyetNedeni);
 
-                LoadDashboardData();
+                TryReloadDashboardAfterCommittedOperation("Giriş kaydı");
                 MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
@@ -368,6 +382,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
+                UpdateConnectionStatusIfDatabaseUnavailable();
                 MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -384,7 +399,7 @@ namespace KantarPro.Desktop
 
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, DateTime.Now);
 
-                LoadDashboardData();
+                TryReloadDashboardAfterCommittedOperation("Giriş kaydı");
                 MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
@@ -394,6 +409,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
+                UpdateConnectionStatusIfDatabaseUnavailable();
                 MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -419,7 +435,7 @@ namespace KantarPro.Desktop
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
-                    LoadDashboardData();
+                    TryReloadDashboardAfterCommittedOperation("Çıkış işlemi");
                     MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     if (tartimIsteniyor)
                     {
@@ -430,6 +446,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
+                UpdateConnectionStatusIfDatabaseUnavailable();
                 MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -443,6 +460,34 @@ namespace KantarPro.Desktop
         {
             LoadDashboardData();
             AutoRefreshStatusText.Text = "Son guncelleme: " + DateTime.Now.ToString("HH:mm:ss");
+        }
+
+        private bool TryReloadDashboardAfterCommittedOperation(string operationName)
+        {
+            try
+            {
+                LoadDashboardData(false);
+                AutoRefreshStatusText.Text = "Son guncelleme: " + DateTime.Now.ToString("HH:mm:ss");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                UpdateDatabaseConnectionStatus(false);
+                MessageBox.Show(
+                    operationName + " veritabanına kaydedildi; ancak bağlantı koptuğu için ekran yenilenemedi. Bağlantı geri geldiğinde Yenile butonuna basarak kaydı listede görebilirsiniz.\n\n" + ex.Message,
+                    "Bağlantı uyarısı",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return false;
+            }
+        }
+
+        private void UpdateConnectionStatusIfDatabaseUnavailable()
+        {
+            if (!KantarDbContextFactory.TestConnection(1, 1200))
+            {
+                UpdateDatabaseConnectionStatus(false);
+            }
         }
 
         private void TryAutoRefreshDashboard()
@@ -568,7 +613,7 @@ namespace KantarPro.Desktop
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
-                    LoadDashboardData();
+                    TryReloadDashboardAfterCommittedOperation("Çıkış işlemi");
                     MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     PlakaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
@@ -579,6 +624,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
+                UpdateConnectionStatusIfDatabaseUnavailable();
                 MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -641,7 +687,7 @@ namespace KantarPro.Desktop
 
         private void StartConnectionMonitor()
         {
-            _connectionCheckTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+            _connectionCheckTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _connectionCheckTimer.Tick += (sender, args) => CheckDatabaseConnectionAsync();
             _connectionCheckTimer.Start();
             CheckDatabaseConnectionAsync();
@@ -657,7 +703,7 @@ namespace KantarPro.Desktop
             _connectionCheckInProgress = true;
             try
             {
-                var isConnected = await Task.Run(() => KantarDbContextFactory.TestConnection());
+                var isConnected = await Task.Run(() => KantarDbContextFactory.TestConnection(1, 1200));
                 UpdateDatabaseConnectionStatus(isConnected);
             }
             finally
@@ -688,7 +734,7 @@ namespace KantarPro.Desktop
             ConnectionStatusText.Text = "Bağlantı: koptu";
             ConnectionStatusText.Foreground = new SolidColorBrush(Color.FromRgb(252, 165, 165));
 
-            if (_connectionLostCount >= 3 && !_connectionWarningShown)
+            if (_connectionLostCount >= 1 && !_connectionWarningShown)
             {
                 _connectionWarningShown = true;
                 MessageBox.Show(
@@ -1891,6 +1937,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var users = context.Kullanicilar
+                        .Where(x => x.AktifMi)
                         .OrderBy(x => x.KullaniciAdi)
                         .ToList();
 
