@@ -43,7 +43,7 @@ namespace KantarPro.Desktop
 
             if (e.IsTerminating)
             {
-                System.Windows.MessageBox.Show(
+                MessageBox.Show(
                     "Kritik bir hata oluştu ve program kapatılacak.\n\nHata: " + (exception == null ? "Bilinmeyen hata" : exception.Message) + "\n\nDetaylar log dosyasına yazıldı.",
                     "Kritik Hata",
                     System.Windows.MessageBoxButton.OK,
@@ -54,8 +54,13 @@ namespace KantarPro.Desktop
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             LogError("Dispatcher UnhandledException", e.Exception);
-            System.Windows.MessageBox.Show(
-                "Beklenmeyen bir hata oluştu:\n\n" + e.Exception.Message + "\n\nDetaylar log dosyasına yazıldı.",
+
+            var message = KantarDbContextFactory.IsDatabaseConnectionException(e.Exception)
+                ? KantarDbContextFactory.BuildConnectionLostMessage("İşlem", false)
+                : "Beklenmeyen bir hata oluştu:\n\n" + e.Exception.Message + "\n\nDetaylar log dosyasına yazıldı.";
+
+            MessageBox.Show(
+                message,
                 "Hata",
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Error);

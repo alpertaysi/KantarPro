@@ -88,7 +88,12 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                App.LogError("Çıkış işlemi tamamlanamadı", ex);
+                MessageBox.Show(
+                    KantarDbContextFactory.BuildOperationErrorMessage("Çıkış işlemi", ex),
+                    "Çıkış işlemi tamamlanamadı",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
         }
 

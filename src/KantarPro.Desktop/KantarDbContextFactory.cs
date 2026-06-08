@@ -16,10 +16,15 @@ namespace KantarPro.Desktop
 
         public static bool TestConnection()
         {
-            return TestConnection(3, 3000);
+            return TestConnection(3, 3000, true);
         }
 
         public static bool TestConnection(int connectTimeoutSeconds, int maxWaitMs)
+        {
+            return TestConnection(connectTimeoutSeconds, maxWaitMs, true);
+        }
+
+        public static bool TestConnection(int connectTimeoutSeconds, int maxWaitMs, bool logError)
         {
             try
             {
@@ -44,9 +49,71 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                App.LogError("SQL baglanti testi", ex);
+                if (logError)
+                {
+                    App.LogError("SQL baglanti testi", ex);
+                }
+
                 return false;
             }
+        }
+
+        public static bool IsDatabaseConnectionException(Exception exception)
+        {
+            if (exception == null)
+            {
+                return false;
+            }
+
+            var aggregate = exception as AggregateException;
+            if (aggregate != null)
+            {
+                foreach (var inner in aggregate.Flatten().InnerExceptions)
+                {
+                    if (IsDatabaseConnectionException(inner))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (exception is SqlException || exception is SocketException || exception is TimeoutException)
+            {
+                return true;
+            }
+
+            var message = (exception.Message ?? string.Empty).ToUpperInvariant();
+            return message.Contains("UNDERLYING PROVIDER FAILED ON OPEN") ||
+                   message.Contains("EXECUTING THE COMMAND DEFINITION") ||
+                   message.Contains("SQL NETWORK INTERFACES") ||
+                   message.Contains("TCP PROVIDER") ||
+                   message.Contains("TRANSPORT-LEVEL ERROR") ||
+                   message.Contains("SERVER WAS NOT FOUND") ||
+                   message.Contains("SERVER WAS NOT ACCESSIBLE") ||
+                   message.Contains("SUNUCU BULUNAMADI") ||
+                   message.Contains("SUNUCUYA ERISILEMIYOR") ||
+                   message.Contains("SUNUCUYA ERİŞİLEMİYOR") ||
+                   IsDatabaseConnectionException(exception.InnerException);
+        }
+
+        public static string BuildConnectionLostMessage(string operationName, bool committed)
+        {
+            if (committed)
+            {
+                return operationName + " veritabanına kaydedildi; ancak bağlantı koptuğu için ekran yenilenemedi. Bağlantı geri geldiğinde Yenile butonuna basarak kaydı listede görebilirsiniz.";
+            }
+
+            return operationName + " tamamlanmadı. SQL bağlantısı kesildiği için işlem veritabanına yazılamadı. Bağlantı geri geldikten sonra işlemi tekrar deneyin.";
+        }
+
+        public static string BuildOperationErrorMessage(string operationName, Exception exception)
+        {
+            if (IsDatabaseConnectionException(exception) || !TestConnection(1, 1200, false))
+            {
+                return BuildConnectionLostMessage(operationName, false);
+            }
+
+            return exception == null ? "İşlem tamamlanamadı." : exception.Message;
         }
 
         private static bool ProbeSqlServerEndpoint(string connectionString, int timeoutMs)

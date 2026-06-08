@@ -382,8 +382,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                UpdateConnectionStatusIfDatabaseUnavailable();
-                MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowOperationFailed(ex, "Giriş kaydı", "Giriş kaydı oluşturulamadı");
             }
         }
 
@@ -409,8 +408,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                UpdateConnectionStatusIfDatabaseUnavailable();
-                MessageBox.Show(ex.Message, "Giriş kaydı oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowOperationFailed(ex, "Giriş kaydı", "Giriş kaydı oluşturulamadı");
             }
         }
 
@@ -446,8 +444,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                UpdateConnectionStatusIfDatabaseUnavailable();
-                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowOperationFailed(ex, "Çıkış işlemi", "Çıkış işlemi tamamlanamadı");
             }
         }
 
@@ -470,11 +467,11 @@ namespace KantarPro.Desktop
                 AutoRefreshStatusText.Text = "Son guncelleme: " + DateTime.Now.ToString("HH:mm:ss");
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 UpdateDatabaseConnectionStatus(false);
                 MessageBox.Show(
-                    operationName + " veritabanına kaydedildi; ancak bağlantı koptuğu için ekran yenilenemedi. Bağlantı geri geldiğinde Yenile butonuna basarak kaydı listede görebilirsiniz.\n\n" + ex.Message,
+                    KantarDbContextFactory.BuildConnectionLostMessage(operationName, true),
                     "Bağlantı uyarısı",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -484,10 +481,22 @@ namespace KantarPro.Desktop
 
         private void UpdateConnectionStatusIfDatabaseUnavailable()
         {
-            if (!KantarDbContextFactory.TestConnection(1, 1200))
+            if (!KantarDbContextFactory.TestConnection(1, 1200, false))
             {
                 UpdateDatabaseConnectionStatus(false);
             }
+        }
+
+        private void ShowOperationFailed(Exception ex, string operationName, string title)
+        {
+            App.LogError(title, ex);
+            var message = KantarDbContextFactory.BuildOperationErrorMessage(operationName, ex);
+            if (KantarDbContextFactory.IsDatabaseConnectionException(ex) || message.Contains("SQL bağlantısı kesildi"))
+            {
+                UpdateDatabaseConnectionStatus(false);
+            }
+
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         private void TryAutoRefreshDashboard()
@@ -624,8 +633,7 @@ namespace KantarPro.Desktop
             }
             catch (Exception ex)
             {
-                UpdateConnectionStatusIfDatabaseUnavailable();
-                MessageBox.Show(ex.Message, "Çıkış işlemi tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowOperationFailed(ex, "Çıkış işlemi", "Çıkış işlemi tamamlanamadı");
             }
         }
 
@@ -703,7 +711,7 @@ namespace KantarPro.Desktop
             _connectionCheckInProgress = true;
             try
             {
-                var isConnected = await Task.Run(() => KantarDbContextFactory.TestConnection(1, 1200));
+                var isConnected = await Task.Run(() => KantarDbContextFactory.TestConnection(1, 1200, false));
                 UpdateDatabaseConnectionStatus(isConnected);
             }
             finally
