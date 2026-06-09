@@ -538,7 +538,7 @@ namespace KantarPro.Application.Services
                 .DefaultIfEmpty(0)
                 .Max();
 
-            return (sonNo + 1).ToString("0000");
+            return (sonNo + 1).ToString("00000");
         }
 
         private static int ParseTahsilatNo(string tahsilatNo)

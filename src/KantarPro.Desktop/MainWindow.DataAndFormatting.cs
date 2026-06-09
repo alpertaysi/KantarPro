@@ -1075,7 +1075,7 @@ namespace KantarPro.Desktop
                     "WHERE TahsilEdildiMi = 1 AND TahsilTarihi IS NOT NULL AND FaturaId IS NULL");
                 context.Database.ExecuteSqlCommand(
                     "UPDATE dbo.IslemUcretleri " +
-                    "SET TahsilatNo = RIGHT('0000' + CAST(IslemId AS NVARCHAR(12)), 4) " +
+                    "SET TahsilatNo = RIGHT('00000' + CAST(IslemId AS NVARCHAR(12)), 5) " +
                     "WHERE TahsilEdildiMi = 1 AND TahsilTarihi IS NOT NULL AND (TahsilatNo IS NULL OR TahsilatNo = '')");
                 context.Database.ExecuteSqlCommand(
                     "UPDATE dbo.IslemUcretleri " +

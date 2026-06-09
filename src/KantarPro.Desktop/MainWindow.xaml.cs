@@ -349,7 +349,7 @@ namespace KantarPro.Desktop
                 var plaka = PlakaTextBox.Text;
                 var firmaAdi = FirmaTextBox.Text;
                 var aciklama = AciklamaTextBox.Text;
-                var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
+                var agirlik = tartimIsteniyor ? GetCurrentScaleWeightKg() : (decimal?)null;
                 var islemTarihi = DateTime.Now;
 
                 if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi, muafMi, muafiyetNedeni))
@@ -388,7 +388,7 @@ namespace KantarPro.Desktop
                 var firmaAdi = EntryFirmaTextBox.Text;
                 var aciklama = EntryAciklamaTextBox.Text;
                 var tartimIsteniyor = EntryTartimIsteniyorCheckBox.IsChecked != true;
-                var agirlik = tartimIsteniyor ? ParseAgirlik(EntryAgirlikTextBox.Text) : (decimal?)null;
+                var agirlik = tartimIsteniyor ? GetCurrentScaleWeightKg() : (decimal?)null;
 
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, DateTime.Now);
 
@@ -422,7 +422,7 @@ namespace KantarPro.Desktop
             {
                 var plaka = ExitPlakaTextBox.Text;
                 var tartimIsteniyor = ExitManuelTartimCheckBox.IsChecked == true;
-                var agirlik = tartimIsteniyor ? ParseAgirlik(ExitAgirlikTextBox.Text) : (decimal?)null;
+                var agirlik = tartimIsteniyor ? GetCurrentScaleWeightKg() : (decimal?)null;
                 var cikisTarihi = DateTime.Now;
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
@@ -962,7 +962,7 @@ namespace KantarPro.Desktop
                 }
             }
 
-            tartim.KantarFisNo = (sonNumara + 1).ToString("0000");
+            tartim.KantarFisNo = (sonNumara + 1).ToString("00000");
             context.SaveChanges();
             return tartim.KantarFisNo;
         }
@@ -1263,7 +1263,7 @@ namespace KantarPro.Desktop
 
             try
             {
-                var agirlik = ParseAgirlik(AgirlikTextBox.Text);
+                var agirlik = GetCurrentScaleWeightKg();
                 var tartimTarihi = DateTime.Now;
 
                 using (var context = KantarDbContextFactory.Create())
@@ -1283,7 +1283,7 @@ namespace KantarPro.Desktop
                     var openVisitPendingRow = openIslem != null ? BuildOpenVisitSecondWeighingRow(openIslem, tartimTarihi) : null;
                     if (openVisitPendingRow != null)
                     {
-                        var dialog = new DoluBosSecondWeighingWindow(openVisitPendingRow, agirlik.Value, tartimTarihi)
+                        var dialog = new DoluBosSecondWeighingWindow(openVisitPendingRow, agirlik, tartimTarihi)
                         {
                             Owner = this
                         };
@@ -1306,7 +1306,7 @@ namespace KantarPro.Desktop
 
                     if (openIslem != null && pendingRow != null)
                     {
-                        var dialog = new DoluBosSecondWeighingWindow(pendingRow, agirlik.Value, tartimTarihi)
+                        var dialog = new DoluBosSecondWeighingWindow(pendingRow, agirlik, tartimTarihi)
                         {
                             Owner = this
                         };
@@ -1332,7 +1332,7 @@ namespace KantarPro.Desktop
                         : YukDurumuFromRow(row);
                     var kullaniciId = CurrentUserId;
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    servis.SonradanTartimEkle(row.Plaka, yukDurumu, agirlik.Value, kullaniciId, tartimTarihi);
+                    servis.SonradanTartimEkle(row.Plaka, yukDurumu, agirlik, kullaniciId, tartimTarihi);
                 }
 
                 LoadDashboardData();
@@ -1710,13 +1710,9 @@ namespace KantarPro.Desktop
                 var islemTarihi = DateTime.Now;
                 if (dialog.Choice == EntrySaveChoice.WeighAndSave)
                 {
-                    var agirlik = ParseAgirlik(AgirlikTextBox.Text);
-                    if (!agirlik.HasValue || agirlik.Value <= 0)
-                    {
-                        throw new InvalidOperationException("Tart ve Kaydet icin gecerli kilo alinmali.");
-                    }
+                    var agirlik = GetCurrentScaleWeightKg();
 
-                    if (!TryCompletePendingDoluBosFromDashboard(row.Plaka, agirlik.Value, islemTarihi))
+                    if (!TryCompletePendingDoluBosFromDashboard(row.Plaka, agirlik, islemTarihi))
                     {
                         throw new InvalidOperationException("Bekleyen dolu-bos kaydi bulunamadi.");
                     }
@@ -2189,6 +2185,16 @@ namespace KantarPro.Desktop
             }
 
             textBox.Text = value;
+        }
+
+        private decimal GetCurrentScaleWeightKg()
+        {
+            if (!_lastScaleWeightKg.HasValue || _lastScaleWeightKg.Value <= 0)
+            {
+                throw new InvalidOperationException("İndikatörden geçerli kilo alınmadan tartımlı kayıt yapılamaz.");
+            }
+
+            return _lastScaleWeightKg.Value;
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)

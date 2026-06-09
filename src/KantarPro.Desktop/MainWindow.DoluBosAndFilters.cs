@@ -66,10 +66,15 @@ namespace KantarPro.Desktop
 
         private void DoluBosKiloAl_Click(object sender, RoutedEventArgs e)
         {
-            DoluBosIkinciKgTextBox.Text = AgirlikTextBox != null && !string.IsNullOrWhiteSpace(AgirlikTextBox.Text)
-                ? AgirlikTextBox.Text
-                : "0";
-            CalculateDoluBosNet();
+            try
+            {
+                DoluBosIkinciKgTextBox.Text = GetCurrentScaleWeightKg().ToString("0.##", CultureInfo.InvariantCulture);
+                CalculateDoluBosNet();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kilo alınamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void DoluBosNetHesapla_Click(object sender, RoutedEventArgs e)
@@ -92,7 +97,7 @@ namespace KantarPro.Desktop
                 var gelisTuru = row != null && row.YukDurumu == KantarSabitleri.YukDurumu.Bos
                     ? KantarSabitleri.GelisTuru.Dolu
                     : KantarSabitleri.GelisTuru.Bos;
-                var ikinciKg = ParseAgirlik(DoluBosIkinciKgTextBox.Text);
+                var ikinciKg = GetCurrentScaleWeightKg();
 
                 CreateEntry(plaka, firma, DoluBosAciklamaTextBox.Text, true, ikinciKg, DateTime.Now, gelisTuru);
                 LoadDashboardData();

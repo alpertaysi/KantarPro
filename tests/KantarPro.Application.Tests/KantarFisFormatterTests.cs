@@ -34,7 +34,7 @@ namespace KantarPro.Application.Tests
             StringAssert.Contains(fis, "FIRMA");
             StringAssert.Contains(fis, "TEST FIRMA");
             StringAssert.Contains(fis, "FIS NO");
-            StringAssert.Contains(fis, "0060");
+            StringAssert.Contains(fis, "00060");
             StringAssert.Contains(fis, "GIRIS TARIHI");
             StringAssert.Contains(fis, "1.TARTI");
             StringAssert.Contains(fis, "MEMUR IMZA");
@@ -98,7 +98,7 @@ namespace KantarPro.Application.Tests
 
             Assert.AreEqual("Tek Tartım", data.FisTipi);
             Assert.AreEqual("34TCL633", data.Plaka);
-            Assert.AreEqual("0060", data.FisNo);
+            Assert.AreEqual("00060", data.FisNo);
             Assert.AreEqual("31.05.2026", data.GirisTarihi);
             Assert.AreEqual("18:20:00", data.GirisSaati);
             Assert.AreEqual("24.500 kg", data.BirinciTartim);
@@ -135,7 +135,7 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
-        public void PreviewData_FromVehicleRow_UzunTeknikIslemNoYerineDortHaneliFisNoKullanir()
+        public void PreviewData_FromVehicleRow_UzunTeknikIslemNoYerineBesHaneliFisNoKullanir()
         {
             var row = new VehicleMovementRow
             {
@@ -150,8 +150,8 @@ namespace KantarPro.Application.Tests
 
             var data = KantarFisPreviewData.FromVehicleRow(row, rawText);
 
-            Assert.AreEqual("0010", data.FisNo);
-            StringAssert.Contains(rawText, "0010");
+            Assert.AreEqual("00010", data.FisNo);
+            StringAssert.Contains(rawText, "00010");
             Assert.IsFalse(rawText.Contains("ZYR20260604112753000"));
         }
 
@@ -172,8 +172,8 @@ namespace KantarPro.Application.Tests
             var rawText = KantarFisFormatter.BuildFromRow(row);
             var data = KantarFisPreviewData.FromVehicleRow(row, rawText);
 
-            Assert.AreEqual("0003", data.FisNo);
-            StringAssert.Contains(rawText, "0003");
+            Assert.AreEqual("00003", data.FisNo);
+            StringAssert.Contains(rawText, "00003");
             Assert.IsFalse(rawText.Contains("0010"));
             Assert.IsFalse(rawText.Contains("ZYR20260604112753000"));
         }

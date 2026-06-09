@@ -83,17 +83,17 @@ namespace KantarPro.Desktop
 
             if (!string.IsNullOrWhiteSpace(row.KantarFisNo))
             {
-                return row.KantarFisNo.Trim();
+                return FormatNumericFisNo(row.KantarFisNo);
             }
 
-            if (IsFourDigitNumber(row.IslemNo))
+            if (IsNumericFisNo(row.IslemNo))
             {
-                return row.IslemNo.Trim();
+                return FormatNumericFisNo(row.IslemNo);
             }
 
             if (row.IslemId > 0)
             {
-                return row.IslemId.ToString("0000");
+                return row.IslemId.ToString("00000");
             }
 
             return string.IsNullOrWhiteSpace(row.IslemNo) ? "-" : row.IslemNo.Trim();
@@ -112,7 +112,7 @@ namespace KantarPro.Desktop
                 value.Trim() != "-";
         }
 
-        private static bool IsFourDigitNumber(string value)
+        private static bool IsNumericFisNo(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -120,13 +120,26 @@ namespace KantarPro.Desktop
             }
 
             value = value.Trim();
-            if (value.Length != 4)
+            if (value.Length < 1 || value.Length > 5)
             {
                 return false;
             }
 
             int parsed;
             return int.TryParse(value, out parsed);
+        }
+
+        private static string FormatNumericFisNo(string value)
+        {
+            if (!IsNumericFisNo(value))
+            {
+                return string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
+            }
+
+            int parsed;
+            return int.TryParse(value.Trim(), out parsed)
+                ? parsed.ToString("00000")
+                : value.Trim();
         }
 
         private static string Safe(string value)

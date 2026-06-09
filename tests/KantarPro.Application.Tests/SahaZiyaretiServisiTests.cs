@@ -167,8 +167,8 @@ namespace KantarPro.Application.Tests
             var ikinci = servis.GirisKaydet("16 TNO 002", "Firma T", KantarSabitleri.GelisTuru.Dolu, true, 22000m, 1, new DateTime(2026, 5, 13, 9, 0, 0));
             servis.CikisYap(ikinci.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 13, 10, 0, 0));
 
-            Assert.AreEqual("0001", ilk.Ucretler.Single().TahsilatNo);
-            Assert.IsTrue(ikinci.Ucretler.All(x => x.TahsilatNo == "0002"));
+            Assert.AreEqual("00001", ilk.Ucretler.Single().TahsilatNo);
+            Assert.IsTrue(ikinci.Ucretler.All(x => x.TahsilatNo == "00002"));
         }
 
         [TestMethod]
@@ -182,10 +182,10 @@ namespace KantarPro.Application.Tests
             var ucretli = servis.GirisKaydet("16 MNO 002", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 11, 0, 0));
             servis.CikisYap(ucretli.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 12, 12, 0, 0));
 
-            Assert.AreEqual("0001", muaf.CikisNo);
+            Assert.AreEqual("00001", muaf.CikisNo);
             Assert.AreEqual(0, muaf.Ucretler.Count);
-            Assert.AreEqual("0002", ucretli.CikisNo);
-            Assert.IsTrue(ucretli.Ucretler.All(x => x.TahsilatNo == "0002"));
+            Assert.AreEqual("00002", ucretli.CikisNo);
+            Assert.IsTrue(ucretli.Ucretler.All(x => x.TahsilatNo == "00002"));
         }
 
         [TestMethod]
