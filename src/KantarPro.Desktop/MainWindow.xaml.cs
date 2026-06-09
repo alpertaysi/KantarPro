@@ -681,7 +681,11 @@ namespace KantarPro.Desktop
 
         private static void PrintKantarFisiCore(VehicleMovementRow row)
         {
-            row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+            if (string.IsNullOrWhiteSpace(row.KantarFisNo))
+            {
+                row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+            }
+
             var rawText = KantarFisFormatter.BuildFromRow(row);
             PrintReceiptText(rawText, "Kantar Fisi " + KantarFisPreviewData.FormatFisNo(row));
         }
@@ -764,7 +768,11 @@ namespace KantarPro.Desktop
 
             try
             {
-                row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
+                if (string.IsNullOrWhiteSpace(row.KantarFisNo))
+                {
+                    row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
+                }
+
                 var rawText = KantarFisFormatter.BuildFromPendingRow(row);
                 PrintReceiptText(rawText, "Kantar Fisi " + (string.IsNullOrWhiteSpace(row.KantarFisNo) ? row.IslemNo : row.KantarFisNo));
             }
@@ -833,7 +841,11 @@ namespace KantarPro.Desktop
 
             try
             {
-                row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+                if (string.IsNullOrWhiteSpace(row.KantarFisNo))
+                {
+                    row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+                }
+
                 var rawText = KantarFisFormatter.BuildFromRow(row);
                 var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromVehicleRow(row, rawText))
                 {
@@ -857,7 +869,11 @@ namespace KantarPro.Desktop
 
             try
             {
-                row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
+                if (string.IsNullOrWhiteSpace(row.KantarFisNo))
+                {
+                    row.KantarFisNo = EnsureKantarFisNoForPendingRow(row);
+                }
+
                 var rawText = KantarFisFormatter.BuildFromPendingRow(row);
                 var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromPendingRow(row, rawText))
                 {

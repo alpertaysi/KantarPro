@@ -179,6 +179,25 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void PreviewData_FromVehicleRow_MevcutBesHaneliFisNoyuAynenKullanir()
+        {
+            var row = new VehicleMovementRow
+            {
+                IslemId = 77,
+                IslemNo = "ZYR20260604112753000",
+                KantarFisNo = "00077",
+                Plaka = "16DUZELT002",
+                GirisTarihi = "04.06.2026",
+                GirisSaati = "11:27:53",
+                Tartim = "34.000 kg"
+            };
+
+            var data = KantarFisPreviewData.FromVehicleRow(row, KantarFisFormatter.BuildFromRow(row));
+
+            Assert.AreEqual("00077", data.FisNo);
+        }
+
+        [TestMethod]
         public void BuildFromRow_TartimsizKayit_FisOlusturmaz()
         {
             var row = new VehicleMovementRow
