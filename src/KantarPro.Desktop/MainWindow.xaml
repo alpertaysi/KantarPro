@@ -413,7 +413,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Menü" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
                             <Button Content="Makbuz" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="KantarFisiYazdir_Click" />
-                            <Button Content="Araştır" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
+                            <Button Content="Araştır" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="SearchButton_Click" />
                             <Button Content="Yedekler" MinHeight="34" Padding="16,4" FontSize="13" Click="MenuButton_Click" />
                         </StackPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">

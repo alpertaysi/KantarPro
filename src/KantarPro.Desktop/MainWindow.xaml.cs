@@ -210,6 +210,15 @@ namespace KantarPro.Desktop
             window.ShowDialog();
         }
 
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new SearchWindow
+            {
+                Owner = this
+            };
+            window.ShowDialog();
+        }
+
         private void AddUserButton_Click(object sender, RoutedEventArgs e)
         {
             if (_currentUser == null || !_currentUser.AdminMi)
