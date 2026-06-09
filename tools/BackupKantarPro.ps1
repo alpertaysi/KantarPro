@@ -5,7 +5,8 @@ param(
     [switch]$UseSqlLogin,
     [string]$SqlUser = "sa",
     [string]$SqlPassword = "",
-    [switch]$ForceFull
+    [switch]$ForceFull,
+    [switch]$IgnoreWeekend
 )
 
 $ErrorActionPreference = "Stop"
@@ -61,7 +62,7 @@ function Invoke-DatabaseCommand {
 }
 
 $day = (Get-Date).DayOfWeek
-if ($day -eq [DayOfWeek]::Saturday -or $day -eq [DayOfWeek]::Sunday) {
+if (-not $IgnoreWeekend -and ($day -eq [DayOfWeek]::Saturday -or $day -eq [DayOfWeek]::Sunday)) {
     Write-Host "Hafta sonu yedek alinmaz."
     exit 0
 }

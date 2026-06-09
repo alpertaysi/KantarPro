@@ -187,6 +187,12 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\tools\BackupKantarPro.ps1">
+      <Link>tools\BackupKantarPro.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Assets\app-icon-source.png" />
     <Resource Include="Assets\kantarpro.ico" />
     <Resource Include="Assets\login-hero.png" />

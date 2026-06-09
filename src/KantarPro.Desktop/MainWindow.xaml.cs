@@ -219,6 +219,87 @@ namespace KantarPro.Desktop
             window.ShowDialog();
         }
 
+        private async void BackupButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var scriptPath = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "tools",
+                    "BackupKantarPro.ps1");
+
+                if (!System.IO.File.Exists(scriptPath))
+                {
+                    throw new InvalidOperationException("Yedekleme scripti uygulama paketinde bulunamadı.");
+                }
+
+                var settings = StationSettingsStore.Load();
+                var arguments = "-NoProfile -ExecutionPolicy Bypass -File " +
+                    QuoteProcessArgument(scriptPath) +
+                    " -IgnoreWeekend -SqlServer " +
+                    QuoteProcessArgument(settings.SqlServerAddress) +
+                    " -Database " +
+                    QuoteProcessArgument(settings.DatabaseName);
+
+                if (!settings.UseWindowsAuthentication)
+                {
+                    arguments += " -UseSqlLogin -SqlUser " +
+                        QuoteProcessArgument(settings.SqlUsername) +
+                        " -SqlPassword " +
+                        QuoteProcessArgument(settings.SqlPassword);
+                }
+
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = arguments,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (var process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException("Yedekleme işlemi başlatılamadı.");
+                    }
+
+                    var outputTask = process.StandardOutput.ReadToEndAsync();
+                    var errorTask = process.StandardError.ReadToEndAsync();
+                    await Task.Run(() => process.WaitForExit());
+                    var output = await outputTask;
+                    var error = await errorTask;
+
+                    if (process.ExitCode != 0)
+                    {
+                        throw new InvalidOperationException(
+                            string.IsNullOrWhiteSpace(error) ? output : error);
+                    }
+                }
+
+                MessageBox.Show(
+                    "Veritabanı yedeği başarıyla alındı.",
+                    "Yedekle",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Yedekleme çalıştırılamadı: " + ex.Message,
+                    "Yedekle",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
+
+        private static string QuoteProcessArgument(string value)
+        {
+            return "\"" + (value ?? string.Empty).Replace("\"", "\\\"") + "\"";
+        }
+
         private void AddUserButton_Click(object sender, RoutedEventArgs e)
         {
             if (_currentUser == null || !_currentUser.AdminMi)

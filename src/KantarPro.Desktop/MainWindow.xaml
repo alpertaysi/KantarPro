@@ -411,10 +411,9 @@
                 <Border Grid.Row="3" Grid.ColumnSpan="2" Background="#16202C" Padding="8" Margin="0,10,0,0">
                     <DockPanel LastChildFill="False">
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="Menü" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="MenuButton_Click" />
                             <Button Content="Makbuz" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="KantarFisiYazdir_Click" />
                             <Button Content="Araştır" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="SearchButton_Click" />
-                            <Button Content="Yedekler" MinHeight="34" Padding="16,4" FontSize="13" Click="MenuButton_Click" />
+                            <Button Content="Yedekle" MinHeight="34" Padding="16,4" FontSize="13" Click="BackupButton_Click" />
                         </StackPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                             <Button Content="Yenile" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="16,4" FontSize="13" Margin="0,0,8,0" Click="RefreshButton_Click" />
