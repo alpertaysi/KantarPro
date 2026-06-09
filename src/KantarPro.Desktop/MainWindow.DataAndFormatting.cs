@@ -152,13 +152,11 @@ namespace KantarPro.Desktop
                     RevenueWaitingTotalText.Text,
                     RevenueGrandTotalText.Text);
 
-                RawPrinterHelper.PrintTextWithDriver(
-                    RawPrinterHelper.GetPreferredPrinterName(),
-                    rawText,
-                    "Gunluk Tahsilat " + DateTime.Today.ToString("yyyyMMdd"),
-                    topMarginLines: 0,
-                    leftMarginColumns: 0,
-                    fontSize: 9.0f);
+                var preview = new TextPreviewWindow("Günlük Tahsilat OKI Dökümü", rawText)
+                {
+                    Owner = this
+                };
+                preview.ShowDialog();
             }
             catch (Exception ex)
             {
