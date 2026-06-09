@@ -111,10 +111,10 @@ namespace KantarPro.Desktop
                 var dialog = new SaveFileDialog
                 {
                     Title = "Günlük tahsilat Excel dosyası",
-                    Filter = "Excel CSV dosyası (*.csv)|*.csv",
-                    FileName = "GunlukTahsilat_" + DateTime.Today.ToString("yyyyMMdd") + ".csv",
+                    Filter = "Excel dosyası (*.xlsx)|*.xlsx",
+                    FileName = "GunlukTahsilat_" + DateTime.Today.ToString("yyyyMMdd") + ".xlsx",
                     AddExtension = true,
-                    DefaultExt = ".csv"
+                    DefaultExt = ".xlsx"
                 };
 
                 if (dialog.ShowDialog(this) != true)

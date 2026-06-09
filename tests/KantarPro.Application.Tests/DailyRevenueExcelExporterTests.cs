@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using KantarPro.Desktop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,9 +11,9 @@ namespace KantarPro.Application.Tests
     public class DailyRevenueExcelExporterTests
     {
         [TestMethod]
-        public void Export_CsvDosyasiOlustururVeToplamUcretiYazar()
+        public void Export_XlsxDosyasiOlustururVeToplamUcretiYazar()
         {
-            var path = Path.Combine(Path.GetTempPath(), "kantarpro-gunluk-tahsilat-" + Guid.NewGuid().ToString("N") + ".csv");
+            var path = Path.Combine(Path.GetTempPath(), "kantarpro-gunluk-tahsilat-" + Guid.NewGuid().ToString("N") + ".xlsx");
             try
             {
                 DailyRevenueExcelExporter.Export(
@@ -37,10 +39,18 @@ namespace KantarPro.Application.Tests
                     });
 
                 Assert.IsTrue(File.Exists(path));
-                var content = File.ReadAllText(path);
-                StringAssert.Contains(content, "16DENEME1616");
-                StringAssert.Contains(content, "Toplam Ücret");
-                StringAssert.Contains(content, "732,00 TL");
+                using (var archive = ZipFile.OpenRead(path))
+                {
+                    Assert.IsTrue(archive.Entries.Any(x => x.FullName == "xl/worksheets/sheet1.xml"));
+                    var sheet = archive.GetEntry("xl/worksheets/sheet1.xml");
+                    using (var reader = new StreamReader(sheet.Open()))
+                    {
+                        var content = reader.ReadToEnd();
+                        StringAssert.Contains(content, "16DENEME1616");
+                        StringAssert.Contains(content, "Toplam Ücret");
+                        StringAssert.Contains(content, "732,00 TL");
+                    }
+                }
             }
             finally
             {
