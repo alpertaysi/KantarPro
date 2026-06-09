@@ -103,6 +103,7 @@ namespace KantarPro.Application.Services
                     ManuelMi = false,
                     KullaniciId = kullaniciId
                 };
+                KantarFisNoUretici.GarantiEt(tartim, _unitOfWork.Tartimlar.Query());
                 _unitOfWork.Tartimlar.Add(tartim);
                 islem.Tartimlar.Add(tartim);
                 UcretEkle(islem, KantarSabitleri.UcretKodu.Tartim, islemTarihi);
@@ -168,6 +169,7 @@ namespace KantarPro.Application.Services
                 KullaniciId = kullaniciId
             };
 
+            KantarFisNoUretici.GarantiEt(ikinciTartim, _unitOfWork.Tartimlar.Query());
             _unitOfWork.Tartimlar.Add(ikinciTartim);
             islem.Tartimlar.Add(ikinciTartim);
             islem.GirisTarihi = islemTarihi;
@@ -222,6 +224,7 @@ namespace KantarPro.Application.Services
                 KullaniciId = kullaniciId
             };
 
+            KantarFisNoUretici.GarantiEt(ikinciTartim, _unitOfWork.Tartimlar.Query());
             _unitOfWork.Tartimlar.Add(ikinciTartim);
             islem.Tartimlar.Add(ikinciTartim);
             UcretEkle(islem, KantarSabitleri.UcretKodu.Tartim, tartimTarihi);
@@ -268,6 +271,7 @@ namespace KantarPro.Application.Services
                     ManuelMi = false,
                     KullaniciId = kullaniciId
                 };
+                KantarFisNoUretici.GarantiEt(tartim, _unitOfWork.Tartimlar.Query());
                 _unitOfWork.Tartimlar.Add(tartim);
                 islem.Tartimlar.Add(tartim);
                 UcretEkle(islem, KantarSabitleri.UcretKodu.Tartim, cikisTarihi);
@@ -326,6 +330,7 @@ namespace KantarPro.Application.Services
                 KullaniciId = kullaniciId
             };
 
+            KantarFisNoUretici.GarantiEt(tartim, _unitOfWork.Tartimlar.Query());
             _unitOfWork.Tartimlar.Add(tartim);
             islem.Tartimlar.Add(tartim);
             UcretEkle(islem, KantarSabitleri.UcretKodu.Tartim, tartimTarihi);

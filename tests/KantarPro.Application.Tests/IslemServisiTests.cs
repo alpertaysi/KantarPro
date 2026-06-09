@@ -37,6 +37,7 @@ namespace KantarPro.Application.Tests
             Assert.AreEqual(732m, islem.ToplamTahakkuk);
             Assert.AreEqual(1, uow.TartimListesi.Count);
             Assert.AreEqual(18500m, uow.TartimListesi.Single().AgirlikKg);
+            Assert.AreEqual("00001", uow.TartimListesi.Single().KantarFisNo);
             Assert.AreEqual(2, uow.IslemUcretiListesi.Count);
             Assert.IsTrue(uow.IslemUcretiListesi.Any(x => x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.GirisCikis));
             Assert.IsTrue(uow.IslemUcretiListesi.Any(x => x.Ucret.UcretKodu == KantarSabitleri.UcretKodu.Tartim));
@@ -239,6 +240,7 @@ namespace KantarPro.Application.Tests
             Assert.AreEqual(KantarSabitleri.BekleyenTartimDurumu.Tamamlandi, bekleyen.Durum);
             Assert.IsNotNull(bekleyen.TamamlayanTartim);
             Assert.AreEqual(KantarSabitleri.TartimTipi.Cikis, bekleyen.TamamlayanTartim.TartimTipi);
+            Assert.AreEqual("00001", bekleyen.TamamlayanTartim.KantarFisNo);
         }
 
         [TestMethod]

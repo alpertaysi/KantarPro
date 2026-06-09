@@ -3,6 +3,7 @@ using System.Linq;
 using KantarPro.Application.Services;
 using KantarPro.Application.Tests.Fakes;
 using KantarPro.Domain;
+using KantarPro.Domain.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KantarPro.Application.Tests
@@ -42,6 +43,36 @@ namespace KantarPro.Application.Tests
             Assert.AreEqual(0, uow.KantarDosyasiListesi.Count);
             Assert.AreEqual(1, uow.IslemUcretiListesi.Count);
             Assert.IsTrue(uow.IslemUcretiListesi.Single().TahsilEdildiMi);
+        }
+
+        [TestMethod]
+        public void GirisKaydet_TartimliKaydaBesHaneliKantarFisNoAtar()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            servis.GirisKaydet("16 FIS 001", "Firma Fis", KantarSabitleri.GelisTuru.Dolu, true, 34000m, 1, new DateTime(2026, 5, 12, 11, 0, 0));
+
+            Assert.AreEqual("00001", uow.TartimListesi.Single().KantarFisNo);
+        }
+
+        [TestMethod]
+        public void SonradanTartimEkle_MevcutSonNumaradanDevamEder()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var arac = new Arac { AracId = 101, Plaka = "16FIS002", FirmaAdi = "Firma Fis", AktifMi = true };
+            var mevcutIslem = new Islem { IslemId = 101, Arac = arac, AracId = arac.AracId, Durum = KantarSabitleri.IslemDurumu.CikisYapti, GirisTarihi = new DateTime(2026, 5, 10, 9, 0, 0), GirisKullaniciId = 1 };
+            var mevcutTartim = new Tartim { TartimId = 101, Islem = mevcutIslem, IslemId = mevcutIslem.IslemId, Arac = arac, AracId = arac.AracId, TartimTipi = KantarSabitleri.TartimTipi.Giris, AgirlikKg = 20000m, TartimTarihi = mevcutIslem.GirisTarihi, KullaniciId = 1, KantarFisNo = "00041" };
+            mevcutIslem.Tartimlar.Add(mevcutTartim);
+            uow.AracListesi.Add(arac);
+            uow.IslemListesi.Add(mevcutIslem);
+            uow.TartimListesi.Add(mevcutTartim);
+            var ziyaret = new SahaZiyaretiServisi(uow).GirisKaydet("16 FIS 003", "Firma Fis", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 5, 12, 10, 0, 0));
+            var servis = new SahaZiyaretiServisi(uow);
+
+            servis.SonradanTartimEkle(ziyaret.Arac.Plaka, KantarSabitleri.YukDurumu.Dolu, 18000m, 1, new DateTime(2026, 5, 12, 11, 0, 0));
+
+            Assert.AreEqual("00042", uow.TartimListesi.Single(x => !ReferenceEquals(x, mevcutTartim)).KantarFisNo);
         }
 
         [TestMethod]

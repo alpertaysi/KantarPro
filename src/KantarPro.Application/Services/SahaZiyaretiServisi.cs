@@ -408,6 +408,7 @@ namespace KantarPro.Application.Services
                 KullaniciId = kullaniciId
             };
 
+            KantarFisNoUretici.GarantiEt(tartim, _unitOfWork.Tartimlar.Query());
             _unitOfWork.Tartimlar.Add(tartim);
             ziyaret.Tartimlar.Add(tartim);
             ziyaret.Arac.Tartimlar.Add(tartim);
