@@ -7,61 +7,92 @@ namespace KantarPro.Desktop
 {
     public static class SearchResultsTextFormatter
     {
+        private const int SiraWidth = 5;
+        private const int IslemWidth = 8;
+        private const int DurumWidth = 16;
+        private const int PlakaWidth = 12;
+        private const int FirmaWidth = 22;
+        private const int TarihWidth = 12;
+        private const int SaatWidth = 9;
+        private const int TartimWidth = 11;
+        private const int NetWidth = 10;
+        private const int TahsilatWidth = 12;
+        private const int OdemeWidth = 12;
+        private const int FisWidth = 8;
+        private const int KullaniciWidth = 16;
+        private const int ToplamWidth = 11;
+        private const int ReportWidth =
+            SiraWidth +
+            IslemWidth +
+            DurumWidth +
+            PlakaWidth +
+            FirmaWidth +
+            TarihWidth +
+            SaatWidth +
+            TarihWidth +
+            SaatWidth +
+            TartimWidth +
+            TartimWidth +
+            NetWidth +
+            TahsilatWidth +
+            OdemeWidth +
+            FisWidth +
+            KullaniciWidth +
+            ToplamWidth;
+
         public static string Build(IEnumerable<SearchResultRow> rows, string title)
         {
             var list = (rows ?? Enumerable.Empty<SearchResultRow>()).ToList();
             var builder = new StringBuilder();
 
-            const int reportWidth = 176;
-
-            builder.AppendLine(Center("TURKIYE CUMHURIYETI", reportWidth));
-            builder.AppendLine(Center("TICARET BAKANLIGI", reportWidth));
-            builder.AppendLine(Center("GECMIS KAYIT ARASTIRMA DOKUMU", reportWidth));
-            builder.AppendLine(Center(string.IsNullOrWhiteSpace(title) ? DateTime.Now.ToString("dd.MM.yyyy HH:mm") : title, reportWidth));
-            builder.AppendLine(new string('-', reportWidth));
+            builder.AppendLine(Center("TURKIYE CUMHURIYETI", ReportWidth));
+            builder.AppendLine(Center("TICARET BAKANLIGI", ReportWidth));
+            builder.AppendLine(Center("GECMIS KAYIT ARASTIRMA DOKUMU", ReportWidth));
+            builder.AppendLine(Center(string.IsNullOrWhiteSpace(title) ? DateTime.Now.ToString("dd.MM.yyyy HH:mm") : title, ReportWidth));
+            builder.AppendLine(new string('-', ReportWidth));
             builder.AppendLine(
-                Col("Sira", 5) +
-                Col("Islem", 8) +
-                Col("Durum", 16) +
-                Col("Plaka", 12) +
-                Col("Firma", 22) +
-                Col("Giris", 12) +
-                Col("Saat", 9) +
-                Col("Cikis", 12) +
-                Col("Saat", 9) +
-                Col("1.Tartim", 11) +
-                Col("2.Tartim", 11) +
-                Col("Net", 10) +
-                Col("Tahsilat", 12) +
-                Col("Odeme", 12) +
-                Col("Fis", 8) +
-                Col("Kullanici", 16) +
-                Col("Toplam", 11));
-            builder.AppendLine(new string('-', reportWidth));
+                Col("Sira", SiraWidth) +
+                Col("Islem", IslemWidth) +
+                Col("Durum", DurumWidth) +
+                Col("Plaka", PlakaWidth) +
+                Col("Firma", FirmaWidth) +
+                Col("Giris", TarihWidth) +
+                Col("Saat", SaatWidth) +
+                Col("Cikis", TarihWidth) +
+                Col("Saat", SaatWidth) +
+                Col("1.Tartim", TartimWidth) +
+                Col("2.Tartim", TartimWidth) +
+                Col("Net", NetWidth) +
+                Col("Tahsilat", TahsilatWidth) +
+                Col("Odeme", OdemeWidth) +
+                Col("Fis", FisWidth) +
+                Col("Kullanici", KullaniciWidth) +
+                Col("Toplam", ToplamWidth));
+            builder.AppendLine(new string('-', ReportWidth));
 
             foreach (var row in list)
             {
                 builder.AppendLine(
-                    Col(row.SiraNo.ToString(), 5) +
-                    Col(row.IslemNo, 8) +
-                    Col(row.Durum, 16) +
-                    Col(row.Plaka, 12) +
-                    Col(row.Firma, 22) +
-                    Col(row.GirisTarihi, 12) +
-                    Col(row.GirisSaati, 9) +
-                    Col(row.CikisTarihi, 12) +
-                    Col(row.CikisSaati, 9) +
-                    Col(row.BirinciTartim, 11) +
-                    Col(row.IkinciTartim, 11) +
-                    Col(row.Net, 10) +
-                    Col(row.TahsilatNo, 12) +
-                    Col(row.OdemeTuru, 12) +
-                    Col(row.KantarFisNo, 8) +
-                    Col(row.Kullanici, 16) +
-                    Col(row.ToplamUcret, 11));
+                    Col(row.SiraNo.ToString(), SiraWidth) +
+                    Col(row.IslemNo, IslemWidth) +
+                    Col(row.Durum, DurumWidth) +
+                    Col(row.Plaka, PlakaWidth) +
+                    Col(row.Firma, FirmaWidth) +
+                    Col(row.GirisTarihi, TarihWidth) +
+                    Col(row.GirisSaati, SaatWidth) +
+                    Col(row.CikisTarihi, TarihWidth) +
+                    Col(row.CikisSaati, SaatWidth) +
+                    Col(row.BirinciTartim, TartimWidth) +
+                    Col(row.IkinciTartim, TartimWidth) +
+                    Col(row.Net, NetWidth) +
+                    Col(row.TahsilatNo, TahsilatWidth) +
+                    Col(row.OdemeTuru, OdemeWidth) +
+                    Col(row.KantarFisNo, FisWidth) +
+                    Col(row.Kullanici, KullaniciWidth) +
+                    Col(row.ToplamUcret, ToplamWidth));
             }
 
-            builder.AppendLine(new string('-', reportWidth));
+            builder.AppendLine(new string('-', ReportWidth));
             builder.AppendLine("Kayit: " + list.Count);
             return builder.ToString();
         }

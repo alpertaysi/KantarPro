@@ -1,4 +1,6 @@
 using KantarPro.Desktop;
+using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KantarPro.Application.Tests
@@ -41,6 +43,17 @@ namespace KantarPro.Application.Tests
             StringAssert.Contains(text, "THS-42");
             StringAssert.Contains(text, "5000 kg");
             StringAssert.Contains(text, "Admin Kullanici");
+
+            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None)
+                .Where(x => x.Length > 0)
+                .ToList();
+            var firstSeparatorIndex = lines.FindIndex(x => x.All(c => c == '-'));
+            var separatorLength = lines[firstSeparatorIndex].Length;
+            var headerLength = lines[firstSeparatorIndex + 1].Length;
+            var dataLength = lines[firstSeparatorIndex + 3].Length;
+
+            Assert.AreEqual(separatorLength, headerLength);
+            Assert.AreEqual(separatorLength, dataLength);
         }
     }
 }
