@@ -80,7 +80,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, _kullaniciId, ParseExitDateTime(), odemeTuru);
+                    servis.CikisYap(_plaka, _tartimIsteniyor, _agirlikKg, _kullaniciId, DateTime.Now, odemeTuru);
                 }
 
                 DialogResult = true;

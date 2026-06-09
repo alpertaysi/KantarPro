@@ -70,8 +70,8 @@
 
                         <TextBlock Grid.Row="2" Text="Çıkış Bilgileri" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text=":" VerticalAlignment="Center" />
-                        <TextBox x:Name="ExitDateText" Grid.Row="2" Grid.Column="2" IsReadOnly="False" />
-                        <TextBox x:Name="ExitTimeText" Grid.Row="2" Grid.Column="4" IsReadOnly="False" />
+                        <TextBox x:Name="ExitDateText" Grid.Row="2" Grid.Column="2" IsTabStop="False" />
+                        <TextBox x:Name="ExitTimeText" Grid.Row="2" Grid.Column="4" IsTabStop="False" />
                     </Grid>
                 </GroupBox>
 

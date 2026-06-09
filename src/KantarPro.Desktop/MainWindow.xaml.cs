@@ -40,8 +40,6 @@ namespace KantarPro.Desktop
         private string _pendingPlakaFilter = string.Empty;
         private string _pendingFirmaFilter = string.Empty;
         private string _plateCorrectionOriginalPlate;
-        private bool _manualGirisSaati;
-        private bool _manualCikisSaati;
         private bool _isAutoRefreshing;
         private KantarSerialReader _scaleReader;
         private decimal? _lastScaleWeightKg;
@@ -50,6 +48,7 @@ namespace KantarPro.Desktop
         private bool _connectionCheckInProgress;
         private int _connectionLostCount;
         private bool _connectionWarningShown;
+        private bool? _lastDatabaseConnectionStatus;
 
         public MainWindow()
         {
@@ -107,15 +106,10 @@ namespace KantarPro.Desktop
             {
                 var saat = DateTime.Now.ToString("HH:mm:ss");
                 ClockText.Text = saat;
-                if (!_manualGirisSaati)
-                {
-                    GirisSaatiTextBox.Text = saat;
-                }
-
-                if (!_manualCikisSaati)
-                {
-                    CikisSaatiTextBox.Text = saat;
-                }
+                GirisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
+                GirisSaatiTextBox.Text = saat;
+                CikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
+                CikisSaatiTextBox.Text = saat;
             };
             timer.Start();
 
@@ -356,7 +350,7 @@ namespace KantarPro.Desktop
                 var firmaAdi = FirmaTextBox.Text;
                 var aciklama = AciklamaTextBox.Text;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(AgirlikTextBox.Text) : (decimal?)null;
-                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giriş tarihi");
+                var islemTarihi = DateTime.Now;
 
                 if (tartimIsteniyor && TryCompletePendingDoluBosFromDashboard(plaka, agirlik.GetValueOrDefault(), islemTarihi, muafMi, muafiyetNedeni))
                 {
@@ -429,7 +423,7 @@ namespace KantarPro.Desktop
                 var plaka = ExitPlakaTextBox.Text;
                 var tartimIsteniyor = ExitManuelTartimCheckBox.IsChecked == true;
                 var agirlik = tartimIsteniyor ? ParseAgirlik(ExitAgirlikTextBox.Text) : (decimal?)null;
-                var cikisTarihi = ParseIslemTarihi(ExitCikisTarihiTextBox.Text, "Çıkış tarihi");
+                var cikisTarihi = DateTime.Now;
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
@@ -618,7 +612,7 @@ namespace KantarPro.Desktop
                 var plaka = GetPlakaForOperation();
                 var tartimIsteniyor = false;
                 var agirlik = (decimal?)null;
-                var cikisTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
+                var cikisTarihi = DateTime.Now;
 
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
@@ -627,7 +621,6 @@ namespace KantarPro.Desktop
                     PlakaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
                     CikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
-                    _manualCikisSaati = false;
                     CikisSaatiTextBox.Text = DateTime.Now.ToString("HH:mm:ss");
                 }
             }
@@ -725,6 +718,14 @@ namespace KantarPro.Desktop
             if (ConnectionStatusDot == null || ConnectionStatusText == null)
             {
                 return;
+            }
+
+            if (!_lastDatabaseConnectionStatus.HasValue || _lastDatabaseConnectionStatus.Value != isConnected)
+            {
+                App.LogInfo(isConnected
+                    ? "SQL bağlantısı geri geldi."
+                    : "SQL bağlantısı kesildi.");
+                _lastDatabaseConnectionStatus = isConnected;
             }
 
             if (isConnected)
@@ -1263,7 +1264,7 @@ namespace KantarPro.Desktop
             try
             {
                 var agirlik = ParseAgirlik(AgirlikTextBox.Text);
-                var tartimTarihi = ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
+                var tartimTarihi = DateTime.Now;
 
                 using (var context = KantarDbContextFactory.Create())
                 {
@@ -1706,7 +1707,7 @@ namespace KantarPro.Desktop
                     return;
                 }
 
-                var islemTarihi = ParseIslemTarihi(GirisTarihiTextBox.Text, GirisSaatiTextBox.Text, "Giriş tarihi");
+                var islemTarihi = DateTime.Now;
                 if (dialog.Choice == EntrySaveChoice.WeighAndSave)
                 {
                     var agirlik = ParseAgirlik(AgirlikTextBox.Text);
@@ -2368,46 +2369,22 @@ namespace KantarPro.Desktop
 
         private void GirisSaatiTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var textBox = sender as TextBox;
-            if (textBox != null && textBox.IsKeyboardFocusWithin)
-            {
-                _manualGirisSaati = true;
-            }
+            // Gercek kurulumda saat bilgisayardan gelir; elle degisiklik dikkate alinmaz.
         }
 
         private void CikisSaatiTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var textBox = sender as TextBox;
-            if (textBox != null && textBox.IsKeyboardFocusWithin)
-            {
-                _manualCikisSaati = true;
-            }
-
-            RefreshDashboardForManualExitDate(textBox);
+            // Gercek kurulumda cikis saati bilgisayardan gelir; elle degisiklik dikkate alinmaz.
         }
 
         private void CikisTarihiTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            RefreshDashboardForManualExitDate(sender as TextBox);
+            // Gercek kurulumda cikis tarihi bilgisayardan gelir; elle degisiklik dikkate alinmaz.
         }
 
         private void RefreshDashboardForManualExitDate(TextBox textBox)
         {
-            if (textBox == null || !textBox.IsKeyboardFocusWithin)
-            {
-                return;
-            }
-
-            try
-            {
-                ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
-            }
-            catch
-            {
-                return;
-            }
-
-            LoadDashboardData();
+            // Prova donemindeki manuel cikis tarihi yenilemesi kapatildi.
         }
 
 

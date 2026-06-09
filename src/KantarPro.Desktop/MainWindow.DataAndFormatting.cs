@@ -875,14 +875,7 @@ namespace KantarPro.Desktop
 
         private DateTime GetListeHesapTarihi()
         {
-            try
-            {
-                return ParseIslemTarihi(CikisTarihiTextBox.Text, CikisSaatiTextBox.Text, "Çıkış tarihi");
-            }
-            catch
-            {
-                return DateTime.Now;
-            }
+            return DateTime.Now;
         }
 
         private static decimal HesaplaBeklemeUcreti(KantarDbContext context, Islem islem, DateTime hesapTarihi)

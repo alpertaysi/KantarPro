@@ -205,14 +205,14 @@
                             <TextBox x:Name="PlakaTextBox" Grid.Column="1" CharacterCasing="Upper" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
 
                             <TextBlock Grid.Row="1" Text="Giriş Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="GirisTarihiTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
+                            <TextBox x:Name="GirisTarihiTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" IsReadOnly="True" IsTabStop="False" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#E5E7EB" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
-                            <TextBox x:Name="GirisSaatiTextBox" Grid.Row="1" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="GirisSaatiTextBox_TextChanged" />
+                            <TextBox x:Name="GirisSaatiTextBox" Grid.Row="1" Grid.Column="3" IsReadOnly="True" IsTabStop="False" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" />
 
-                            <TextBlock Grid.Row="2" Text="Çıkış Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" />
-                            <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" TextChanged="CikisTarihiTextBox_TextChanged" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" />
-                            <TextBox x:Name="CikisSaatiTextBox" Grid.Row="2" Grid.Column="3" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" TextChanged="CikisSaatiTextBox_TextChanged" />
+                            <TextBlock Grid.Row="2" Text="Çıkış Tarihi:" VerticalAlignment="Center" Margin="0,0,6,8" Visibility="Collapsed" />
+                            <TextBox x:Name="CikisTarihiTextBox" Grid.Row="2" Grid.Column="1" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" IsReadOnly="True" IsTabStop="False" Height="26" Padding="6,2" FontSize="13" FontWeight="Bold" Background="#E5E7EB" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" Visibility="Collapsed" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Saat:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,8" Visibility="Collapsed" />
+                            <TextBox x:Name="CikisSaatiTextBox" Grid.Row="2" Grid.Column="3" IsReadOnly="True" IsTabStop="False" Height="26" Padding="4,2" FontFamily="Consolas" FontSize="15" FontWeight="Bold" Foreground="White" Background="#0284C7" BorderBrush="#0369A1" BorderThickness="1" TextAlignment="Center" Margin="0,0,0,8" Visibility="Collapsed" />
 
                             <TextBlock Grid.Row="3" Text="Müşteri Adı:" VerticalAlignment="Center" Margin="0,0,6,8" />
                             <TextBox x:Name="FirmaTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="26" Padding="6,2" FontSize="13" FontWeight="SemiBold" Background="#C9E6C8" BorderBrush="#6B7280" BorderThickness="1" Margin="0,0,0,8" />
@@ -227,7 +227,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="1.KG:" FontSize="26" Foreground="Black" VerticalAlignment="Center" />
-                                <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
+                                <TextBox x:Name="AgirlikTextBox" Grid.Column="1" Text="0" IsReadOnly="True" IsTabStop="False" Height="48" Padding="8,5" FontFamily="Consolas" FontSize="26" FontWeight="Bold" Background="#FFFFE1" BorderBrush="#6B7280" BorderThickness="1" TextAlignment="Right" />
                                 <StackPanel Grid.Column="2" Margin="18,0,0,0" VerticalAlignment="Center">
                                     <Button x:Name="EntrySaveButton" Content="Kaydet" Style="{StaticResource PrimaryButton}" MinHeight="34" Padding="10,4" FontSize="13" Margin="0,0,0,6" Click="TartVeKaydet_Click" />
                                     <Button x:Name="EntryCorrectionCancelButton" Content="Vazgeç" Style="{StaticResource DangerButton}" MinHeight="34" Padding="10,4" FontSize="13" Visibility="Collapsed" Click="EntryCorrectionCancelButton_Click" />
@@ -790,7 +790,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Margin="0,0,10,0">
                                     <TextBlock Text="Giriş Ağırlığı" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
-                                    <TextBox x:Name="EntryAgirlikTextBox" Text="0" />
+                                    <TextBox x:Name="EntryAgirlikTextBox" Text="0" IsReadOnly="True" IsTabStop="False" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="Birim" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
@@ -874,8 +874,8 @@
                             <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                             <TextBox x:Name="ExitPlakaTextBox" CharacterCasing="Upper" Margin="0,0,0,12" />
 
-                            <TextBlock Text="Çıkış Tarihi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
-                            <TextBox x:Name="ExitCikisTarihiTextBox" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" Margin="0,0,0,12" />
+                            <TextBlock Text="Çıkış Tarihi" Foreground="{StaticResource Muted}" Margin="0,0,0,6" Visibility="Collapsed" />
+                            <TextBox x:Name="ExitCikisTarihiTextBox" Text="{Binding Source={x:Static sys:DateTime.Today}, Path=., Mode=OneWay, StringFormat={}{0:dd.MM.yyyy}}" IsReadOnly="True" IsTabStop="False" Margin="0,0,0,12" Visibility="Collapsed" />
 
                             <Button Content="Açık Girişi Bul" Margin="0,0,0,16" Click="ExitFindVehicle_Click" />
 
@@ -901,7 +901,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Margin="0,0,10,0">
                                     <TextBlock Text="Çıkış Ağırlığı" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
-                                    <TextBox x:Name="ExitAgirlikTextBox" Text="0" />
+                                    <TextBox x:Name="ExitAgirlikTextBox" Text="0" IsReadOnly="True" IsTabStop="False" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="Birim" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
@@ -1143,7 +1143,7 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="2.KG" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
-                                    <TextBox x:Name="DoluBosIkinciKgTextBox" Grid.Column="1" Text="8200" />
+                                    <TextBox x:Name="DoluBosIkinciKgTextBox" Grid.Column="1" Text="8200" IsReadOnly="True" IsTabStop="False" />
                                 </Grid>
 
                                 <Grid Margin="0,0,0,10">
