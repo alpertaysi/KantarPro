@@ -12,11 +12,13 @@ namespace KantarPro.Desktop
             var list = (rows ?? Enumerable.Empty<SearchResultRow>()).ToList();
             var builder = new StringBuilder();
 
-            builder.AppendLine(Center("TURKIYE CUMHURIYETI", 160));
-            builder.AppendLine(Center("TICARET BAKANLIGI", 160));
-            builder.AppendLine(Center("GECMIS KAYIT ARASTIRMA DOKUMU", 160));
-            builder.AppendLine(Center(string.IsNullOrWhiteSpace(title) ? DateTime.Now.ToString("dd.MM.yyyy HH:mm") : title, 160));
-            builder.AppendLine(new string('-', 160));
+            const int reportWidth = 176;
+
+            builder.AppendLine(Center("TURKIYE CUMHURIYETI", reportWidth));
+            builder.AppendLine(Center("TICARET BAKANLIGI", reportWidth));
+            builder.AppendLine(Center("GECMIS KAYIT ARASTIRMA DOKUMU", reportWidth));
+            builder.AppendLine(Center(string.IsNullOrWhiteSpace(title) ? DateTime.Now.ToString("dd.MM.yyyy HH:mm") : title, reportWidth));
+            builder.AppendLine(new string('-', reportWidth));
             builder.AppendLine(
                 Col("Sira", 5) +
                 Col("Islem", 8) +
@@ -33,8 +35,9 @@ namespace KantarPro.Desktop
                 Col("Tahsilat", 12) +
                 Col("Odeme", 12) +
                 Col("Fis", 8) +
+                Col("Kullanici", 16) +
                 Col("Toplam", 11));
-            builder.AppendLine(new string('-', 160));
+            builder.AppendLine(new string('-', reportWidth));
 
             foreach (var row in list)
             {
@@ -54,10 +57,11 @@ namespace KantarPro.Desktop
                     Col(row.TahsilatNo, 12) +
                     Col(row.OdemeTuru, 12) +
                     Col(row.KantarFisNo, 8) +
+                    Col(row.Kullanici, 16) +
                     Col(row.ToplamUcret, 11));
             }
 
-            builder.AppendLine(new string('-', 160));
+            builder.AppendLine(new string('-', reportWidth));
             builder.AppendLine("Kayit: " + list.Count);
             return builder.ToString();
         }

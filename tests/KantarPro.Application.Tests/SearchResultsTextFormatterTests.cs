@@ -40,6 +40,7 @@ namespace KantarPro.Application.Tests
             StringAssert.Contains(text, "BURSA LOJISTIK");
             StringAssert.Contains(text, "THS-42");
             StringAssert.Contains(text, "5000 kg");
+            StringAssert.Contains(text, "Admin Kullanici");
         }
     }
 }
