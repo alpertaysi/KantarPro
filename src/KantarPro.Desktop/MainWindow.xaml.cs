@@ -153,7 +153,7 @@ namespace KantarPro.Desktop
 
             SettingsNavButton.Visibility = _currentUser.AdminMi ? Visibility.Visible : Visibility.Collapsed;
             ApplyAdminOnlyMenuVisibility(_currentUser.AdminMi);
-            StationStatusText.Text = StationStatusText.Text + "   " + _currentUser.Rol + ": " + _currentUser.AdSoyad;
+            UpdateStationStatus();
         }
 
         private void ApplyAdminOnlyMenuVisibility(bool adminMi)
@@ -198,16 +198,20 @@ namespace KantarPro.Desktop
             ShowSettingsPage();
         }
 
-        private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
+        private void ChangeUserButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentUser == null)
+            var window = new UserSwitchWindow { Owner = this };
+            if (window.ShowDialog() != true || window.AuthenticatedUser == null)
             {
-                MessageBox.Show("Oturum bilgisi bulunamadı.", "Şifre Değiştir", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var window = new ChangePasswordWindow(_currentUser) { Owner = this };
-            window.ShowDialog();
+            _currentUser = window.AuthenticatedUser;
+            ApplyCurrentUserPermissions();
+            App.LogOperation(
+                _currentUser.KullaniciAdi,
+                "Kullanıcı değiştirildi",
+                "Oturum program kapatılmadan değiştirildi.");
         }
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -2199,7 +2203,10 @@ namespace KantarPro.Desktop
             var settings = StationSettingsStore.Load();
             SqlStatusText.Text = "SQL: " + settings.SqlServerAddress;
             ComStatusText.Text = "COM: " + (string.IsNullOrWhiteSpace(settings.ComPort) ? "Beklemede" : settings.ComPort);
-            StationStatusText.Text = settings.StationType;
+            StationStatusText.Text = settings.StationType +
+                (_currentUser == null
+                    ? string.Empty
+                    : "   " + _currentUser.Rol + ": " + _currentUser.AdSoyad);
         }
 
         private void StartScaleReader()

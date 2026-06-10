@@ -147,7 +147,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Giriş-Çıkış İşlemleri" Style="{StaticResource PrimaryButton}" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AracGirisButton_Click" />
                         <Button Content="Günlük Tahsilat" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="GunlukHasilatButton_Click" />
-                        <Button Content="Şifre Değiştir" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="ChangePasswordButton_Click" />
+                        <Button Content="Kullanıcı Değiştir" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="ChangeUserButton_Click" />
                         <Button x:Name="SettingsNavButton" Content="Ayarlar" MinHeight="28" Padding="12,4" FontSize="13" Margin="0,0,4,0" Click="AyarlarButton_Click" />
                     </StackPanel>
 
