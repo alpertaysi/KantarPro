@@ -133,6 +133,7 @@
     <Compile Include="DashboardVisitInfo.cs" />
     <Compile Include="SearchResultRow.cs" />
     <Compile Include="SearchResultsTextFormatter.cs" />
+    <Compile Include="ScaleWeightSelector.cs" />
     <Compile Include="KantarDbContextFactory.cs" />
     <Compile Include="KantarFisFormatter.cs" />
     <Compile Include="KantarFisPreviewData.cs" />

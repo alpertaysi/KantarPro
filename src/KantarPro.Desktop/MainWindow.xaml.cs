@@ -153,6 +153,7 @@ namespace KantarPro.Desktop
 
             SettingsNavButton.Visibility = _currentUser.AdminMi ? Visibility.Visible : Visibility.Collapsed;
             ApplyAdminOnlyMenuVisibility(_currentUser.AdminMi);
+            UpdateManualWeightAccess();
             UpdateStationStatus();
         }
 
@@ -2302,12 +2303,20 @@ namespace KantarPro.Desktop
 
         private decimal GetCurrentScaleWeightKg()
         {
-            if (!_lastScaleWeightKg.HasValue || _lastScaleWeightKg.Value <= 0)
-            {
-                throw new InvalidOperationException("İndikatörden geçerli kilo alınmadan tartımlı kayıt yapılamaz.");
-            }
+            return ScaleWeightSelector.GetWeight(
+                _lastScaleWeightKg,
+                AgirlikTextBox.Text,
+                _currentUser != null && _currentUser.AdminMi);
+        }
 
-            return _lastScaleWeightKg.Value;
+        private void UpdateManualWeightAccess()
+        {
+            var admin = _currentUser != null && _currentUser.AdminMi;
+            AgirlikTextBox.IsReadOnly = !admin;
+            AgirlikTextBox.IsTabStop = admin;
+            AgirlikTextBox.ToolTip = admin
+                ? "Sunum için kilo elle girilebilir."
+                : "Kilo indikatörden otomatik alınır.";
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)

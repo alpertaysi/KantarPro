@@ -41,6 +41,7 @@
     <Compile Include="AutoRefreshPolicyTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />
     <Compile Include="SearchResultsTextFormatterTests.cs" />
+    <Compile Include="ScaleWeightSelectorTests.cs" />
     <Compile Include="StationSettingsStoreTests.cs" />
     <Compile Include="UcretAyarlariServisiTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
