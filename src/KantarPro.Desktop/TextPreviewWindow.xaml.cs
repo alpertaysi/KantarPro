@@ -23,13 +23,13 @@ namespace KantarPro.Desktop
         {
             try
             {
-                RawPrinterHelper.PrintTextWithDriver(
+                RawPrinterHelper.PrintContinuousLandscapeTextWithDriver(
                     RawPrinterHelper.GetPreferredPrinterName(),
                     _text,
                     _documentName,
                     topMarginLines: 0,
                     leftMarginColumns: 0,
-                    fontSize: ParseFontSize(DriverFontSizeTextBox.Text));
+                    cpi: ParseCpi(DriverFontSizeTextBox.Text));
             }
             catch (Exception ex)
             {
@@ -42,12 +42,12 @@ namespace KantarPro.Desktop
             Close();
         }
 
-        private static float ParseFontSize(string value)
+        private static float ParseCpi(string value)
         {
             float parsed;
             return float.TryParse((value ?? "").Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
                 ? parsed
-                : 9.0f;
+                : 12.0f;
         }
     }
 }

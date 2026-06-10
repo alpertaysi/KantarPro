@@ -60,7 +60,7 @@ namespace KantarPro.Desktop
                 printerName,
                 _data.RawText,
                 "Kantar Fisi " + ValueOrDash(_data.FisNo),
-                topMarginLines: 0,
+                topMarginLines: -1,
                 leftMarginColumns: 2,
                 fontSize: ParseFontSize(DriverFontSizeTextBox.Text));
         }

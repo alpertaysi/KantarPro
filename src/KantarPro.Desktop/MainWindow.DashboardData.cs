@@ -172,7 +172,7 @@ namespace KantarPro.Desktop
             {
                 DailyTransactions.Add(new DailyTransactionRow
                 {
-                    IslemNo = islem.IslemNo,
+                    IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
                     Plaka = islem.Arac.Plaka,
                     Tip = islem.Durum == KantarSabitleri.IslemDurumu.Iceride ? "Giris" : "Cikis",
                     Ucret = DashboardFormat.Para(islem.ToplamTahakkuk),

@@ -155,6 +155,11 @@ namespace KantarPro.Desktop
             ApplyAdminOnlyMenuVisibility(_currentUser.AdminMi);
             UpdateManualWeightAccess();
             UpdateStationStatus();
+
+            if (!_currentUser.AdminMi && SettingsContent.Visibility == Visibility.Visible)
+            {
+                ShowEntryPage();
+            }
         }
 
         private void ApplyAdminOnlyMenuVisibility(bool adminMi)
@@ -877,7 +882,7 @@ namespace KantarPro.Desktop
             }
         }
 
-        private static void PrintReceiptText(string rawText, string documentName)
+        internal static void PrintReceiptText(string rawText, string documentName)
         {
             var settings = StationSettingsStore.Load();
             var printerName = RawPrinterHelper.GetPreferredPrinterName();
@@ -891,7 +896,7 @@ namespace KantarPro.Desktop
                 printerName,
                 rawText,
                 documentName,
-                topMarginLines: 0,
+                topMarginLines: -1,
                 leftMarginColumns: 2,
                 fontSize: 12.0f);
         }

@@ -79,12 +79,14 @@ namespace KantarPro.Application.Tests
                             SiraNo = 1,
                             IslemNo = "9999",
                             IslemTipi = "Dolu-Boş",
-                            KantarFisNo = "9999",
+                            KantarFisNo = "00011, 00012",
                             OdemeTuru = "Kredi Kartı",
                             FirmaAdi = "COK UZUN FIRMA ADI ILE DENEME",
                             Plaka = "16UZUN001",
                             CikisTarihi = "05.06.2026",
                             CikisSaati = "16:37:15",
+                            GirisTarihi = "04.06.2026",
+                            GirisSaati = "09:12:34",
                             IlkTartim = "34.000 kg",
                             GirisCikisUcreti = "366,00 TL",
                             TartimUcreti = "366,00 TL",
@@ -101,6 +103,9 @@ namespace KantarPro.Application.Tests
                 exporter.Export(path);
 
                 var content = File.ReadAllText(path);
+                StringAssert.Contains(content, "00011, 00012");
+                StringAssert.Contains(content, "Giri");
+                StringAssert.Contains(content, "04.06.2026");
                 var matches = Regex.Matches(content, @"(?<x>\d+(?:\.\d+)?) (?<y>\d+(?:\.\d+)?) (?<w>\d+(?:\.\d+)?) (?<h>\d+(?:\.\d+)?) re S");
                 Assert.IsTrue(matches.Count > 0);
 

@@ -2,6 +2,7 @@ namespace KantarPro.Desktop
 {
     public class SearchResultRow
     {
+        public int IslemId { get; set; }
         public int SiraNo { get; set; }
         public string IslemNo { get; set; }
         public string Durum { get; set; }
@@ -19,6 +20,9 @@ namespace KantarPro.Desktop
         public string KantarFisNo { get; set; }
         public string Kullanici { get; set; }
         public string ToplamUcret { get; set; }
+        public string GirisCikisUcreti { get; set; }
+        public string TartimUcreti { get; set; }
+        public string BeklemeUcreti { get; set; }
         public string Notlar { get; set; }
     }
 }

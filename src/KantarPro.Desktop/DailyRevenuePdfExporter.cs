@@ -99,24 +99,23 @@ namespace KantarPro.Desktop
 
         private static IList<ReportColumn> BuildColumns()
         {
-            var baseWidths = new[] { 30, 48, 70, 54, 62, 120, 70, 68, 64, 75, 75, 82, 82 };
-            var scale = (PageWidth - LeftMargin - RightMargin) / baseWidths.Sum();
-            var widths = baseWidths.Select(x => (float)Math.Floor(x * scale)).ToArray();
+            var widths = new float[] { 30, 42, 58, 80, 58, 45, 58, 45, 50, 78, 55, 55, 62, 70 };
             return new[]
             {
                 new ReportColumn("Sıra", widths[0], x => x.SiraNo.ToString(CultureInfo.InvariantCulture)),
                 new ReportColumn("İşlem", widths[1], x => x.IslemNo),
-                new ReportColumn("Tip", widths[2], x => x.IslemTipi),
-                new ReportColumn("Fiş", widths[3], x => x.KantarFisNo),
-                new ReportColumn("Ödeme", widths[4], x => x.OdemeTuru),
-                new ReportColumn("Firma", widths[5], x => x.FirmaAdi),
-                new ReportColumn("Plaka", widths[6], x => x.Plaka),
-                new ReportColumn("Çıkış T.", widths[7], x => x.CikisTarihi),
-                new ReportColumn("Çıkış S.", widths[8], x => x.CikisSaati),
-                new ReportColumn("Giriş", widths[9], x => x.GirisCikisUcreti),
-                new ReportColumn("Tartım", widths[10], x => x.TartimUcreti),
-                new ReportColumn("İşgaliye", widths[11], x => x.BeklemeUcreti),
-                new ReportColumn("Toplam", widths[12], x => x.ToplamUcret)
+                new ReportColumn("Plaka", widths[2], x => x.Plaka),
+                new ReportColumn("Firma", widths[3], x => x.FirmaAdi),
+                new ReportColumn("Çıkış T.", widths[4], x => x.CikisTarihi),
+                new ReportColumn("Çıkış S.", widths[5], x => x.CikisSaati),
+                new ReportColumn("Giriş T.", widths[6], x => x.GirisTarihi),
+                new ReportColumn("Giriş S.", widths[7], x => x.GirisSaati),
+                new ReportColumn("Ödeme", widths[8], x => x.OdemeTuru),
+                new ReportColumn("Fiş", widths[9], x => x.KantarFisNo),
+                new ReportColumn("Giriş-Çıkış", widths[10], x => x.GirisCikisUcreti),
+                new ReportColumn("Tartım", widths[11], x => x.TartimUcreti),
+                new ReportColumn("Bekleme", widths[12], x => x.BeklemeUcreti),
+                new ReportColumn("Toplam", widths[13], x => x.ToplamUcret)
             };
         }
 

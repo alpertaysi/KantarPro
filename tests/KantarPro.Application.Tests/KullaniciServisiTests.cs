@@ -141,6 +141,36 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void KullaniciEkle_PasifKullaniciAyniAdlaEklenirseYenidenEtkinlestirir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new KullaniciServisi(uow);
+            servis.VarsayilanKullanicilariOlustur();
+            AssignKullaniciIds(uow);
+            var kullanici = servis.KullaniciEkle(
+                "Güvenlik",
+                "Eski Güvenlik Personeli",
+                KullaniciRolleri.Memur,
+                "EskiSifre");
+            kullanici.KullaniciId = 3;
+            servis.KullaniciSil(kullanici.KullaniciId, 1);
+
+            var yenidenEtkinlesen = servis.KullaniciEkle(
+                "Güvenlik",
+                "Güvenlik Personeli",
+                KullaniciRolleri.Memur,
+                "Güvenlik");
+
+            Assert.AreSame(kullanici, yenidenEtkinlesen);
+            Assert.AreEqual(3, uow.KullaniciListesi.Count);
+            Assert.IsTrue(yenidenEtkinlesen.AktifMi);
+            Assert.AreEqual("Güvenlik Personeli", yenidenEtkinlesen.AdSoyad);
+            Assert.AreEqual(KullaniciRolleri.Memur, yenidenEtkinlesen.Rol);
+            var oturum = servis.GirisYap("Güvenlik", "Güvenlik");
+            Assert.AreEqual("Güvenlik Personeli", oturum.AdSoyad);
+        }
+
+        [TestMethod]
         public void KullaniciSil_KullaniciyiPasifeAlirVeGirisiniEngeller()
         {
             var uow = new InMemoryUnitOfWork();

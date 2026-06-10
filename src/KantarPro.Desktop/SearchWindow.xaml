@@ -5,7 +5,7 @@
         Title="Araştır"
         Width="1280"
         Height="720"
-        MinWidth="1100"
+        MinWidth="1000"
         MinHeight="620"
         WindowStartupLocation="CenterOwner"
         Background="#EEF2F5"
@@ -67,68 +67,103 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" />
-                    <ColumnDefinition Width="180" />
-                    <ColumnDefinition Width="120" />
-                    <ColumnDefinition Width="220" />
-                    <ColumnDefinition Width="130" />
-                    <ColumnDefinition Width="220" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,4" />
-                    <TextBox x:Name="PlateTextBox" CharacterCasing="Upper" />
-                </StackPanel>
+                <DockPanel Grid.Row="0" LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Margin="18,0,0,0"
+                                VerticalAlignment="Bottom">
+                        <Button Content="Ara"
+                                Style="{StaticResource PrimaryButton}"
+                                Width="92"
+                                Margin="0,0,8,0"
+                                Click="Search_Click" />
+                        <Button Content="OKI Önizle"
+                                Width="120"
+                                Margin="0,0,8,0"
+                                Click="Preview_Click" />
+                        <Button Content="Kapat"
+                                Width="92"
+                                Click="Close_Click" />
+                    </StackPanel>
 
-                <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                    <TextBlock Text="Firma" Foreground="{StaticResource Muted}" Margin="0,0,0,4" />
-                    <TextBox x:Name="CompanyTextBox" />
-                </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="2"
-                           Text="Giriş Tarihi"
-                           Foreground="{StaticResource Muted}"
-                           VerticalAlignment="Bottom"
-                           Margin="0,0,10,8" />
-                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="0,0,12,0">
-                    <DatePicker x:Name="EntryStartDatePicker" Width="104" Margin="0,18,8,0" />
-                    <DatePicker x:Name="EntryEndDatePicker" Width="104" Margin="0,18,0,0" />
-                </StackPanel>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Plaka" Foreground="{StaticResource Muted}" Margin="0,0,0,4" />
+                            <TextBox x:Name="PlateTextBox" CharacterCasing="Upper" />
+                        </StackPanel>
 
-                <TextBlock Grid.Column="4"
-                           Text="Çıkış Tarihi"
-                           Foreground="{StaticResource Muted}"
-                           VerticalAlignment="Bottom"
-                           Margin="0,0,10,8" />
-                <StackPanel Grid.Column="5" Orientation="Horizontal" Margin="0,0,12,0">
-                    <DatePicker x:Name="ExitStartDatePicker" Width="104" Margin="0,18,8,0" />
-                    <DatePicker x:Name="ExitEndDatePicker" Width="104" Margin="0,18,0,0" />
-                </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Firma" Foreground="{StaticResource Muted}" Margin="0,0,0,4" />
+                            <TextBox x:Name="CompanyTextBox" />
+                        </StackPanel>
+                    </Grid>
+                </DockPanel>
 
-                <StackPanel Grid.Column="6"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom">
-                    <Button Content="Ara"
-                            Style="{StaticResource PrimaryButton}"
-                            Width="92"
-                            Margin="0,0,8,0"
-                            Click="Search_Click" />
-                    <Button Content="OKI Önizle"
-                            Width="120"
-                            Margin="0,0,8,0"
-                            Click="Preview_Click" />
-                    <Button Content="Kapat"
-                            Width="92"
-                            Click="Close_Click" />
-                </StackPanel>
+                <Grid Grid.Row="1" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Giriş Tarihi"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource Ink}"
+                                   Margin="0,0,0,5" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Margin="0,0,12,0">
+                                <TextBlock Text="Başlangıç"
+                                           Foreground="{StaticResource Muted}"
+                                           FontSize="12"
+                                           Margin="0,0,0,3" />
+                                <DatePicker x:Name="EntryStartDatePicker" Width="160" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Bitiş"
+                                           Foreground="{StaticResource Muted}"
+                                           FontSize="12"
+                                           Margin="0,0,0,3" />
+                                <DatePicker x:Name="EntryEndDatePicker" Width="160" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Çıkış Tarihi"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource Ink}"
+                                   Margin="0,0,0,5" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Margin="0,0,12,0">
+                                <TextBlock Text="Başlangıç"
+                                           Foreground="{StaticResource Muted}"
+                                           FontSize="12"
+                                           Margin="0,0,0,3" />
+                                <DatePicker x:Name="ExitStartDatePicker" Width="160" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Bitiş"
+                                           Foreground="{StaticResource Muted}"
+                                           FontSize="12"
+                                           Margin="0,0,0,3" />
+                                <DatePicker x:Name="ExitEndDatePicker" Width="160" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
 
                 <TextBlock x:Name="StatusTextBlock"
-                           Grid.Row="1"
-                           Grid.ColumnSpan="7"
+                           Grid.Row="2"
                            Text="Son 500 geçmiş kayıt için plaka, firma, giriş ve çıkış tarih aralığı ile arama yapın."
                            Foreground="{StaticResource Muted}"
                            Margin="0,10,0,0" />
@@ -150,8 +185,23 @@
                   FontSize="13"
                   BorderBrush="{StaticResource Line}"
                   BorderThickness="1"
-                  HorizontalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Visible"
+                  ScrollViewer.HorizontalScrollBarVisibility="Visible"
                   VerticalScrollBarVisibility="Auto">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <EventSetter Event="PreviewMouseRightButtonDown"
+                                 Handler="ResultsGridRow_PreviewMouseRightButtonDown" />
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Kantar Fişi Göster"
+                              Click="SearchReceiptPreview_Click" />
+                    <MenuItem Header="Kantar Fişi Yazdır"
+                              Click="SearchReceiptPrint_Click" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Sıra" Binding="{Binding SiraNo}" Width="48" />
                 <DataGridTextColumn Header="İşlem No" Binding="{Binding IslemNo}" Width="82" />

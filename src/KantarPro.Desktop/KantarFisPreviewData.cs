@@ -8,6 +8,7 @@ namespace KantarPro.Desktop
         public string Plaka { get; private set; }
         public string Firma { get; private set; }
         public string FisNo { get; private set; }
+        public string IslemNo { get; private set; }
         public string GirisTarihi { get; private set; }
         public string GirisSaati { get; private set; }
         public string IkinciGirisTarihi { get; private set; }
@@ -37,6 +38,7 @@ namespace KantarPro.Desktop
                 Plaka = Safe(row.Plaka),
                 Firma = Safe(row.FirmaAdi),
                 FisNo = FormatFisNo(row),
+                IslemNo = FormatIslemNo(row.IslemNo, row.IslemId),
                 GirisTarihi = Safe(row.GirisTarihi),
                 GirisSaati = Safe(row.GirisSaati),
                 IkinciGirisTarihi = FirstNonEmpty(row.BosGelisTarihi, row.IkinciTartimTarihi),
@@ -62,6 +64,7 @@ namespace KantarPro.Desktop
                 Plaka = Safe(row.Plaka),
                 Firma = Safe(row.FirmaAdi),
                 FisNo = FirstNonEmpty(row.KantarFisNo, row.IslemNo),
+                IslemNo = FormatIslemNo(row.IslemNo, 0),
                 GirisTarihi = FirstNonEmpty(row.IlkTartimTarihi, row.IlkGirisTarihi),
                 GirisSaati = FirstNonEmpty(row.IlkTartimSaati, row.IlkGirisSaati),
                 IkinciGirisTarihi = "",
@@ -97,6 +100,22 @@ namespace KantarPro.Desktop
             }
 
             return string.IsNullOrWhiteSpace(row.IslemNo) ? "-" : row.IslemNo.Trim();
+        }
+
+        private static string FormatIslemNo(string islemNo, int islemId)
+        {
+            int parsed;
+            if (int.TryParse(Safe(islemNo), out parsed))
+            {
+                return parsed.ToString("00000");
+            }
+
+            if (islemId > 0)
+            {
+                return islemId.ToString("00000");
+            }
+
+            return Safe(islemNo);
         }
 
         private static string FirstNonEmpty(string first, string second)

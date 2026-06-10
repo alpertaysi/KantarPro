@@ -87,6 +87,7 @@ namespace KantarPro.Desktop
         private static void AppendTekTartimFis(StringBuilder builder, VehicleMovementRow row, string birinciTartim)
         {
             builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            builder.AppendLine("   " + RightField("ISLEM NO..:", FormatIslemNo(row.IslemNo, row.IslemId)));
             AppendFirma(builder, row.FirmaAdi);
             builder.AppendLine();
             builder.AppendLine("   " + Pair("GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
@@ -100,6 +101,7 @@ namespace KantarPro.Desktop
             var ikinciGirisSaati = FirstNonEmpty(row.BosGelisSaati, row.IkinciTartimSaati);
 
             builder.AppendLine("   " + Pair("PLAKA NO.....:", row.Plaka, "FIS NO...:", FormatFisNo(row)));
+            builder.AppendLine("   " + RightField("ISLEM NO..:", FormatIslemNo(row.IslemNo, row.IslemId)));
             AppendFirma(builder, row.FirmaAdi);
             builder.AppendLine();
             builder.AppendLine("   " + Pair("1.GIRIS TARIHI:", row.GirisTarihi, "SAATI....:", row.GirisSaati));
@@ -114,6 +116,22 @@ namespace KantarPro.Desktop
         private static string FormatFisNo(VehicleMovementRow row)
         {
             return KantarFisPreviewData.FormatFisNo(row);
+        }
+
+        private static string FormatIslemNo(string islemNo, int islemId)
+        {
+            int parsed;
+            if (int.TryParse(Safe(islemNo), out parsed))
+            {
+                return parsed.ToString("00000");
+            }
+
+            if (islemId > 0)
+            {
+                return islemId.ToString("00000");
+            }
+
+            return Safe(islemNo);
         }
 
         private static void AppendFirma(StringBuilder builder, string firmaAdi)
@@ -134,6 +152,11 @@ namespace KantarPro.Desktop
         private static string Field(string label, string value)
         {
             return label.PadRight(13) + ": " + Safe(value);
+        }
+
+        private static string RightField(string label, string value)
+        {
+            return new string(' ', 36) + label.PadRight(10) + " " + Safe(value);
         }
 
         private static string Center(string text, int width)

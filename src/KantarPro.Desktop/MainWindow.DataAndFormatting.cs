@@ -1023,10 +1023,16 @@ namespace KantarPro.Desktop
                     "IF COL_LENGTH('dbo.Islemler', 'CikisNo') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD CikisNo NVARCHAR(20) NULL");
                 context.Database.ExecuteSqlCommand(
-                    "IF OBJECT_ID(N'dbo.CK_Islemler_CikisNo_Format', N'C') IS NULL " +
-                    "AND NOT EXISTS (SELECT 1 FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' AND CikisNo NOT LIKE N'[0-9][0-9][0-9][0-9]') " +
+                    "IF OBJECT_ID(N'dbo.CK_Islemler_CikisNo_Format', N'C') IS NOT NULL " +
+                    "ALTER TABLE dbo.Islemler DROP CONSTRAINT CK_Islemler_CikisNo_Format");
+                context.Database.ExecuteSqlCommand(
+                    "UPDATE dbo.Islemler " +
+                    "SET CikisNo = RIGHT(N'00000' + CikisNo, 5) " +
+                    "WHERE CikisNo IS NOT NULL AND CikisNo <> N'' AND CikisNo NOT LIKE N'%[^0-9]%' AND LEN(CikisNo) < 5");
+                context.Database.ExecuteSqlCommand(
+                    "IF NOT EXISTS (SELECT 1 FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' AND (LEN(CikisNo) < 5 OR CikisNo LIKE N'%[^0-9]%')) " +
                     "ALTER TABLE dbo.Islemler WITH CHECK ADD CONSTRAINT CK_Islemler_CikisNo_Format " +
-                    "CHECK (CikisNo IS NULL OR CikisNo = N'' OR CikisNo LIKE N'[0-9][0-9][0-9][0-9]')");
+                    "CHECK (CikisNo IS NULL OR CikisNo = N'' OR (LEN(CikisNo) >= 5 AND CikisNo NOT LIKE N'%[^0-9]%'))");
                 context.Database.ExecuteSqlCommand(
                     "IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_Islemler_CikisNo' AND object_id = OBJECT_ID(N'dbo.Islemler')) " +
                     "AND NOT EXISTS (SELECT CikisNo FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' GROUP BY CikisNo HAVING COUNT(*) > 1) " +
@@ -1055,6 +1061,23 @@ namespace KantarPro.Desktop
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'TahsilatNo') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD TahsilatNo NVARCHAR(20) NULL");
+                context.Database.ExecuteSqlCommand(
+                    "UPDATE dbo.IslemUcretleri " +
+                    "SET TahsilatNo = RIGHT(N'00000' + TahsilatNo, 5) " +
+                    "WHERE TahsilatNo IS NOT NULL AND TahsilatNo <> N'' AND TahsilatNo NOT LIKE N'%[^0-9]%' AND LEN(TahsilatNo) < 5");
+                context.Database.ExecuteSqlCommand(
+                    "DECLARE @SonIslemNo BIGINT; " +
+                    "SELECT @SonIslemNo = ISNULL(MAX(Numara), 0) FROM (" +
+                    "SELECT CASE WHEN CikisNo NOT LIKE N'%[^0-9]%' THEN CONVERT(BIGINT, CikisNo) END AS Numara FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' " +
+                    "UNION ALL " +
+                    "SELECT CASE WHEN TahsilatNo NOT LIKE N'%[^0-9]%' THEN CONVERT(BIGINT, TahsilatNo) END FROM dbo.IslemUcretleri WHERE TahsilatNo IS NOT NULL AND TahsilatNo <> N'') AS Numaralar; " +
+                    ";WITH NumarasizIslemler AS (" +
+                    "SELECT IslemId, ROW_NUMBER() OVER (ORDER BY IslemId) AS Sira " +
+                    "FROM dbo.Islemler WHERE (CikisNo IS NULL OR CikisNo = N'') AND ISNULL(SilindiMi, 0) = 0) " +
+                    "UPDATE I SET CikisNo = CASE WHEN @SonIslemNo + N.Sira < 100000 " +
+                    "THEN RIGHT(N'00000' + CONVERT(NVARCHAR(20), @SonIslemNo + N.Sira), 5) " +
+                    "ELSE CONVERT(NVARCHAR(20), @SonIslemNo + N.Sira) END " +
+                    "FROM dbo.Islemler I INNER JOIN NumarasizIslemler N ON N.IslemId = I.IslemId");
                 context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'OdemeTuru') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD OdemeTuru NVARCHAR(30) NULL");

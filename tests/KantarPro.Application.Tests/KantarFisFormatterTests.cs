@@ -34,7 +34,11 @@ namespace KantarPro.Application.Tests
             StringAssert.Contains(fis, "FIRMA");
             StringAssert.Contains(fis, "TEST FIRMA");
             StringAssert.Contains(fis, "FIS NO");
+            StringAssert.Contains(fis, "ISLEM NO");
             StringAssert.Contains(fis, "00060");
+            var fisSatiri = Array.Find(fis.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None), x => x.Contains("FIS NO"));
+            var islemSatiri = Array.Find(fis.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None), x => x.Contains("ISLEM NO"));
+            Assert.AreEqual(fisSatiri.IndexOf("FIS NO", StringComparison.Ordinal), islemSatiri.IndexOf("ISLEM NO", StringComparison.Ordinal));
             StringAssert.Contains(fis, "GIRIS TARIHI");
             StringAssert.Contains(fis, "1.TARTI");
             StringAssert.Contains(fis, "MEMUR IMZA");
@@ -67,6 +71,8 @@ namespace KantarPro.Application.Tests
 
             StringAssert.Contains(fis, "1.GIRIS TARIHI");
             StringAssert.Contains(fis, "2.GIRIS TARIHI");
+            StringAssert.Contains(fis, "ISLEM NO");
+            StringAssert.Contains(fis, "00061");
             StringAssert.Contains(fis, "1.TARTI");
             StringAssert.Contains(fis, "2.TARTI");
             StringAssert.Contains(fis, "NET");
@@ -174,7 +180,8 @@ namespace KantarPro.Application.Tests
 
             Assert.AreEqual("00003", data.FisNo);
             StringAssert.Contains(rawText, "00003");
-            Assert.IsFalse(rawText.Contains("0010"));
+            StringAssert.Contains(rawText, "ISLEM NO");
+            StringAssert.Contains(rawText, "00010");
             Assert.IsFalse(rawText.Contains("ZYR20260604112753000"));
         }
 

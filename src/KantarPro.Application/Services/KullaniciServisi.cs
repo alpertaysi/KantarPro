@@ -139,9 +139,22 @@ namespace KantarPro.Application.Services
                 throw new InvalidOperationException("Sifre en az 6 karakter olmalidir.");
             }
 
-            if (_unitOfWork.Kullanicilar.Query().Any(x => x.KullaniciAdi == kullaniciAdi))
+            var mevcutKullanici = _unitOfWork.Kullanicilar
+                .SingleOrDefault(x => x.KullaniciAdi == kullaniciAdi);
+            if (mevcutKullanici != null && mevcutKullanici.AktifMi)
             {
                 throw new InvalidOperationException("Bu kullanici adi zaten kullaniliyor.");
+            }
+
+            if (mevcutKullanici != null)
+            {
+                mevcutKullanici.ParolaHash = HashPassword(parola.Trim());
+                mevcutKullanici.AdSoyad = adSoyad;
+                mevcutKullanici.Rol = rol;
+                mevcutKullanici.AktifMi = true;
+                mevcutKullanici.SonGirisTarihi = null;
+                _unitOfWork.SaveChanges();
+                return mevcutKullanici;
             }
 
             var kullanici = new Kullanici

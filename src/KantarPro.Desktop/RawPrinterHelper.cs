@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
@@ -150,8 +151,66 @@ namespace KantarPro.Desktop
                 document.PrintPage += (sender, args) =>
                 {
                     var x = Math.Max(0, Math.Min(40, leftMarginColumns)) * 8;
-                    var y = Math.Max(0, Math.Min(20, topMarginLines)) * font.GetHeight(args.Graphics);
+                    var lineHeight = font.GetHeight(args.Graphics);
+                    var y = DotMatrixReportLayout.ReceiptTopOffset(lineHeight, topMarginLines);
                     args.Graphics.DrawString(NormalizeLineEndings(text), font, Brushes.Black, (float)x, (float)y);
+                    args.HasMorePages = false;
+                };
+
+                document.Print();
+            }
+        }
+
+        public static void PrintContinuousLandscapeTextWithDriver(
+            string printerName,
+            string text,
+            string documentName,
+            int topMarginLines,
+            int leftMarginColumns,
+            float cpi)
+        {
+            if (string.IsNullOrWhiteSpace(printerName))
+            {
+                throw new InvalidOperationException("Yazıcı bulunamadı. Windows'ta OKI yazıcının kurulu olduğunu kontrol edin.");
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new InvalidOperationException("Yazdırılacak döküm metni boş.");
+            }
+
+            var lines = NormalizeLineEndings(text)
+                .Replace("\r\n", "\n")
+                .Split('\n');
+            var fontSize = DotMatrixReportLayout.FontPointSizeForCpi(cpi);
+            var pageLength = DotMatrixReportLayout.PageLengthHundredthsForLines(lines.Length + topMarginLines);
+
+            using (var document = new PrintDocument())
+            using (var font = new Font("Courier New", fontSize, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                document.DocumentName = string.IsNullOrWhiteSpace(documentName) ? "Kantar Dökümü" : documentName;
+                document.PrinterSettings.PrinterName = printerName;
+
+                // Landscape output is 11 inches wide (132 columns at 12 CPI).
+                // The feed direction is one long page so 14 cm perforations do not
+                // introduce form feeds or blank gaps in report output.
+                document.DefaultPageSettings.PaperSize = new PaperSize("Sürekli Yatay Döküm", pageLength, 1100);
+                document.DefaultPageSettings.Landscape = true;
+                document.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
+                document.OriginAtMargins = false;
+
+                document.PrintPage += (sender, args) =>
+                {
+                    var x = Math.Max(0, Math.Min(40, leftMarginColumns)) * 8.0f;
+                    var lineHeight = font.GetHeight(args.Graphics);
+                    var y = Math.Max(0, Math.Min(20, topMarginLines)) * lineHeight;
+
+                    foreach (var line in lines)
+                    {
+                        args.Graphics.DrawString(line, font, Brushes.Black, x, y);
+                        y += lineHeight;
+                    }
+
                     args.HasMorePages = false;
                 };
 

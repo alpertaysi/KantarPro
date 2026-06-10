@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using KantarPro.Application.Services;
 using KantarPro.Domain;
 using KantarPro.Domain.Entities;
@@ -48,19 +49,106 @@ namespace KantarPro.Desktop
             Close();
         }
 
+        private void ResultsGridRow_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var row = sender as DataGridRow;
+            if (row != null)
+            {
+                row.IsSelected = true;
+                ResultsGrid.SelectedItem = row.Item;
+            }
+        }
+
+        private void SearchReceiptPreview_Click(object sender, RoutedEventArgs e)
+        {
+            var row = LoadSelectedReceiptRow();
+            if (row == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var rawText = KantarFisFormatter.BuildFromRow(row);
+                var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromVehicleRow(row, rawText))
+                {
+                    Owner = this
+                };
+                preview.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kantar fişi oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void SearchReceiptPrint_Click(object sender, RoutedEventArgs e)
+        {
+            var row = LoadSelectedReceiptRow();
+            if (row == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var rawText = KantarFisFormatter.BuildFromRow(row);
+                MainWindow.PrintReceiptText(
+                    rawText,
+                    "Kantar Fisi " + KantarFisPreviewData.FormatFisNo(row));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kantar fişi yazdırılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private VehicleMovementRow LoadSelectedReceiptRow()
+        {
+            var selected = ResultsGrid.SelectedItem as SearchResultRow;
+            if (selected == null)
+            {
+                MessageBox.Show("Kantar fişi için bir kayıt seçin.", "Araştır", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+
+            using (var context = KantarDbContextFactory.Create())
+            {
+                var islem = context.Islemler
+                    .Include(x => x.Arac)
+                    .Include(x => x.Tartimlar)
+                    .FirstOrDefault(x => x.IslemId == selected.IslemId && !x.SilindiMi);
+                if (islem == null)
+                {
+                    MessageBox.Show("Seçilen işlem veritabanında bulunamadı.", "Araştır", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+
+                var dosya = context.KantarDosyalari
+                    .Include(x => x.IlkTartim)
+                    .Include(x => x.KarsiTartim)
+                    .FirstOrDefault(x =>
+                        x.IlkTartim.IslemId == selected.IslemId ||
+                        (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == selected.IslemId));
+
+                return SearchReceiptRowBuilder.Build(islem, dosya);
+            }
+        }
+
         private void LoadResults()
         {
             try
             {
                 var plate = NormalizePlate(PlateTextBox.Text);
                 var company = NormalizeText(CompanyTextBox.Text);
-                var entryStart = EntryStartDatePicker.SelectedDate.HasValue ? (DateTime?)EntryStartDatePicker.SelectedDate.Value.Date : null;
-                var entryEndExclusive = EntryEndDatePicker.SelectedDate.HasValue ? (DateTime?)EntryEndDatePicker.SelectedDate.Value.Date.AddDays(1) : null;
-                var exitStart = ExitStartDatePicker.SelectedDate.HasValue ? (DateTime?)ExitStartDatePicker.SelectedDate.Value.Date : null;
-                var exitEndExclusive = ExitEndDatePicker.SelectedDate.HasValue ? (DateTime?)ExitEndDatePicker.SelectedDate.Value.Date.AddDays(1) : null;
-
-                ValidateRange(entryStart, entryEndExclusive, "Giriş");
-                ValidateRange(exitStart, exitEndExclusive, "Çıkış");
+                var entryDates = SearchDateCriteria.Create(
+                    EntryStartDatePicker.SelectedDate,
+                    EntryEndDatePicker.SelectedDate,
+                    "Giriş");
+                var exitDates = SearchDateCriteria.Create(
+                    ExitStartDatePicker.SelectedDate,
+                    ExitEndDatePicker.SelectedDate,
+                    "Çıkış");
 
                 using (var context = KantarDbContextFactory.Create())
                 {
@@ -82,24 +170,28 @@ namespace KantarPro.Desktop
                         query = query.Where(x => x.Arac.FirmaAdi != null && x.Arac.FirmaAdi.ToUpper().Contains(company));
                     }
 
-                    if (entryStart.HasValue)
+                    if (entryDates.StartInclusive.HasValue)
                     {
-                        query = query.Where(x => x.GirisTarihi >= entryStart.Value);
+                        query = query.Where(x => x.GirisTarihi >= entryDates.StartInclusive.Value);
                     }
 
-                    if (entryEndExclusive.HasValue)
+                    if (entryDates.EndExclusive.HasValue)
                     {
-                        query = query.Where(x => x.GirisTarihi < entryEndExclusive.Value);
+                        query = query.Where(x => x.GirisTarihi < entryDates.EndExclusive.Value);
                     }
 
-                    if (exitStart.HasValue)
+                    if (exitDates.StartInclusive.HasValue)
                     {
-                        query = query.Where(x => x.CikisTarihi.HasValue && x.CikisTarihi.Value >= exitStart.Value);
+                        query = query.Where(x =>
+                            x.CikisTarihi.HasValue &&
+                            x.CikisTarihi.Value >= exitDates.StartInclusive.Value);
                     }
 
-                    if (exitEndExclusive.HasValue)
+                    if (exitDates.EndExclusive.HasValue)
                     {
-                        query = query.Where(x => x.CikisTarihi.HasValue && x.CikisTarihi.Value < exitEndExclusive.Value);
+                        query = query.Where(x =>
+                            x.CikisTarihi.HasValue &&
+                            x.CikisTarihi.Value < exitDates.EndExclusive.Value);
                     }
 
                     var islemler = query
@@ -115,6 +207,14 @@ namespace KantarPro.Desktop
                     }
 
                     StatusTextBlock.Text = "Kayıt: " + Results.Count + " (en fazla 500 kayıt gösterilir)";
+                    if (Results.Count == 0)
+                    {
+                        MessageBox.Show(
+                            "Aradığınız kriterlerde veri bulunamamıştır.",
+                            "Araştır",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
                 }
             }
             catch (Exception ex)
@@ -130,6 +230,9 @@ namespace KantarPro.Desktop
             var tahsilatlar = islem.Ucretler
                 .Where(x => x.TahsilEdildiMi || !string.IsNullOrWhiteSpace(x.TahsilatNo) || !string.IsNullOrWhiteSpace(x.FaturaId))
                 .ToList();
+            var girisCikisUcreti = SumFee(tahsilatlar, KantarSabitleri.UcretKodu.GirisCikis);
+            var tartimUcreti = SumFee(tahsilatlar, KantarSabitleri.UcretKodu.Tartim);
+            var beklemeUcreti = SumFee(tahsilatlar, KantarSabitleri.UcretKodu.Bekleme);
             var fisNolari = islem.Tartimlar
                 .Where(x => !string.IsNullOrWhiteSpace(x.KantarFisNo))
                 .OrderBy(x => x.TartimTarihi)
@@ -139,6 +242,7 @@ namespace KantarPro.Desktop
 
             return new SearchResultRow
             {
+                IslemId = islem.IslemId,
                 SiraNo = siraNo,
                 IslemNo = ValueOrDash(!string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.CikisNo : islem.IslemNo),
                 Durum = FormatDurum(islem),
@@ -156,6 +260,9 @@ namespace KantarPro.Desktop
                 KantarFisNo = fisNolari.Count == 0 ? "-" : string.Join(", ", fisNolari),
                 Kullanici = FormatKullanici(islem),
                 ToplamUcret = DashboardFormat.Para(islem.ToplamTahsilat > 0 ? islem.ToplamTahsilat : islem.Ucretler.Where(x => x.TahsilEdildiMi).Sum(x => x.Tutar)),
+                GirisCikisUcreti = DashboardFormat.Para(girisCikisUcreti),
+                TartimUcreti = DashboardFormat.Para(tartimUcreti),
+                BeklemeUcreti = DashboardFormat.Para(beklemeUcreti),
                 Notlar = islem.MuafMi && !string.IsNullOrWhiteSpace(islem.MuafiyetNedeni)
                     ? islem.MuafiyetNedeni
                     : islem.Notlar
@@ -173,7 +280,7 @@ namespace KantarPro.Desktop
         {
             if (!start.HasValue && !end.HasValue)
             {
-                return "Tum";
+                return "Tümü";
             }
 
             return (start.HasValue ? start.Value.ToString("dd.MM.yyyy") : "...") + "-" +
@@ -237,6 +344,13 @@ namespace KantarPro.Desktop
             return tartim != null ? (decimal?)tartim.AgirlikKg : null;
         }
 
+        private static decimal SumFee(System.Collections.Generic.IEnumerable<IslemUcreti> fees, string feeCode)
+        {
+            return fees
+                .Where(x => x.Ucret != null && x.Ucret.UcretKodu == feeCode)
+                .Sum(x => x.Tutar);
+        }
+
         private static bool IsTartimsiz(Islem islem, Tartim ilkTartim, Tartim ikinciTartim)
         {
             return islem != null &&
@@ -258,14 +372,6 @@ namespace KantarPro.Desktop
         private static string NormalizeText(string value)
         {
             return (value ?? string.Empty).Trim().ToUpperInvariant();
-        }
-
-        private static void ValidateRange(DateTime? start, DateTime? endExclusive, string label)
-        {
-            if (start.HasValue && endExclusive.HasValue && endExclusive.Value <= start.Value)
-            {
-                throw new InvalidOperationException(label + " bitiş tarihi başlangıç tarihinden önce olamaz.");
-            }
         }
     }
 }

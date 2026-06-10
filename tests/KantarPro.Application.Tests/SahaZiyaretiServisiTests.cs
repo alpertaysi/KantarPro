@@ -203,6 +203,60 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void GirisKaydet_IslemNumarasiniIlkKayittaVerir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ziyaret = servis.GirisKaydet("16 INO 001", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 9, 0, 0));
+
+            Assert.AreEqual("00001", ziyaret.CikisNo);
+        }
+
+        [TestMethod]
+        public void GirisKaydet_IslemNumarasi99999danSonra100000Olur()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var eskiArac = new Arac
+            {
+                AracId = 99999,
+                Plaka = "16ESKI999",
+                FirmaAdi = "Eski Firma",
+                AktifMi = true
+            };
+            uow.IslemListesi.Add(new Islem
+            {
+                IslemId = 99999,
+                IslemNo = "ZYR-ESKI",
+                CikisNo = "99999",
+                Arac = eskiArac,
+                AracId = eskiArac.AracId,
+                GirisTarihi = new DateTime(2026, 6, 9, 9, 0, 0),
+                Durum = KantarSabitleri.IslemDurumu.CikisYapti
+            });
+            uow.AracListesi.Add(eskiArac);
+            var servis = new SahaZiyaretiServisi(uow);
+
+            var ziyaret = servis.GirisKaydet("16 INO 002", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 10, 0, 0));
+
+            Assert.AreEqual("100000", ziyaret.CikisNo);
+        }
+
+        [TestMethod]
+        public void CikisYap_GiristeVerilenIslemNumarasiniTahsilataTasir()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            var ziyaret = servis.GirisKaydet("16 INO 003", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 11, 0, 0));
+            var giristeVerilenNo = ziyaret.CikisNo;
+
+            servis.CikisYap(ziyaret.Arac.Plaka, false, null, 1, new DateTime(2026, 6, 10, 12, 0, 0));
+
+            Assert.AreEqual(giristeVerilenNo, ziyaret.CikisNo);
+            Assert.IsTrue(ziyaret.Ucretler.All(x => x.TahsilatNo == giristeVerilenNo));
+        }
+
+        [TestMethod]
         public void CikisYap_MuafIslemlereDeSiraliCikisNoVerir()
         {
             var uow = new InMemoryUnitOfWork();

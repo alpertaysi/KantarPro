@@ -27,7 +27,7 @@ namespace KantarPro.Desktop
             return new VehicleMovementRow
             {
                 IslemId = islem.IslemId,
-                IslemNo = islem.IslemNo,
+                IslemNo = string.IsNullOrWhiteSpace(islem.CikisNo) ? islem.IslemNo : islem.CikisNo,
                 KantarFisNo = FormatKantarFisNo(ilkTartim, ikinciTartim),
                 Plaka = islem.Arac.Plaka,
                 FirmaAdi = islem.Arac.FirmaAdi,

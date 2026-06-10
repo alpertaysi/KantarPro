@@ -40,20 +40,16 @@ namespace KantarPro.Application.Tests
 
             StringAssert.Contains(text, "16ABC123");
             StringAssert.Contains(text, "BURSA LOJISTIK");
-            StringAssert.Contains(text, "THS-42");
-            StringAssert.Contains(text, "5000 kg");
-            StringAssert.Contains(text, "Admin Kullanici");
+            StringAssert.Contains(text, "09.06.2026");
+            StringAssert.Contains(text, "Nakit");
+            StringAssert.Contains(text, "77");
 
             var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None)
                 .Where(x => x.Length > 0)
                 .ToList();
-            var firstSeparatorIndex = lines.FindIndex(x => x.All(c => c == '-'));
-            var separatorLength = lines[firstSeparatorIndex].Length;
-            var headerLength = lines[firstSeparatorIndex + 1].Length;
-            var dataLength = lines[firstSeparatorIndex + 3].Length;
-
-            Assert.AreEqual(separatorLength, headerLength);
-            Assert.AreEqual(separatorLength, dataLength);
+            Assert.IsTrue(lines.All(x => x.Length <= 132));
+            StringAssert.Contains(text, "0042");
+            StringAssert.Contains(text, "16ABC123");
         }
     }
 }

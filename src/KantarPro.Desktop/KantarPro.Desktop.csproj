@@ -128,10 +128,12 @@
     <Compile Include="DailyRevenuePdfExporter.cs" />
     <Compile Include="DailyRevenueExcelExporter.cs" />
     <Compile Include="DailyRevenueTextFormatter.cs" />
+    <Compile Include="DotMatrixReportLayout.cs" />
     <Compile Include="DashboardRowBuilder.cs" />
     <Compile Include="DashboardRows.cs" />
     <Compile Include="DashboardVisitInfo.cs" />
     <Compile Include="SearchResultRow.cs" />
+    <Compile Include="SearchReceiptRowBuilder.cs" />
     <Compile Include="SearchResultsTextFormatter.cs" />
     <Compile Include="ScaleWeightSelector.cs" />
     <Compile Include="KantarDbContextFactory.cs" />
@@ -186,6 +188,7 @@
     <Compile Include="SearchWindow.xaml.cs">
       <DependentUpon>SearchWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SearchDateCriteria.cs" />
     <Compile Include="TextPreviewWindow.xaml.cs">
       <DependentUpon>TextPreviewWindow.xaml</DependentUpon>
     </Compile>

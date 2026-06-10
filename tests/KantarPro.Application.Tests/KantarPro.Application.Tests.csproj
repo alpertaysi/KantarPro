@@ -40,7 +40,9 @@
     <Compile Include="KullaniciServisiTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />
     <Compile Include="SahaZiyaretiServisiTests.cs" />
+    <Compile Include="ReportTextFormatterTests.cs" />
     <Compile Include="SearchResultsTextFormatterTests.cs" />
+    <Compile Include="SearchDateCriteriaTests.cs" />
     <Compile Include="ScaleWeightSelectorTests.cs" />
     <Compile Include="StationSettingsStoreTests.cs" />
     <Compile Include="UcretAyarlariServisiTests.cs" />

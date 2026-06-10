@@ -51,7 +51,7 @@
                          BorderThickness="0"
                          Background="White"
                          FontFamily="Courier New"
-                         FontSize="13"
+                         FontSize="15"
                          TextWrapping="NoWrap"
                          AcceptsReturn="True"
                          AcceptsTab="True" />
@@ -62,12 +62,12 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,12,0,0">
-            <TextBlock Text="Font"
+            <TextBlock Text="CPI"
                        VerticalAlignment="Center"
                        Margin="0,0,4,0"
                        Foreground="#475569" />
             <TextBox x:Name="DriverFontSizeTextBox"
-                     Text="9"
+                     Text="12"
                      Width="44"
                      Height="32"
                      VerticalContentAlignment="Center"
