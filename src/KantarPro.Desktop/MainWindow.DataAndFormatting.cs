@@ -1017,6 +1017,12 @@ namespace KantarPro.Desktop
                     "IF COL_LENGTH('dbo.IslemUcretleri', 'FaturaId') IS NULL " +
                     "ALTER TABLE dbo.IslemUcretleri ADD FaturaId NVARCHAR(40) NULL");
                 context.Database.ExecuteSqlCommand(
+                    "IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_IslemUcretleri_FaturaId' AND object_id = OBJECT_ID(N'dbo.IslemUcretleri')) " +
+                    "DROP INDEX UX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri");
+                context.Database.ExecuteSqlCommand(
+                    "IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_IslemUcretleri_FaturaId' AND object_id = OBJECT_ID(N'dbo.IslemUcretleri')) " +
+                    "CREATE INDEX IX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri(FaturaId) WHERE FaturaId IS NOT NULL");
+                context.Database.ExecuteSqlCommand(
                     "IF COL_LENGTH('dbo.Islemler', 'GelisTuru') IS NULL " +
                     "ALTER TABLE dbo.Islemler ADD GelisTuru NVARCHAR(20) NOT NULL CONSTRAINT DF_Islemler_GelisTuru DEFAULT (N'Tartimsiz')");
                 context.Database.ExecuteSqlCommand(

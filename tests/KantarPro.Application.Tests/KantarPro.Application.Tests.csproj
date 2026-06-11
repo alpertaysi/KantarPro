@@ -36,6 +36,8 @@
     <Compile Include="KantarSerialReaderTests.cs" />
     <Compile Include="DailyRevenueExcelExporterTests.cs" />
     <Compile Include="DailyRevenuePdfExporterTests.cs" />
+    <Compile Include="DatabaseSchemaScriptTests.cs" />
+    <Compile Include="KantarFisKaynakResolverTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
     <Compile Include="KullaniciServisiTests.cs" />
     <Compile Include="AutoRefreshPolicyTests.cs" />

@@ -178,7 +178,7 @@ BEGIN TRY
     );
 
     CREATE INDEX IX_IslemUcretleri_Islem ON dbo.IslemUcretleri(IslemId);
-    CREATE UNIQUE INDEX UX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri(FaturaId) WHERE FaturaId IS NOT NULL;
+    CREATE INDEX IX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri(FaturaId) WHERE FaturaId IS NOT NULL;
     CREATE INDEX IX_IslemUcretleri_TahsilatNo ON dbo.IslemUcretleri(TahsilatNo) WHERE TahsilatNo IS NOT NULL;
 
     CREATE TABLE dbo.Loglar

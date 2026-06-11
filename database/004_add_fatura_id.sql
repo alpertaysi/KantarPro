@@ -80,12 +80,14 @@ BEGIN TRY
         DROP INDEX IX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri;
     END
 
-    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_IslemUcretleri_FaturaId' AND object_id = OBJECT_ID(N'dbo.IslemUcretleri'))
+    IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_IslemUcretleri_FaturaId' AND object_id = OBJECT_ID(N'dbo.IslemUcretleri'))
     BEGIN
-        CREATE UNIQUE INDEX UX_IslemUcretleri_FaturaId
-        ON dbo.IslemUcretleri(FaturaId)
-        WHERE FaturaId IS NOT NULL;
+        DROP INDEX UX_IslemUcretleri_FaturaId ON dbo.IslemUcretleri;
     END
+
+    CREATE INDEX IX_IslemUcretleri_FaturaId
+    ON dbo.IslemUcretleri(FaturaId)
+    WHERE FaturaId IS NOT NULL;
 
     IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_IslemUcretleri_TahsilatNo' AND object_id = OBJECT_ID(N'dbo.IslemUcretleri'))
     BEGIN

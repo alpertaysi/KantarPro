@@ -771,7 +771,7 @@ namespace KantarPro.Desktop
 
             try
             {
-                PrintKantarFisiCore(row);
+                PrintKantarFisiCore(ResolveKantarFisKaynagi(row));
             }
             catch (Exception ex)
             {
@@ -941,13 +941,14 @@ namespace KantarPro.Desktop
 
             try
             {
-                if (string.IsNullOrWhiteSpace(row.KantarFisNo))
+                var fisRow = ResolveKantarFisKaynagi(row);
+                if (string.IsNullOrWhiteSpace(fisRow.KantarFisNo))
                 {
-                    row.KantarFisNo = EnsureKantarFisNoForVehicleRow(row);
+                    fisRow.KantarFisNo = EnsureKantarFisNoForVehicleRow(fisRow);
                 }
 
-                var rawText = KantarFisFormatter.BuildFromRow(row);
-                var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromVehicleRow(row, rawText))
+                var rawText = KantarFisFormatter.BuildFromRow(fisRow);
+                var preview = new KantarFisPreviewWindow(KantarFisPreviewData.FromVehicleRow(fisRow, rawText))
                 {
                     Owner = this
                 };
@@ -984,6 +985,40 @@ namespace KantarPro.Desktop
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Kantar fişi oluşturulamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private VehicleMovementRow ResolveKantarFisKaynagi(VehicleMovementRow row)
+        {
+            if (KantarFisKaynakResolver.SatirinGercekTartimiVar(row))
+            {
+                return row;
+            }
+
+            using (var context = KantarDbContextFactory.Create())
+            {
+                var islem = context.Islemler
+                    .Include(x => x.Arac)
+                    .FirstOrDefault(x => x.IslemId == row.IslemId);
+                if (islem == null)
+                {
+                    throw new InvalidOperationException("Kantar fişi için seçili işlem kaydı bulunamadı.");
+                }
+
+                if (islem.Arac == null)
+                {
+                    throw new InvalidOperationException("Kantar fişi için seçili işlemin araç kaydı bulunamadı.");
+                }
+
+                var dosyaSorgusu = context.KantarDosyalari
+                    .Include(x => x.Arac)
+                    .Include(x => x.IlkTartim)
+                    .Include(x => x.IlkTartim.Islem);
+                var dosyalar = KantarFisKaynakResolver
+                    .AktifAdaylariFiltrele(dosyaSorgusu, islem.Arac.Plaka)
+                    .ToList();
+
+                return KantarFisKaynakResolver.Resolve(row, dosyalar, islem.Arac.Plaka);
             }
         }
 
