@@ -1952,7 +1952,8 @@ namespace KantarPro.Desktop
 
         private async void InstallDatabaseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentUser == null || !_currentUser.AdminMi)
+            var initialSetupMode = _currentUser == null;
+            if (!initialSetupMode && !_currentUser.AdminMi)
             {
                 MessageBox.Show(
                     "Veritabanı kurma yetkisi yalnızca admin kullanıcısına aittir.",
@@ -1990,8 +1991,11 @@ namespace KantarPro.Desktop
                 InstallDatabaseButton.IsEnabled = false;
                 SettingsConnectionInfoText.Text = "Veritabanı kurulumu hazırlanıyor...";
                 var scriptDirectory = FindDatabaseScriptDirectory();
+                var operationUser = initialSetupMode
+                    ? "Ilk Kurulum"
+                    : _currentUser.KullaniciAdi;
                 App.LogOperation(
-                    _currentUser.KullaniciAdi,
+                    operationUser,
                     "Veritabani kurulumu baslatildi",
                     settings.SqlServerAddress + " / " + settings.DatabaseName);
 
@@ -2010,6 +2014,15 @@ namespace KantarPro.Desktop
 
                 StationSettingsStore.Save(settings);
                 EnsureDatabaseSchema();
+                if (initialSetupMode)
+                {
+                    AuthenticateCurrentUser();
+                    if (_currentUser == null)
+                    {
+                        return;
+                    }
+                }
+
                 LoadFeeSettings();
                 LoadUsers();
                 LoadDashboardData();
@@ -2019,7 +2032,7 @@ namespace KantarPro.Desktop
                     "Kurulum tamamlandı. Çalıştırılan script: " +
                     result.ExecutedScripts.Count + ". 003 demo verisi atlandı.";
                 App.LogOperation(
-                    _currentUser.KullaniciAdi,
+                    operationUser,
                     "Veritabani kurulumu tamamlandi",
                     "Calistirilan script: " + result.ExecutedScripts.Count + "; 003 atlandi.");
                 MessageBox.Show(
