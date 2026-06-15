@@ -142,6 +142,7 @@
     <Compile Include="ScaleWeightSelector.cs" />
     <Compile Include="KantarDbContextFactory.cs" />
     <Compile Include="DatabaseInstallationService.cs" />
+    <Compile Include="SqlDatabaseInstallationExecutor.cs" />
     <Compile Include="KantarFisFormatter.cs" />
     <Compile Include="KantarFisKaynakResolver.cs" />
     <Compile Include="KantarFisPreviewData.cs" />

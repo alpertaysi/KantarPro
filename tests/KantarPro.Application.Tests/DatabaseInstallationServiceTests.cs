@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using KantarPro.Desktop;
@@ -138,6 +139,30 @@ namespace KantarPro.Application.Tests
                 new[] { "000_create.sql", "002_after.sql" },
                 result.ExecutedScripts.ToArray());
             Assert.IsFalse(executor.ExecutedBatches.Any(x => x.Contains("demo")));
+        }
+
+        [TestMethod]
+        public void BuildMasterConnectionString_HedefVeritabaniYerineMasterKullanir()
+        {
+            var settings = new StationSettings
+            {
+                SqlServerAddress = @".\SQLEXPRESS",
+                DatabaseName = "KantarPro",
+                UseWindowsAuthentication = false,
+                SqlUsername = "kantar_app",
+                SqlPassword = "secret"
+            };
+
+            var connectionString =
+                SqlDatabaseInstallationExecutor.BuildMasterConnectionString(settings, 15);
+            var builder = new SqlConnectionStringBuilder(connectionString);
+
+            Assert.AreEqual("master", builder.InitialCatalog);
+            Assert.AreEqual(@".\SQLEXPRESS", builder.DataSource);
+            Assert.AreEqual("kantar_app", builder.UserID);
+            Assert.AreEqual("secret", builder.Password);
+            Assert.AreEqual(15, builder.ConnectTimeout);
+            Assert.IsFalse(builder.MultipleActiveResultSets);
         }
 
         private string CreateTempDirectory(params string[] fileNames)
