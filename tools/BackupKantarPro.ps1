@@ -5,7 +5,6 @@ param(
     [switch]$UseSqlLogin,
     [string]$SqlUser = "sa",
     [string]$SqlPassword = "",
-    [switch]$ForceFull,
     [switch]$IgnoreWeekend
 )
 
@@ -71,31 +70,14 @@ New-Item -ItemType Directory -Force -Path $BackupDirectory | Out-Null
 $script:LogPath = Join-Path $BackupDirectory "KantarProBackup.log"
 
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$fullPattern = "${Database}_FULL_*.bak"
-$diffPattern = "${Database}_DIFF_*.bak"
-$hasFullBackup = @(Get-ChildItem -Path $BackupDirectory -Filter $fullPattern -ErrorAction SilentlyContinue).Count -gt 0
+$backupFile = Join-Path $BackupDirectory ("{0}_FULL_{1}.bak" -f $Database, $stamp)
+Write-BackupLog "Full yedek basladi: $backupFile"
+Invoke-DatabaseCommand "BACKUP DATABASE [$Database] TO DISK = N'$backupFile' WITH INIT, NAME = N'$Database full backup', STATS = 10"
+Write-BackupLog "Full yedek tamamlandi."
 
-if ($ForceFull -or -not $hasFullBackup) {
-    $backupFile = Join-Path $BackupDirectory ("{0}_FULL_{1}.bak" -f $Database, $stamp)
-    Write-BackupLog "Full taban yedek basladi: $backupFile"
-    Invoke-DatabaseCommand "BACKUP DATABASE [$Database] TO DISK = N'$backupFile' WITH INIT, NAME = N'$Database full backup', STATS = 10"
-    Write-BackupLog "Full taban yedek tamamlandi."
-
-    Get-ChildItem -Path $BackupDirectory -Filter $fullPattern |
-        Sort-Object LastWriteTime -Descending |
-        Select-Object -Skip 1 |
-        Remove-Item -Force
-}
-else {
-    $backupFile = Join-Path $BackupDirectory ("{0}_DIFF_{1}.bak" -f $Database, $stamp)
-    Write-BackupLog "Differential yedek basladi: $backupFile"
-    Invoke-DatabaseCommand "BACKUP DATABASE [$Database] TO DISK = N'$backupFile' WITH DIFFERENTIAL, INIT, NAME = N'$Database differential backup', STATS = 10"
-    Write-BackupLog "Differential yedek tamamlandi."
-
-    Get-ChildItem -Path $BackupDirectory -Filter $diffPattern |
-        Sort-Object LastWriteTime -Descending |
-        Select-Object -Skip 1 |
-        Remove-Item -Force
-}
+Get-ChildItem -Path $BackupDirectory -Filter "*.bak" -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -Skip 2 |
+    Remove-Item -Force
 
 Write-BackupLog "Yedekleme islemi basariyla bitti."
