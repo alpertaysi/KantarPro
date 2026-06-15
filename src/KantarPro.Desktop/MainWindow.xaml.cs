@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using System.Windows.Controls;
@@ -26,6 +26,7 @@ namespace KantarPro.Desktop
         public ObservableCollection<DailyRevenueRow> DailyRevenueRows { get; private set; }
         public ObservableCollection<PendingWeighingPrototypeRow> PendingWeighings { get; private set; }
         public ObservableCollection<UserManagementRow> Users { get; private set; }
+        public ObservableCollection<LogRow> Logs { get; private set; }
         public ICollectionView EntryVehiclesView { get; private set; }
         public ICollectionView ExitVehiclesView { get; private set; }
         public ICollectionView DailyRevenueView { get; private set; }
@@ -44,6 +45,7 @@ namespace KantarPro.Desktop
         private KantarSerialReader _scaleReader;
         private decimal? _lastScaleWeightKg;
         private KullaniciOturumu _currentUser;
+        private int? _editingUserId = null; // Düzenlenen kullanıcı ID'si
         private DispatcherTimer _connectionCheckTimer;
         private bool _connectionCheckInProgress;
         private int _connectionLostCount;
@@ -58,6 +60,7 @@ namespace KantarPro.Desktop
             DailyRevenueRows = new ObservableCollection<DailyRevenueRow>();
             PendingWeighings = new ObservableCollection<PendingWeighingPrototypeRow>();
             Users = new ObservableCollection<UserManagementRow>();
+            Logs = new ObservableCollection<LogRow>();
             EntryVehiclesView = CollectionViewSource.GetDefaultView(EntryVehicles);
             ExitVehiclesView = CollectionViewSource.GetDefaultView(ExitVehicles);
             DailyRevenueView = CollectionViewSource.GetDefaultView(DailyRevenueRows);
@@ -120,6 +123,78 @@ namespace KantarPro.Desktop
             StartConnectionMonitor();
         }
 
+        private void LogDatePicker_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (LogDatePicker.SelectedDate.HasValue)
+            {
+                LoadLogsByDate(LogDatePicker.SelectedDate.Value);
+            }
+        }
+
+        private void SearchLogsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!LogDatePicker.SelectedDate.HasValue)
+            {
+                MessageBox.Show("Lütfen bir tarih seçin.", "Hata", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            LoadLogsByDate(LogDatePicker.SelectedDate.Value);
+        }
+
+        private void LoadTodayLogsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LogDatePicker.SelectedDate = DateTime.Today;
+            LoadLogsByDate(DateTime.Today);
+        }
+
+        private void LoadLogsByDate(DateTime selectedDate)
+        {
+            try
+            {
+                Logs.Clear();
+
+                using (var context = KantarDbContextFactory.Create())
+                {
+                    var loglar = context.Loglar
+                        .Where(l => System.Data.Entity.DbFunctions.TruncateTime(l.Tarih) == selectedDate.Date)
+                        .OrderByDescending(l => l.Tarih)
+                        .ToList();
+
+                    foreach (var log in loglar)
+                    {
+                        Logs.Add(new LogRow
+                        {
+                            LogId = log.LogId,
+                            TarihStr = log.Tarih.ToString("dd.MM.yyyy HH:mm:ss"),
+                            LogTipi = log.LogTipi ?? "-",
+                            KullaniciAdi = log.Kullanici?.KullaniciAdi ?? "-",
+                            Mesaj = log.Mesaj ?? "-",
+                            Detay = log.Detay ?? "-",
+                            BilgisayarAdi = log.BilgisayarAdi ?? "-"
+                        });
+                    }
+
+                    LogCountText.Text = $"Toplam: {loglar.Count} log";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Loglar yüklenirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogCountText.Text = "Hata: Loglar yüklenemedi";
+            }
+        }
+
+        public class LogRow
+        {
+            public int LogId { get; set; }
+            public string TarihStr { get; set; }
+            public string LogTipi { get; set; }
+            public string KullaniciAdi { get; set; }
+            public string Mesaj { get; set; }
+            public string Detay { get; set; }
+            public string BilgisayarAdi { get; set; }
+        }
+
         private void AuthenticateCurrentUser()
         {
             using (var context = KantarDbContextFactory.Create())
@@ -177,6 +252,19 @@ namespace KantarPro.Desktop
         {
             var button = sender as Button;
             MessageBox.Show((button != null ? button.Content : "Menü") + " ekranı bir sonraki adımda bağlanacak.", "Kantar Pro");
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Programı kapatmak istediğinize emin misiniz?",
+                "Kantar Pro",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                System.Windows.Application.Current.Shutdown();
+            }
         }
 
         private void AracGirisButton_Click(object sender, RoutedEventArgs e)
@@ -322,21 +410,41 @@ namespace KantarPro.Desktop
             {
                 var roleItem = NewUserRoleComboBox.SelectedItem as ComboBoxItem;
                 var role = roleItem != null ? Convert.ToString(roleItem.Content) : KullaniciRolleri.Memur;
-                using (var context = KantarDbContextFactory.Create())
+
+                if (_editingUserId.HasValue)
                 {
-                    var servis = new KullaniciServisi(new KantarUnitOfWork(context));
-                    servis.KullaniciEkle(NewUserNameTextBox.Text, NewUserFullNameTextBox.Text, role, NewUserPasswordBox.Password);
+                    // Düzenleme modu - kullanıcıyı güncelle
+                    using (var context = KantarDbContextFactory.Create())
+                    {
+                        var servis = new KullaniciServisi(new KantarUnitOfWork(context));
+                        servis.KullaniciGuncelle(_editingUserId.Value, NewUserNameTextBox.Text, NewUserFullNameTextBox.Text, role,
+                            string.IsNullOrEmpty(NewUserPasswordBox.Password) ? null : NewUserPasswordBox.Password);
+                    }
+
+                    App.LogOperation(_currentUser.KullaniciAdi, "Kullanici guncellendi", "Guncellenen kullanici: " + NewUserNameTextBox.Text);
+                    MessageBox.Show("Kullanıcı başarıyla güncellendi.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    // Ekleme modu - yeni kullanıcı ekle
+                    using (var context = KantarDbContextFactory.Create())
+                    {
+                        var servis = new KullaniciServisi(new KantarUnitOfWork(context));
+                        servis.KullaniciEkle(NewUserNameTextBox.Text, NewUserFullNameTextBox.Text, role, NewUserPasswordBox.Password);
+                    }
+
+                    App.LogOperation(_currentUser.KullaniciAdi, "Kullanici eklendi", "Yeni kullanici: " + NewUserNameTextBox.Text);
+                    MessageBox.Show("Kullanıcı başarıyla eklendi.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
-                App.LogOperation(_currentUser.KullaniciAdi, "Kullanici eklendi", "Yeni kullanici: " + NewUserNameTextBox.Text);
-                MessageBox.Show("Kullanıcı başarıyla eklendi.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Information);
                 ClearNewUserForm();
+                SwitchToAddMode(); // Ekleme moduna geri dön
                 LoadUsers();
             }
             catch (Exception ex)
             {
-                App.LogError("Kullanici ekleme", ex);
-                MessageBox.Show(ex.Message, "Kullanıcı eklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                App.LogError("Kullanici ekleme/guncelleme", ex);
+                MessageBox.Show(ex.Message, "İşlem tamamlanamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
                 NewUserPasswordBox.Clear();
                 NewUserPasswordBox.Focus();
             }
@@ -344,7 +452,43 @@ namespace KantarPro.Desktop
 
         private void ClearNewUserButton_Click(object sender, RoutedEventArgs e)
         {
-            ClearNewUserForm();
+            if (_editingUserId.HasValue)
+            {
+                // Düzenleme modundaysa vazgeç - formu temizle ve ekleme moduna dön
+                ClearNewUserForm();
+                SwitchToAddMode();
+            }
+            else
+            {
+                // Normal temizleme
+                ClearNewUserForm();
+            }
+        }
+
+        private void EditUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentUser == null || !_currentUser.AdminMi)
+            {
+                MessageBox.Show("Kullanıcı düzenleme yetkisi sadece admin kullanıcılara açıktır.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var selectedUser = UsersGrid.SelectedItem as UserManagementRow;
+            if (selectedUser == null)
+            {
+                MessageBox.Show("Düzenlenecek kullanıcıyı listeden seçin.", "Kullanıcı Yönetimi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Kullanıcı bilgilerini forma yükle
+            NewUserNameTextBox.Text = selectedUser.KullaniciAdi;
+            NewUserFullNameTextBox.Text = selectedUser.AdSoyad;
+            NewUserRoleComboBox.SelectedIndex = selectedUser.Rol == "Admin" ? 1 : 0;
+            NewUserPasswordBox.Clear(); // Şifre boş bırakılabilir (değiştirmek istemiyorsa)
+
+            // Düzenleme moduna geç
+            _editingUserId = selectedUser.KullaniciId;
+            SwitchToEditMode();
         }
 
         private void DeleteUserButton_Click(object sender, RoutedEventArgs e)
@@ -390,6 +534,19 @@ namespace KantarPro.Desktop
             NewUserRoleComboBox.SelectedIndex = 0;
             NewUserPasswordBox.Clear();
             NewUserNameTextBox.Focus();
+        }
+
+        private void SwitchToAddMode()
+        {
+            _editingUserId = null;
+            AddOrUpdateUserButton.Content = "Kullanıcı Ekle";
+            ClearOrCancelUserButton.Content = "Temizle";
+        }
+
+        private void SwitchToEditMode()
+        {
+            AddOrUpdateUserButton.Content = "Değiştir";
+            ClearOrCancelUserButton.Content = "Vazgeç";
         }
 
         private void TartVeKaydet_Click(object sender, RoutedEventArgs e)
@@ -467,7 +624,6 @@ namespace KantarPro.Desktop
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, islemTarihi, tartimIsteniyor ? null : KantarSabitleri.GelisTuru.Tartimsiz, muafMi, muafiyetNedeni);
 
                 TryReloadDashboardAfterCommittedOperation("Giriş kaydı");
-                MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
                     AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -493,7 +649,6 @@ namespace KantarPro.Desktop
                 CreateEntry(plaka, firmaAdi, aciklama, tartimIsteniyor, agirlik, DateTime.Now);
 
                 TryReloadDashboardAfterCommittedOperation("Giriş kaydı");
-                MessageBox.Show("Giriş kaydı oluşturuldu.", "Kantar Pro");
                 if (tartimIsteniyor)
                 {
                     AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -528,7 +683,6 @@ namespace KantarPro.Desktop
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
                     TryReloadDashboardAfterCommittedOperation("Çıkış işlemi");
-                    MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     if (tartimIsteniyor)
                     {
                         AskAndPrintLatestKantarFisiForPlate(plaka);
@@ -717,7 +871,6 @@ namespace KantarPro.Desktop
                 if (ShowExitConfirmation(plaka, tartimIsteniyor, agirlik, cikisTarihi))
                 {
                     TryReloadDashboardAfterCommittedOperation("Çıkış işlemi");
-                    MessageBox.Show("Çıkış işlemi tamamlandı.", "Kantar Pro");
                     PlakaTextBox.Clear();
                     AgirlikTextBox.Text = "0";
                     CikisTarihiTextBox.Text = DateTime.Today.ToString("dd.MM.yyyy");
@@ -730,11 +883,41 @@ namespace KantarPro.Desktop
             }
         }
 
-        private void KantarFisiYazdir_Click(object sender, RoutedEventArgs e)
+        private void UstMakbuzYazdir_Click(object sender, RoutedEventArgs e)
         {
-            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow
-                ?? ExitVehiclesGrid.SelectedItem as VehicleMovementRow;
+            // Üstteki "Dolu-Boş Kantar Hareketleri" listesinden makbuz yazdır
+            var row = EntryVehiclesGrid.SelectedItem as VehicleMovementRow;
+            if (row == null)
+            {
+                MessageBox.Show("Makbuz yazdırılacak satırı üst listeden seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             PrintKantarFisi(row);
+        }
+
+        private void AltMakbuzYazdir_Click(object sender, RoutedEventArgs e)
+        {
+            // Alttaki sekmelerden makbuz yazdır (2. Tartım Bekleyenler veya Kesin Çıkış Yapılanlar)
+
+            // Önce "2. Tartım Bekleyenler" sekmesini kontrol et
+            var pendingRow = PendingWeighingsGrid.SelectedItem as PendingWeighingPrototypeRow;
+            if (pendingRow != null)
+            {
+                PrintPendingKantarFisi(pendingRow);
+                return;
+            }
+
+            // Sonra "Kesin Çıkış Yapılanlar" sekmesini kontrol et
+            var exitRow = ExitVehiclesGrid.SelectedItem as VehicleMovementRow;
+            if (exitRow != null)
+            {
+                PrintKantarFisi(exitRow);
+                return;
+            }
+
+            // Hiçbir alt sekmede seçim yoksa uyarı göster
+            MessageBox.Show("Makbuz yazdırılacak satırı alt listeden seçin.\n\n(2. Tartım Bekleyenler veya Kesin Çıkış Yapılanlar sekmesinden)",
+                "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         private void EntryGridMakbuzYazdirMenuItem_Click(object sender, RoutedEventArgs e)
@@ -766,6 +949,16 @@ namespace KantarPro.Desktop
             if (row == null)
             {
                 MessageBox.Show("Kantar fişi yazdırılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new PrintReceiptPromptWindow(row.Plaka)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
                 return;
             }
 
@@ -863,6 +1056,17 @@ namespace KantarPro.Desktop
             if (row == null)
             {
                 MessageBox.Show("Kantar fişi yazdırılacak satırı seçin.", "Kantar Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Kullanıcıya yazdırma onayı sor
+            var dialog = new PrintReceiptPromptWindow(row.Plaka)
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
                 return;
             }
 

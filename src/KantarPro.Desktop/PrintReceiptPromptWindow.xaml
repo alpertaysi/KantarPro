@@ -32,7 +32,7 @@
             <Border Background="#0F766E" CornerRadius="8,8,0,0" />
 
             <StackPanel Grid.Row="1" Margin="22,20,22,18">
-                <TextBlock Text="Kantar fisi yazdirilsin mi?"
+                <TextBlock Text="Kantar fişi yazdırılsın mı?"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="#0F172A"

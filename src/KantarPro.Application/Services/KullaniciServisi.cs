@@ -171,6 +171,52 @@ namespace KantarPro.Application.Services
             return kullanici;
         }
 
+        public Kullanici KullaniciGuncelle(int kullaniciId, string kullaniciAdi, string adSoyad, string rol, string yeniParola = null)
+        {
+            kullaniciAdi = (kullaniciAdi ?? string.Empty).Trim();
+            adSoyad = (adSoyad ?? string.Empty).Trim();
+            rol = NormalizeRol(rol);
+
+            if (string.IsNullOrWhiteSpace(kullaniciAdi))
+            {
+                throw new InvalidOperationException("Kullanici adi girilmelidir.");
+            }
+
+            if (string.IsNullOrWhiteSpace(adSoyad))
+            {
+                throw new InvalidOperationException("Ad soyad girilmelidir.");
+            }
+
+            var mevcutKullanici = _unitOfWork.Kullanicilar
+                .SingleOrDefault(x => x.KullaniciAdi == kullaniciAdi && x.KullaniciId != kullaniciId);
+            if (mevcutKullanici != null && mevcutKullanici.AktifMi)
+            {
+                throw new InvalidOperationException("Bu kullanici adi baska bir hesap tarafindan kullaniliyor.");
+            }
+
+            var kullanici = _unitOfWork.Kullanicilar.SingleOrDefault(x => x.KullaniciId == kullaniciId && x.AktifMi);
+            if (kullanici == null)
+            {
+                throw new InvalidOperationException("Guncellenecek kullanici bulunamadi veya pasif.");
+            }
+
+            kullanici.KullaniciAdi = kullaniciAdi;
+            kullanici.AdSoyad = adSoyad;
+            kullanici.Rol = rol;
+
+            if (!string.IsNullOrWhiteSpace(yeniParola))
+            {
+                if (yeniParola.Trim().Length < 6)
+                {
+                    throw new InvalidOperationException("Sifre en az 6 karakter olmalidir.");
+                }
+                kullanici.ParolaHash = HashPassword(yeniParola.Trim());
+            }
+
+            _unitOfWork.SaveChanges();
+            return kullanici;
+        }
+
         public IList<Kullanici> KullanicilariListele(bool sadeceAktif)
         {
             var query = _unitOfWork.Kullanicilar.Query();

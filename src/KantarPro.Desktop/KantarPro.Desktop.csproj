@@ -88,6 +88,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="AlreadyRunningWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LoginWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -176,6 +180,9 @@
     </Compile>
     <Compile Include="PrintReceiptPromptWindow.xaml.cs">
       <DependentUpon>PrintReceiptPromptWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AlreadyRunningWindow.xaml.cs">
+      <DependentUpon>AlreadyRunningWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>

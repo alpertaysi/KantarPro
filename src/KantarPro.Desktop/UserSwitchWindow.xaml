@@ -4,7 +4,7 @@
         Title="Kullanıcı Değiştir"
         Icon="Assets/kantarpro.ico"
         Width="470"
-        Height="560"
+        Height="600"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="#F3F6FA"

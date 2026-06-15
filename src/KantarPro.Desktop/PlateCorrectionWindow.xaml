@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Plaka Düzelt"
         Width="410"
-        Height="230"
+        Height="250"
         MinWidth="410"
         MinHeight="230"
         MaxWidth="520"

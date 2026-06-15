@@ -8,16 +8,49 @@ namespace KantarPro.Desktop
             "KantarPro",
             "logs");
 
+        private System.Threading.Mutex _singleInstanceMutex;
+        private const string MutexName = "KantarPro_SingleInstance_Mutex_B7E4C3A1";
+
         protected override void OnStartup(System.Windows.StartupEventArgs e)
         {
             base.OnStartup(e);
             EnsureLogDirectory();
+
+            // Tek instance kontrolü
+            bool createdNew;
+            _singleInstanceMutex = new System.Threading.Mutex(true, MutexName, out createdNew);
+
+            if (!createdNew)
+            {
+                // Program zaten çalışıyor - özel dialog göster
+                LogInfo("Uygulama zaten çalışıyor - ikinci instance kapatılıyor.");
+
+                var dialog = new AlreadyRunningWindow();
+                dialog.ShowDialog();
+
+                Shutdown();
+                return;
+            }
 
             System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
             LogInfo("Uygulama başlatıldı.");
+
+            // MainWindow'u manuel olarak aç
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+        }
+
+        protected override void OnExit(System.Windows.ExitEventArgs e)
+        {
+            if (_singleInstanceMutex != null)
+            {
+                _singleInstanceMutex.ReleaseMutex();
+                _singleInstanceMutex.Dispose();
+            }
+            base.OnExit(e);
         }
 
         public static void LogInfo(string message)
