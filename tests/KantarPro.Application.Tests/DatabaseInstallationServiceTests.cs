@@ -69,6 +69,77 @@ namespace KantarPro.Application.Tests
                 Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")));
         }
 
+        [TestMethod]
+        public void Install_MevcutKantarProSemasiVarsaHicbirScriptCalistirmaz()
+        {
+            var directory = CreateTempDirectory("000_create.sql", "001_schema.sql");
+            var executor = new FakeInstallationExecutor { HasExistingSchema = true };
+
+            try
+            {
+                new DatabaseInstallationService().Install(
+                    directory, "KantarPro", executor, null);
+                Assert.Fail("Mevcut şema için kurulum reddedilmeliydi.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                StringAssert.Contains(ex.Message, "zaten");
+            }
+
+            Assert.AreEqual(0, executor.ExecutedBatches.Count);
+        }
+
+        [TestMethod]
+        public void Install_BirScriptHataVerirseSonrakiScriptiCalistirmaz()
+        {
+            var directory = CreateTempDirectory();
+            File.WriteAllText(Path.Combine(directory, "000_create.sql"), "SELECT 'ilk';");
+            File.WriteAllText(Path.Combine(directory, "001_schema.sql"), "SELECT 'hata';");
+            File.WriteAllText(Path.Combine(directory, "002_after.sql"), "SELECT 'sonraki';");
+            File.WriteAllText(
+                Path.Combine(directory, "003_seed_random_demo_data.sql"),
+                "SELECT 'demo';");
+            var executor = new FakeInstallationExecutor { FailWhenBatchContains = "hata" };
+
+            try
+            {
+                new DatabaseInstallationService().Install(
+                    directory, "KantarPro", executor, null);
+                Assert.Fail("SQL hatası dışarı aktarılmalıydı.");
+            }
+            catch (DatabaseInstallationException ex)
+            {
+                Assert.AreEqual("001_schema.sql", ex.ScriptName);
+            }
+
+            Assert.AreEqual(2, executor.ExecutedBatches.Count);
+            Assert.IsFalse(executor.ExecutedBatches.Any(x => x.Contains("sonraki")));
+            Assert.IsFalse(executor.ExecutedBatches.Any(x => x.Contains("demo")));
+        }
+
+        [TestMethod]
+        public void Install_BosHedefteScriptleriSiraylaCalistirip003uAtlar()
+        {
+            var directory = CreateTempDirectory();
+            File.WriteAllText(Path.Combine(directory, "002_after.sql"), "SELECT 'son';");
+            File.WriteAllText(Path.Combine(directory, "000_create.sql"), "SELECT 'ilk';");
+            File.WriteAllText(
+                Path.Combine(directory, "003_seed_random_demo_data.sql"),
+                "SELECT 'demo';");
+            var executor = new FakeInstallationExecutor();
+
+            var result = new DatabaseInstallationService().Install(
+                directory, "KantarPro", executor, null);
+
+            CollectionAssert.AreEqual(
+                new[] { "SELECT 'ilk';", "SELECT 'son';" },
+                executor.ExecutedBatches);
+            CollectionAssert.AreEqual(
+                new[] { "000_create.sql", "002_after.sql" },
+                result.ExecutedScripts.ToArray());
+            Assert.IsFalse(executor.ExecutedBatches.Any(x => x.Contains("demo")));
+        }
+
         private string CreateTempDirectory(params string[] fileNames)
         {
             var directory = Path.Combine(
@@ -84,6 +155,28 @@ namespace KantarPro.Application.Tests
             }
 
             return directory;
+        }
+
+        private sealed class FakeInstallationExecutor : IDatabaseInstallationExecutor
+        {
+            public bool HasExistingSchema { get; set; }
+            public string FailWhenBatchContains { get; set; }
+            public List<string> ExecutedBatches { get; } = new List<string>();
+
+            public bool HasKantarProCoreSchema(string databaseName)
+            {
+                return HasExistingSchema;
+            }
+
+            public void ExecuteBatch(string batch)
+            {
+                ExecutedBatches.Add(batch);
+                if (!string.IsNullOrWhiteSpace(FailWhenBatchContains) &&
+                    batch.Contains(FailWhenBatchContains))
+                {
+                    throw new InvalidOperationException("Planlı SQL hatası");
+                }
+            }
         }
     }
 }
