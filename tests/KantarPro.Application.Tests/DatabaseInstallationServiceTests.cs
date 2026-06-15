@@ -165,6 +165,21 @@ namespace KantarPro.Application.Tests
             Assert.IsFalse(builder.MultipleActiveResultSets);
         }
 
+        [TestMethod]
+        public void DesktopProject_DatabaseScriptleriniCiktiyaKopyalar()
+        {
+            var root = FindRepositoryRoot();
+            var projectText = File.ReadAllText(
+                Path.Combine(
+                    root,
+                    "src",
+                    "KantarPro.Desktop",
+                    "KantarPro.Desktop.csproj"));
+
+            StringAssert.Contains(projectText, @"database\%(Filename)%(Extension)");
+            StringAssert.Contains(projectText, "CopyToOutputDirectory");
+        }
+
         private string CreateTempDirectory(params string[] fileNames)
         {
             var directory = Path.Combine(
@@ -180,6 +195,22 @@ namespace KantarPro.Application.Tests
             }
 
             return directory;
+        }
+
+        private static string FindRepositoryRoot()
+        {
+            var current = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (current != null)
+            {
+                if (File.Exists(Path.Combine(current.FullName, "KantarPro.sln")))
+                {
+                    return current.FullName;
+                }
+
+                current = current.Parent;
+            }
+
+            throw new DirectoryNotFoundException("KantarPro.sln bulunamadı.");
         }
 
         private sealed class FakeInstallationExecutor : IDatabaseInstallationExecutor
