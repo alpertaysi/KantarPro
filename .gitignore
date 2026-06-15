@@ -1,6 +1,7 @@
 .vs/
 .superpowers/
 .codegraph/
+.worktrees/
 TestResults/
 artifacts/
 
