@@ -74,6 +74,10 @@ Get-ChildItem -Path $desktopOutput -File |
     Where-Object { $_.Extension -in ".exe", ".dll", ".config" } |
     Copy-Item -Destination $programPath -Force
 
+Copy-IfExists `
+    -Path (Join-Path $desktopOutput "database") `
+    -Destination (Join-Path $programPath "database")
+
 Copy-Item -Path (Join-Path $repoRoot "tools\SetupServerNetwork.ps1") -Destination (Join-Path $kurulumPath "Server_Ag_SQL_Ayarla.ps1") -Force
 Copy-Item -Path (Join-Path $repoRoot "tools\SetupClientNetwork.ps1") -Destination (Join-Path $kurulumPath "Client_Ag_Ayarla.ps1") -Force
 

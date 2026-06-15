@@ -25,6 +25,7 @@
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
@@ -37,6 +38,7 @@
     <Compile Include="DailyRevenueExcelExporterTests.cs" />
     <Compile Include="DailyRevenuePdfExporterTests.cs" />
     <Compile Include="DatabaseSchemaScriptTests.cs" />
+    <Compile Include="DatabaseInstallationServiceTests.cs" />
     <Compile Include="KantarFisKaynakResolverTests.cs" />
     <Compile Include="KantarDisplayFormatterTests.cs" />
     <Compile Include="KullaniciServisiTests.cs" />

@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -1947,6 +1948,131 @@ namespace KantarPro.Desktop
         private void SettingsSaveConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             SaveConnectionSettings();
+        }
+
+        private async void InstallDatabaseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var initialSetupMode = _currentUser == null;
+            if (!initialSetupMode && !_currentUser.AdminMi)
+            {
+                MessageBox.Show(
+                    "Veritabanı kurma yetkisi yalnızca admin kullanıcısına aittir.",
+                    "Veritabanı Kurulumu",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var settings = ReadStationSettingsFromForm();
+                if (!string.Equals(
+                    settings.DatabaseName,
+                    "KantarPro",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        "Otomatik kurulum için veritabanı adı KantarPro olmalıdır.");
+                }
+
+                var confirmation = MessageBox.Show(
+                    "SQL Server: " + settings.SqlServerAddress + "\n" +
+                    "Veritabanı: " + settings.DatabaseName + "\n\n" +
+                    "Yeni KantarPro veritabanı kurulacaktır. Mevcut KantarPro tabloları " +
+                    "bulunursa hiçbir işlem yapılmayacaktır. Devam edilsin mi?",
+                    "Veritabanını Kur",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (confirmation != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                InstallDatabaseButton.IsEnabled = false;
+                SettingsConnectionInfoText.Text = "Veritabanı kurulumu hazırlanıyor...";
+                var scriptDirectory = FindDatabaseScriptDirectory();
+                var operationUser = initialSetupMode
+                    ? "Ilk Kurulum"
+                    : _currentUser.KullaniciAdi;
+                App.LogOperation(
+                    operationUser,
+                    "Veritabani kurulumu baslatildi",
+                    settings.SqlServerAddress + " / " + settings.DatabaseName);
+
+                var result = await Task.Run(() =>
+                {
+                    using (var executor = new SqlDatabaseInstallationExecutor(settings))
+                    {
+                        return new DatabaseInstallationService().Install(
+                            scriptDirectory,
+                            settings.DatabaseName,
+                            executor,
+                            scriptName => App.LogInfo(
+                                "Veritabani scripti calistiriliyor: " + scriptName));
+                    }
+                });
+
+                StationSettingsStore.Save(settings);
+                EnsureDatabaseSchema();
+                if (initialSetupMode)
+                {
+                    AuthenticateCurrentUser();
+                    if (_currentUser == null)
+                    {
+                        return;
+                    }
+                }
+
+                LoadFeeSettings();
+                LoadUsers();
+                LoadDashboardData();
+                UpdateStationStatus();
+
+                SettingsConnectionInfoText.Text =
+                    "Kurulum tamamlandı. Çalıştırılan script: " +
+                    result.ExecutedScripts.Count + ". 003 demo verisi atlandı.";
+                App.LogOperation(
+                    operationUser,
+                    "Veritabani kurulumu tamamlandi",
+                    "Calistirilan script: " + result.ExecutedScripts.Count + "; 003 atlandi.");
+                MessageBox.Show(
+                    SettingsConnectionInfoText.Text,
+                    "Veritabanı Kurulumu",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                App.LogError("Veritabani kurulumu", ex);
+                SettingsConnectionInfoText.Text = "Kurulum başarısız: " + ex.Message;
+                MessageBox.Show(
+                    ex.Message,
+                    "Veritabanı kurulamadı",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            finally
+            {
+                InstallDatabaseButton.IsEnabled = true;
+            }
+        }
+
+        private static string FindDatabaseScriptDirectory()
+        {
+            var current = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (current != null)
+            {
+                var candidate = Path.Combine(current.FullName, "database");
+                if (Directory.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                current = current.Parent;
+            }
+
+            throw new DirectoryNotFoundException(
+                "database klasörü bulunamadı. Program paketinin eksiksiz kopyalandığını kontrol edin.");
         }
 
         private void SaveFeeSettings()
