@@ -2,9 +2,9 @@
 {
     public static class AutoRefreshPolicy
     {
-        public static bool ShouldRefresh(bool isEditingInput, bool isModalDialogOpen)
+        public static bool ShouldRefresh(bool isEditingInput, bool isModalDialogOpen, bool hasActiveSelection = false)
         {
-            return !isEditingInput && !isModalDialogOpen;
+            return !isEditingInput && !isModalDialogOpen && !hasActiveSelection;
         }
     }
 }

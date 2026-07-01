@@ -383,17 +383,18 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
-        public void OnGunuGecenKantarDosyasiSuresiDolduOlur()
+        public void YediGunuGecenKantarDosyasiSuresiDolduOlur()
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
             servis.GirisKaydet("16 TST 007", "Firma H", KantarSabitleri.GelisTuru.Bos, true, 9000m, 1, new DateTime(2026, 5, 1, 10, 0, 0));
 
-            var kapanan = servis.SuresiDolanKantarDosyalariniKapat(new DateTime(2026, 5, 12, 9, 0, 0), 10);
+            var kapanan = servis.SuresiDolanKantarDosyalariniKapat(new DateTime(2026, 5, 9, 9, 0, 0), 7);
 
             Assert.AreEqual(1, kapanan);
             Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "KantarDosyasiSuresiDoldu"));
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu, uow.KantarDosyasiListesi.Single().Durum);
+            StringAssert.Contains(uow.IslemListesi.Single().Notlar, "7 gun icinde ikinci tartima gelmedigi icin kesin cikisa alindi.");
         }
 
         [TestMethod]

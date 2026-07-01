@@ -18,7 +18,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var sahaServisi = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
-                    sahaServisi.SuresiDolanKantarDosyalariniKapat(DateTime.Today, 10);
+                    sahaServisi.SuresiDolanKantarDosyalariniKapat(DateTime.Today, 7);
 
                     var bugun = DateTime.Today;
                     var yarin = bugun.AddDays(1);

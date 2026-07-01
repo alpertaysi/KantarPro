@@ -23,6 +23,14 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
+        public void ShouldRefresh_SatirSeciliykenYenilemez()
+        {
+            var result = AutoRefreshPolicy.ShouldRefresh(isEditingInput: false, isModalDialogOpen: false, hasActiveSelection: true);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public void ShouldRefresh_IslemYokkenYeniler()
         {
             var result = AutoRefreshPolicy.ShouldRefresh(isEditingInput: false, isModalDialogOpen: false);

@@ -137,7 +137,7 @@ namespace KantarPro.Desktop
 
             fontSize = Math.Max(8.0f, Math.Min(16.0f, fontSize));
             using (var document = new PrintDocument())
-            using (var font = new Font("Courier New", fontSize, FontStyle.Regular, GraphicsUnit.Point))
+            using (var font = new Font("Courier New", fontSize, FontStyle.Bold, GraphicsUnit.Point))
             {
                 document.DocumentName = string.IsNullOrWhiteSpace(documentName) ? "Kantar Fisi" : documentName;
                 document.PrinterSettings.PrinterName = printerName;

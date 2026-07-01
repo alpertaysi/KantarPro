@@ -139,7 +139,16 @@ namespace KantarPro.Application.Services
             foreach (var dosya in kapanacaklar)
             {
                 dosya.Durum = KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu;
-                LogEkle(null, dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null, "KantarDosyasiSuresiDoldu", "Karsi tartim suresi doldu: " + dosya.Arac.Plaka);
+                var ilkIslem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
+                var not = gunSiniri.ToString() + " gun icinde ikinci tartima gelmedigi icin kesin cikisa alindi.";
+                if (ilkIslem != null)
+                {
+                    ilkIslem.Notlar = string.IsNullOrWhiteSpace(ilkIslem.Notlar)
+                        ? not
+                        : ilkIslem.Notlar + Environment.NewLine + not;
+                }
+
+                LogEkle(null, ilkIslem, "KantarDosyasiSuresiDoldu", "Karsi tartim suresi doldu: " + dosya.Arac.Plaka + ". " + not);
             }
 
             if (kapanacaklar.Count > 0)

@@ -755,7 +755,7 @@ namespace KantarPro.Desktop
                 return;
             }
 
-            if (!AutoRefreshPolicy.ShouldRefresh(IsEditingInput(), IsAnyChildWindowOpen()))
+            if (!AutoRefreshPolicy.ShouldRefresh(IsEditingInput(), IsAnyChildWindowOpen(), HasActiveDashboardSelection()))
             {
                 AutoRefreshStatusText.Text = "Oto yenileme: bekliyor";
                 return;
@@ -800,6 +800,13 @@ namespace KantarPro.Desktop
         private bool IsAnyChildWindowOpen()
         {
             return System.Windows.Application.Current.Windows.OfType<Window>().Any(x => x != this && x.IsVisible);
+        }
+
+        private bool HasActiveDashboardSelection()
+        {
+            return (EntryVehiclesGrid != null && EntryVehiclesGrid.SelectedItem != null) ||
+                   (PendingWeighingsGrid != null && PendingWeighingsGrid.SelectedItem != null) ||
+                   (ExitVehiclesGrid != null && ExitVehiclesGrid.SelectedItem != null);
         }
 
         private void CheckStaleOpenVisitsOnStartup()
@@ -1121,7 +1128,14 @@ namespace KantarPro.Desktop
 
             if (dialog.ShowDialog() == true)
             {
-                PrintKantarFisi(row);
+                try
+                {
+                    PrintKantarFisiCore(ResolveKantarFisKaynagi(row));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Kantar fişi yazdırılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
