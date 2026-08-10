@@ -503,7 +503,7 @@
             <Grid x:Name="SettingsContent" Grid.Row="2" Visibility="Collapsed">
                 <Border Background="#F8FAFC" BorderBrush="#9CA3AF" BorderThickness="1" Padding="22">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid MaxWidth="860" HorizontalAlignment="Left">
+                    <Grid HorizontalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -777,9 +777,10 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="200" />
-                                                <ColumnDefinition Width="12" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
 
                                             <TextBlock Text="Tarih Seçin:" VerticalAlignment="Center" Margin="0,0,12,0" />
@@ -804,11 +805,11 @@
                                                     Margin="8,0,0,0"
                                                     Click="LoadTodayLogsButton_Click" />
                                             <TextBlock x:Name="LogCountText"
-                                                       Grid.Column="4"
+                                                       Grid.Column="5"
                                                        Text=""
                                                        Foreground="{StaticResource Muted}"
                                                        VerticalAlignment="Center"
-                                                       Margin="94,0,0,0" />
+                                                       Margin="8,0,0,0" />
                                         </Grid>
                                     </StackPanel>
 

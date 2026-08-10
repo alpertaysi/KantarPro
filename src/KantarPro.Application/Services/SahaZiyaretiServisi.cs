@@ -139,6 +139,13 @@ namespace KantarPro.Application.Services
             foreach (var dosya in kapanacaklar)
             {
                 dosya.Durum = KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu;
+                var eskiBekleyen = _unitOfWork.BekleyenTartimlar.Query()
+                    .FirstOrDefault(x => x.IlkTartimId == dosya.IlkTartimId &&
+                                         x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor);
+                if (eskiBekleyen != null)
+                {
+                    eskiBekleyen.Durum = KantarSabitleri.BekleyenTartimDurumu.SuresiDoldu;
+                }
                 var ilkIslem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
                 var not = gunSiniri.ToString() + " gun icinde ikinci tartima gelmedigi icin kesin cikisa alindi.";
                 if (ilkIslem != null)
@@ -157,6 +164,56 @@ namespace KantarPro.Application.Services
             }
 
             return kapanacaklar.Count;
+        }
+
+        public int SenkronizeBekleyenTartimlar()
+        {
+            var dosyalar = _unitOfWork.KantarDosyalari.Query().ToList();
+            var bekleyenler = _unitOfWork.BekleyenTartimlar.Query().ToList();
+            var eklenen = 0;
+
+            foreach (var dosya in dosyalar)
+            {
+                var eskiBekleyen = bekleyenler.FirstOrDefault(x => x.IlkTartimId == dosya.IlkTartimId);
+                if (eskiBekleyen == null && dosya.IlkTartim != null)
+                {
+                    eskiBekleyen = new BekleyenTartim
+                    {
+                        Arac = dosya.Arac,
+                        AracId = dosya.AracId,
+                        IlkTartim = dosya.IlkTartim,
+                        IlkTartimId = dosya.IlkTartimId,
+                        IlkAgirlikKg = dosya.IlkTartim.AgirlikKg,
+                        IlkTartimTarihi = dosya.IlkTartim.TartimTarihi,
+                        Durum = dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor
+                            ? KantarSabitleri.BekleyenTartimDurumu.Bekliyor
+                            : dosya.Durum == KantarPro.Domain.KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu
+                                ? KantarSabitleri.BekleyenTartimDurumu.SuresiDoldu
+                                : KantarSabitleri.BekleyenTartimDurumu.Tamamlandi,
+                        TamamlayanTartim = dosya.KarsiTartim,
+                        TamamlayanTartimId = dosya.KarsiTartimId
+                    };
+                    _unitOfWork.BekleyenTartimlar.Add(eskiBekleyen);
+                    bekleyenler.Add(eskiBekleyen);
+                    eklenen++;
+                }
+                else if (eskiBekleyen != null)
+                {
+                    eskiBekleyen.Durum = dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor
+                        ? KantarSabitleri.BekleyenTartimDurumu.Bekliyor
+                        : dosya.Durum == KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu
+                            ? KantarSabitleri.BekleyenTartimDurumu.SuresiDoldu
+                            : KantarSabitleri.BekleyenTartimDurumu.Tamamlandi;
+                    eskiBekleyen.TamamlayanTartim = dosya.KarsiTartim;
+                    eskiBekleyen.TamamlayanTartimId = dosya.KarsiTartimId;
+                }
+            }
+
+            if (eklenen > 0 || bekleyenler.Any(x => x.TamamlayanTartimId.HasValue))
+            {
+                _unitOfWork.SaveChanges();
+            }
+            return eklenen;
         }
 
         public Islem AcikZiyaretiGetir(string plaka)
@@ -449,6 +506,16 @@ namespace KantarPro.Application.Services
 
                 arac.KantarDosyalari.Add(dosya);
                 _unitOfWork.KantarDosyalari.Add(dosya);
+                _unitOfWork.BekleyenTartimlar.Add(new BekleyenTartim
+                {
+                    Arac = arac,
+                    AracId = arac.AracId,
+                    IlkTartim = tartim,
+                    IlkTartimId = tartim.TartimId,
+                    IlkAgirlikKg = tartim.AgirlikKg,
+                    IlkTartimTarihi = tartim.TartimTarihi,
+                    Durum = KantarSabitleri.BekleyenTartimDurumu.Bekliyor
+                });
                 return;
             }
 
@@ -473,6 +540,16 @@ namespace KantarPro.Application.Services
             bekleyen.NetAgirlikKg = Math.Abs(bekleyen.IlkTartim.AgirlikKg - tartim.AgirlikKg);
             bekleyen.Durum = KantarSabitleri.KantarDosyasiDurumu.Tamamlandi;
             bekleyen.TamamlanmaTarihi = tarih;
+
+            var eskiBekleyenTartim = _unitOfWork.BekleyenTartimlar.Query()
+                .FirstOrDefault(x => x.IlkTartimId == bekleyen.IlkTartimId &&
+                                     x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor);
+            if (eskiBekleyenTartim != null)
+            {
+                eskiBekleyenTartim.TamamlayanTartim = tartim;
+                eskiBekleyenTartim.TamamlayanTartimId = tartim.TartimId;
+                eskiBekleyenTartim.Durum = KantarSabitleri.BekleyenTartimDurumu.Tamamlandi;
+            }
         }
 
         private void UcretEkle(Islem ziyaret, string ucretKodu, DateTime tarih)
