@@ -49,55 +49,72 @@ namespace KantarPro.Infrastructure.Data
                 }
                 catch (DbUpdateException ex)
                 {
-                    if (!IsCikisNoUniqueConstraint(ex) || !CikisNumarasiniYenile())
+                    if (!IsNumberUniqueConstraint(ex) || !RegenerateAddedOperationNumbers())
                     {
                         throw;
                     }
                 }
             }
 
-            throw new InvalidOperationException("Cikis numarasi eszamanli kayitlar nedeniyle tekrar uretilemedi.");
+            throw new InvalidOperationException("Eszamanli kayitlar nedeniyle islem numarasi tekrar uretilemedi.");
         }
 
-        private bool IsCikisNoUniqueConstraint(DbUpdateException ex)
+        private bool IsNumberUniqueConstraint(DbUpdateException ex)
         {
             var message = ex.ToString();
-            return message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   message.IndexOf("duplicate key", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                   _context.ChangeTracker.Entries<Islem>().Any(x =>
-                       x.State == EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo));
-        }
-
-        private bool CikisNumarasiniYenile()
-        {
-            var eklenecekIslemler = _context.ChangeTracker.Entries<Islem>()
-                .Where(x => x.State == EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo))
-                .Select(x => x.Entity)
-                .ToList();
-
-            if (eklenecekIslemler.Count == 0)
+            var islemEklendi = _context.ChangeTracker.Entries<Islem>().Any(x => x.State == EntityState.Added);
+            if (!islemEklendi)
             {
                 return false;
             }
 
-            var sonNo = _context.Set<Islem>()
+            return message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   message.IndexOf("UX_Islemler_IslemNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   (message.IndexOf("duplicate key", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    _context.ChangeTracker.Entries<Islem>().Any(x =>
+                        x.State == EntityState.Added &&
+                        (!string.IsNullOrWhiteSpace(x.Entity.CikisNo) || !string.IsNullOrWhiteSpace(x.Entity.IslemNo))));
+        }
+
+        private bool RegenerateAddedOperationNumbers()
+        {
+            var addedOperations = _context.ChangeTracker.Entries<Islem>()
+                .Where(x => x.State == EntityState.Added)
+                .Select(x => x.Entity)
+                .ToList();
+
+            if (addedOperations.Count == 0)
+            {
+                return false;
+            }
+
+            var sonCikisNo = _context.Set<Islem>()
                 .Where(x => x.CikisNo != null && x.CikisNo != "")
                 .Select(x => x.CikisNo)
                 .ToList()
-                .Select(ParseCikisNo)
+                .Select(ParseNumber)
                 .DefaultIfEmpty(0)
                 .Max();
 
-            foreach (var islem in eklenecekIslemler)
+            foreach (var islem in addedOperations)
             {
-                sonNo++;
-                islem.CikisNo = sonNo.ToString("00000");
+                if (!string.IsNullOrWhiteSpace(islem.CikisNo))
+                {
+                    sonCikisNo++;
+                    islem.CikisNo = sonCikisNo.ToString("00000");
+                }
+
+                if (!string.IsNullOrWhiteSpace(islem.IslemNo) &&
+                    _context.Set<Islem>().Any(x => x.IslemNo == islem.IslemNo))
+                {
+                    islem.IslemNo = islem.IslemNo + "-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
+                }
             }
 
             return true;
         }
 
-        private static int ParseCikisNo(string value)
+        private static int ParseNumber(string value)
         {
             int number;
             return int.TryParse(value, out number) ? number : 0;
