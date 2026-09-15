@@ -387,7 +387,8 @@ namespace KantarPro.Application.Tests
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
-            servis.GirisKaydet("16 TST 007", "Firma H", KantarSabitleri.GelisTuru.Bos, true, 9000m, 1, new DateTime(2026, 5, 1, 10, 0, 0));
+            var ziyaret = servis.GirisKaydet("16 TST 007", "Firma H", KantarSabitleri.GelisTuru.Bos, true, 9000m, 1, new DateTime(2026, 5, 1, 10, 0, 0));
+            servis.CikisYap(ziyaret.Arac.Plaka, false, null, 1, new DateTime(2026, 5, 1, 10, 30, 0));
 
             var kapanan = servis.SuresiDolanKantarDosyalariniKapat(new DateTime(2026, 5, 9, 9, 0, 0), 7);
 
@@ -395,6 +396,22 @@ namespace KantarPro.Application.Tests
             Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "KantarDosyasiSuresiDoldu"));
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu, uow.KantarDosyasiListesi.Single().Durum);
             StringAssert.Contains(uow.IslemListesi.Single().Notlar, "7 gun icinde ikinci tartima gelmedigi icin kesin cikisa alindi.");
+        }
+
+        [TestMethod]
+        public void YediGunuGecenHalaIceridekiIlkZiyaretKesinCikisaAlinmaz()
+        {
+            var uow = new InMemoryUnitOfWork();
+            var servis = new SahaZiyaretiServisi(uow);
+            servis.GirisKaydet("34 THK 367", "Firma H", KantarSabitleri.GelisTuru.Dolu, true, 23000m, 1, new DateTime(2026, 8, 10, 10, 11, 17));
+
+            var kapanan = servis.SuresiDolanKantarDosyalariniKapat(new DateTime(2026, 9, 15, 20, 46, 31), 7);
+
+            Assert.AreEqual(0, kapanan);
+            Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor, uow.KantarDosyasiListesi.Single().Durum);
+            Assert.AreEqual(KantarSabitleri.IslemDurumu.Iceride, uow.IslemListesi.Single().Durum);
+            Assert.IsFalse(uow.LogListesi.Any(x => x.LogTipi == "KantarDosyasiSuresiDoldu"));
+            Assert.IsTrue(string.IsNullOrWhiteSpace(uow.IslemListesi.Single().Notlar));
         }
 
         [TestMethod]

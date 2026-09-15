@@ -139,7 +139,10 @@ namespace KantarPro.Application.Services
             var kapanacaklar = _unitOfWork.KantarDosyalari.Query()
                 .Where(x => x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor &&
                             x.OlusturmaTarihi < sinirSonu &&
-                            (x.IlkTartim == null || x.IlkTartim.Islem == null || !x.IlkTartim.Islem.SilindiMi))
+                            x.IlkTartim != null &&
+                            x.IlkTartim.Islem != null &&
+                            x.IlkTartim.Islem.Durum == KantarSabitleri.IslemDurumu.CikisYapti &&
+                            !x.IlkTartim.Islem.SilindiMi)
                 .ToList();
 
             foreach (var dosya in kapanacaklar)
