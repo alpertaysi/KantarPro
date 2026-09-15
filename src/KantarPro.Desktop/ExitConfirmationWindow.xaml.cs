@@ -77,6 +77,11 @@ namespace KantarPro.Desktop
                     return;
                 }
 
+                if (!string.IsNullOrWhiteSpace(odemeTuru) && !KantarSabitleri.OdemeTuru.GecerliMi(odemeTuru))
+                {
+                    throw new ArgumentException("Gecersiz odeme turu secildi.", nameof(odemeTuru));
+                }
+
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var servis = new SahaZiyaretiServisi(new KantarUnitOfWork(context));
