@@ -49,6 +49,11 @@ namespace KantarPro.Infrastructure.Data
                 }
                 catch (DbUpdateException ex)
                 {
+                    if (IsActiveVehicleUniqueConstraint(ex))
+                    {
+                        throw new InvalidOperationException("Bu plaka icin baska bir bilgisayarda zaten acik saha ziyareti kaydedildi.", ex);
+                    }
+
                     if (!IsNumberUniqueConstraint(ex) || !RegenerateAddedOperationNumbers())
                     {
                         throw;
@@ -69,11 +74,12 @@ namespace KantarPro.Infrastructure.Data
             }
 
             return message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   message.IndexOf("UX_Islemler_IslemNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   (message.IndexOf("duplicate key", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                    _context.ChangeTracker.Entries<Islem>().Any(x =>
-                        x.State == EntityState.Added &&
-                        (!string.IsNullOrWhiteSpace(x.Entity.CikisNo) || !string.IsNullOrWhiteSpace(x.Entity.IslemNo))));
+                   message.IndexOf("UX_Islemler_IslemNo", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private bool IsActiveVehicleUniqueConstraint(DbUpdateException ex)
+        {
+            return ex.ToString().IndexOf("UX_Islemler_Iceride_Arac", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private bool RegenerateAddedOperationNumbers()
