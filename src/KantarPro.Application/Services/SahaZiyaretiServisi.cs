@@ -97,6 +97,12 @@ namespace KantarPro.Application.Services
         public Islem CikisYap(string plaka, bool cikistaTart, decimal? agirlikKg, int kullaniciId, DateTime cikisTarihi, string odemeTuru = KantarSabitleri.OdemeTuru.Nakit)
         {
             var ziyaret = AcikZiyaretBul(plaka);
+            var temizOdemeTuru = ziyaret.MuafMi ? null : NormalizeOdemeTuru(odemeTuru);
+            if (!ziyaret.MuafMi && temizOdemeTuru == null)
+            {
+                throw new ArgumentException("Gecerli odeme turu zorunludur.", nameof(odemeTuru));
+            }
+
             if (cikistaTart)
             {
                 TartimKaydet(ziyaret, KarsiYukDurumuGetir(ziyaret), agirlikKg, KantarSabitleri.TartimTipi.Cikis, kullaniciId, cikisTarihi);
@@ -116,7 +122,7 @@ namespace KantarPro.Application.Services
                 UcretEkle(ziyaret, KantarSabitleri.UcretKodu.Bekleme, cikisTarihi);
             }
 
-            TahsilEt(ziyaret, kullaniciId, cikisTarihi, odemeTuru, ziyaret.CikisNo);
+            TahsilEt(ziyaret, kullaniciId, cikisTarihi, temizOdemeTuru, ziyaret.CikisNo);
             LogEkle(kullaniciId, ziyaret, "SahaCikis", "Saha cikisi yapildi: " + ziyaret.Arac.Plaka + ", Tahakkuk=" + ziyaret.ToplamTahakkuk.ToString("N2"));
             _unitOfWork.SaveChanges();
             return ziyaret;
@@ -252,7 +258,8 @@ namespace KantarPro.Application.Services
             islem.Durum = KantarSabitleri.IslemDurumu.Silindi;
 
             var temizNeden = NormalizeOptional(neden);
-            if (!string.IsNullOrWhiteSpace(temizNeden))
+            if (!string.IsNullOrWhiteSpace(temizNeden)
+            )
             {
                 islem.Notlar = string.IsNullOrWhiteSpace(islem.Notlar)
                     ? "Silme nedeni: " + temizNeden
@@ -605,9 +612,18 @@ namespace KantarPro.Application.Services
 
         private static string NormalizeOdemeTuru(string odemeTuru)
         {
-            return odemeTuru == KantarSabitleri.OdemeTuru.KrediKarti
-                ? KantarSabitleri.OdemeTuru.KrediKarti
-                : KantarSabitleri.OdemeTuru.Nakit;
+            if (string.IsNullOrWhiteSpace(odemeTuru))
+            {
+                return null;
+            }
+
+            if (odemeTuru == KantarSabitleri.OdemeTuru.Nakit ||
+                odemeTuru == KantarSabitleri.OdemeTuru.KrediKarti)
+            {
+                return odemeTuru;
+            }
+
+            throw new ArgumentException("Gecersiz odeme turu.", nameof(odemeTuru));
         }
 
         private string UretSiradakiCikisNo()
