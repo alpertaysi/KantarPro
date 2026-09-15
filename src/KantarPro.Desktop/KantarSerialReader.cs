@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
@@ -62,7 +62,15 @@ namespace KantarPro.Desktop
 
             _configuredPortName = portName.Trim();
             _reconnectAttempts = 0;
-            OpenConfiguredPort();
+            try
+            {
+                OpenConfiguredPort();
+            }
+            catch (Exception ex)
+            {
+                OnReadError(ex.Message);
+                ScheduleReconnect(ex.Message);
+            }
         }
 
         private void OpenConfiguredPort()
@@ -79,7 +87,18 @@ namespace KantarPro.Desktop
                 NewLine = "\r\n"
             };
             _port.DataReceived += Port_DataReceived;
-            _port.Open();
+
+            try
+            {
+                _port.Open();
+            }
+            catch
+            {
+                _port.DataReceived -= Port_DataReceived;
+                _port.Dispose();
+                _port = null;
+                throw;
+            }
 
             _pollTimer = new System.Timers.Timer(100);
             _pollTimer.Elapsed += PollTimer_Elapsed;
@@ -237,6 +256,14 @@ namespace KantarPro.Desktop
                 decimal weight;
                 if (TryParseWeight(data, out weight))
                 {
+                    // A parsed frame has been consumed. Do not keep the previous
+                    // valid weight in the buffer where a later partial read could
+                    // emit it again as if it were a new scale reading.
+                    lock (_syncRoot)
+                    {
+                        _buffer.Clear();
+                    }
+
                     OnWeightReceived(weight, data);
                 }
             }
@@ -353,6 +380,3 @@ namespace KantarPro.Desktop
         }
     }
 }
-
-
-
