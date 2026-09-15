@@ -298,11 +298,7 @@ namespace KantarPro.Application.Services
                 return false;
             }
 
-            if (storedHash == "DEVELOPMENT_PLACEHOLDER_HASH")
-            {
-                return password == "admin";
-            }
-
+            // Never accept a development placeholder as a real password hash.
             var parts = storedHash.Split('$');
             if (parts.Length != 4 || parts[0] != "PBKDF2")
             {
@@ -310,17 +306,33 @@ namespace KantarPro.Application.Services
             }
 
             int iterations;
-            if (!int.TryParse(parts[1], out iterations))
+            if (!int.TryParse(parts[1], out iterations) || iterations <= 0)
             {
                 return false;
             }
 
-            var salt = Convert.FromBase64String(parts[2]);
-            var expected = Convert.FromBase64String(parts[3]);
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
+            try
             {
-                var actual = deriveBytes.GetBytes(expected.Length);
-                return FixedTimeEquals(actual, expected);
+                var salt = Convert.FromBase64String(parts[2]);
+                var expected = Convert.FromBase64String(parts[3]);
+                if (expected.Length == 0)
+                {
+                    return false;
+                }
+
+                using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
+                {
+                    var actual = deriveBytes.GetBytes(expected.Length);
+                    return FixedTimeEquals(actual, expected);
+                }
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                return false;
             }
         }
 
