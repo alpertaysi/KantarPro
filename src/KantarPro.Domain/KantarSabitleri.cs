@@ -56,6 +56,11 @@ namespace KantarPro.Domain
         {
             public const string Nakit = "Nakit";
             public const string KrediKarti = "Kredi Kartı";
+
+            public static bool GecerliMi(string odemeTuru)
+            {
+                return odemeTuru == Nakit || odemeTuru == KrediKarti;
+            }
         }
     }
 }
