@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using EntityFramework.Exceptions.Common;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using KantarPro.Application.Abstractions;
-using KantarPro.Domain;
 using KantarPro.Domain.Entities;
 
 namespace KantarPro.Infrastructure.Data
@@ -47,14 +47,9 @@ namespace KantarPro.Infrastructure.Data
                 {
                     return _context.SaveChanges();
                 }
-                catch (UniqueConstraintException ex)
+                catch (DbUpdateException ex)
                 {
-                    if (!ex.Message.Contains("UX_Islemler_CikisNo"))
-                    {
-                        throw;
-                    }
-
-                    if (!CikisNumarasiniYenile())
+                    if (!IsCikisNoUniqueConstraint(ex) || !CikisNumarasiniYenile())
                     {
                         throw;
                     }
@@ -64,10 +59,19 @@ namespace KantarPro.Infrastructure.Data
             throw new InvalidOperationException("Cikis numarasi eszamanli kayitlar nedeniyle tekrar uretilemedi.");
         }
 
+        private bool IsCikisNoUniqueConstraint(DbUpdateException ex)
+        {
+            var message = ex.ToString();
+            return message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   message.IndexOf("duplicate key", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                   _context.ChangeTracker.Entries<Islem>().Any(x =>
+                       x.State == EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo));
+        }
+
         private bool CikisNumarasiniYenile()
         {
             var eklenecekIslemler = _context.ChangeTracker.Entries<Islem>()
-                .Where(x => x.State == System.Data.Entity.EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo))
+                .Where(x => x.State == EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo))
                 .Select(x => x.Entity)
                 .ToList();
 
