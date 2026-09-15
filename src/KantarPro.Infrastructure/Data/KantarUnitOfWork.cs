@@ -1,4 +1,8 @@
+using System;
+using System.Linq;
+using EntityFramework.Exceptions.Common;
 using KantarPro.Application.Abstractions;
+using KantarPro.Domain;
 using KantarPro.Domain.Entities;
 
 namespace KantarPro.Infrastructure.Data
@@ -35,7 +39,64 @@ namespace KantarPro.Infrastructure.Data
 
         public int SaveChanges()
         {
-            return _context.SaveChanges();
+            const int maxRetries = 3;
+
+            for (var attempt = 0; attempt < maxRetries; attempt++)
+            {
+                try
+                {
+                    return _context.SaveChanges();
+                }
+                catch (UniqueConstraintException ex)
+                {
+                    if (!ex.Message.Contains("UX_Islemler_CikisNo"))
+                    {
+                        throw;
+                    }
+
+                    if (!CikisNumarasiniYenile())
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Cikis numarasi eszamanli kayitlar nedeniyle tekrar uretilemedi.");
+        }
+
+        private bool CikisNumarasiniYenile()
+        {
+            var eklenecekIslemler = _context.ChangeTracker.Entries<Islem>()
+                .Where(x => x.State == System.Data.Entity.EntityState.Added && !string.IsNullOrWhiteSpace(x.Entity.CikisNo))
+                .Select(x => x.Entity)
+                .ToList();
+
+            if (eklenecekIslemler.Count == 0)
+            {
+                return false;
+            }
+
+            var sonNo = _context.Set<Islem>()
+                .Where(x => x.CikisNo != null && x.CikisNo != "")
+                .Select(x => x.CikisNo)
+                .ToList()
+                .Select(ParseCikisNo)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            foreach (var islem in eklenecekIslemler)
+            {
+                sonNo++;
+                islem.CikisNo = sonNo.ToString("00000");
+            }
+
+            return true;
+        }
+
+        private static int ParseCikisNo(string value)
+        {
+            int number;
+            return int.TryParse(value, out number) ? number : 0;
         }
     }
 }
