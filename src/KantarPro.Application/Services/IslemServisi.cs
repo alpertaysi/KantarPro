@@ -249,6 +249,12 @@ namespace KantarPro.Application.Services
                 throw new InvalidOperationException("Bu plaka icin acik giris islemi bulunamadi.");
             }
 
+            var temizOdemeTuru = islem.MuafMi ? null : NormalizeOdemeTuru(odemeTuru);
+            if (!islem.MuafMi && temizOdemeTuru == null)
+            {
+                throw new ArgumentException("Gecerli odeme turu zorunludur.", nameof(odemeTuru));
+            }
+
             islem.CikisTarihi = cikisTarihi;
             islem.CikisKullaniciId = kullaniciId;
             islem.Durum = KantarSabitleri.IslemDurumu.CikisYapti;
@@ -284,7 +290,7 @@ namespace KantarPro.Application.Services
                 UcretEkle(islem, KantarSabitleri.UcretKodu.Bekleme, cikisTarihi);
             }
 
-            TahsilEt(islem, kullaniciId, cikisTarihi, odemeTuru);
+            TahsilEt(islem, kullaniciId, cikisTarihi, temizOdemeTuru);
             LogEkle(kullaniciId, islem, "Cikis", "Arac cikis islemi tamamlandi.");
             _unitOfWork.SaveChanges();
             return islem;
@@ -450,9 +456,18 @@ namespace KantarPro.Application.Services
 
         private static string NormalizeOdemeTuru(string odemeTuru)
         {
-            return odemeTuru == KantarSabitleri.OdemeTuru.KrediKarti
-                ? KantarSabitleri.OdemeTuru.KrediKarti
-                : KantarSabitleri.OdemeTuru.Nakit;
+            if (string.IsNullOrWhiteSpace(odemeTuru))
+            {
+                return null;
+            }
+
+            if (odemeTuru == KantarSabitleri.OdemeTuru.Nakit ||
+                odemeTuru == KantarSabitleri.OdemeTuru.KrediKarti)
+            {
+                return odemeTuru;
+            }
+
+            throw new ArgumentException("Gecersiz odeme turu.", nameof(odemeTuru));
         }
 
         private string UretSiradakiTahsilatNo()
