@@ -191,11 +191,15 @@ namespace KantarPro.Application.Services
         {
             var dosyalar = _unitOfWork.KantarDosyalari.Query().ToList();
             var bekleyenler = _unitOfWork.BekleyenTartimlar.Query().ToList();
+            var bekleyenByIlkTartimId = bekleyenler
+                .GroupBy(x => x.IlkTartimId)
+                .ToDictionary(x => x.Key, x => x.First());
             var eklenen = 0;
 
             foreach (var dosya in dosyalar)
             {
-                var eskiBekleyen = bekleyenler.FirstOrDefault(x => x.IlkTartimId == dosya.IlkTartimId);
+                BekleyenTartim eskiBekleyen;
+                bekleyenByIlkTartimId.TryGetValue(dosya.IlkTartimId, out eskiBekleyen);
                 if (eskiBekleyen == null && dosya.IlkTartim != null)
                 {
                     eskiBekleyen = new BekleyenTartim
@@ -216,6 +220,7 @@ namespace KantarPro.Application.Services
                     };
                     _unitOfWork.BekleyenTartimlar.Add(eskiBekleyen);
                     bekleyenler.Add(eskiBekleyen);
+                    bekleyenByIlkTartimId.Add(eskiBekleyen.IlkTartimId, eskiBekleyen);
                     eklenen++;
                 }
                 else if (eskiBekleyen != null)
