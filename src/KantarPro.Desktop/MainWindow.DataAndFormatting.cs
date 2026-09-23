@@ -412,7 +412,6 @@ namespace KantarPro.Desktop
                     .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
-                    .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
                     .Where(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
                     .ToList()
                     .FirstOrDefault(x =>
@@ -518,7 +517,6 @@ namespace KantarPro.Desktop
             {
                 var tahsilatlar = context.IslemUcretleri
                     .AsNoTracking()
-                    .Include(x => x.Islem.Arac)
                     .Where(x => x.Islem.Arac.Plaka == normalized && x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
                     .ToList()
                     .GroupBy(x => new
