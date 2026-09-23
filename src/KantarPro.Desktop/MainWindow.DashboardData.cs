@@ -6,6 +6,7 @@ using KantarPro.Domain;
 using KantarPro.Domain.Entities;
 using KantarPro.Infrastructure.Data;
 using System.Data.Entity;
+using System.Collections.Generic;
 
 namespace KantarPro.Desktop
 {
@@ -57,11 +58,23 @@ namespace KantarPro.Desktop
                 .Take(100)
                 .ToList();
 
+            var kantarDosyalari = GetKantarDosyalariForIslemler(context, girisler.Select(x => x.IslemId));
+            var aktifBeklemeUcreti = 0m;
+            if (girisler.Any(x => SahaZiyaretiServisi.HesaplaBeklemeGunSayisi(x.GirisTarihi, listeHesapTarihi) > 0))
+            {
+                aktifBeklemeUcreti = context.Ucretler
+                    .Where(x => x.UcretKodu == KantarSabitleri.UcretKodu.Bekleme && x.AktifMi && x.Yil == listeHesapTarihi.Year)
+                    .OrderByDescending(x => x.GecerlilikBaslangic)
+                    .Select(x => (decimal?)x.Tutar)
+                    .FirstOrDefault() ?? 0m;
+            }
+
             EntryVehicles.Clear();
-            var rowBuilder = new DashboardRowBuilder(context);
+            var rowBuilder = new DashboardRowBuilder(aktifBeklemeUcreti);
             foreach (var islem in girisler)
             {
-                var dosya = GetKantarDosyasiForIslem(context, islem);
+                KantarDosyasi dosya;
+                kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                 EntryVehicles.Add(rowBuilder.BuildEntryVehicleRow(islem, dosya, listeHesapTarihi));
             }
         }
@@ -77,10 +90,31 @@ namespace KantarPro.Desktop
                 .Take(100)
                 .ToList();
 
+            var aracIds = bekleyenKantarDosyalari.Select(x => x.AracId).Distinct().ToList();
+            var plakalar = bekleyenKantarDosyalari
+                .Select(x => NormalizePlaka(x.Arac.Plaka))
+                .Distinct()
+                .ToList();
+            var acikDonusler = aracIds.Count == 0
+                ? new List<AcikDonusLookupRow>()
+                : context.Islemler
+                    .Where(x =>
+                        x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
+                        !x.SilindiMi &&
+                        (aracIds.Contains(x.AracId) || plakalar.Contains(x.Arac.Plaka)))
+                    .Select(x => new AcikDonusLookupRow
+                    {
+                        AracId = x.AracId,
+                        Plaka = x.Arac.Plaka
+                    })
+                    .ToList();
+            var acikAracIds = new HashSet<int>(acikDonusler.Select(x => x.AracId));
+            var acikPlakalar = new HashSet<string>(acikDonusler.Select(x => NormalizePlaka(x.Plaka)));
+
             PendingWeighings.Clear();
             foreach (var dosya in bekleyenKantarDosyalari)
             {
-                var row = TryBuildPendingWeighingRow(context, dosya);
+                var row = TryBuildPendingWeighingRow(acikAracIds, acikPlakalar, dosya);
                 if (row != null)
                 {
                     PendingWeighings.Add(row);
@@ -88,7 +122,7 @@ namespace KantarPro.Desktop
             }
         }
 
-        private PendingWeighingPrototypeRow TryBuildPendingWeighingRow(KantarDbContext context, KantarDosyasi dosya)
+        private PendingWeighingPrototypeRow TryBuildPendingWeighingRow(HashSet<int> acikAracIds, HashSet<string> acikPlakalar, KantarDosyasi dosya)
         {
             var islem = dosya.IlkTartim != null ? dosya.IlkTartim.Islem : null;
             if (dosya.IlkTartim == null ||
@@ -99,10 +133,7 @@ namespace KantarPro.Desktop
             }
 
             var dosyaPlaka = NormalizePlaka(dosya.Arac != null ? dosya.Arac.Plaka : null);
-            var acikDonusVarMi = context.Islemler.Any(x =>
-                x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
-                !x.SilindiMi &&
-                (x.AracId == dosya.AracId || x.Arac.Plaka == dosyaPlaka));
+            var acikDonusVarMi = acikAracIds.Contains(dosya.AracId) || acikPlakalar.Contains(dosyaPlaka);
             if (acikDonusVarMi)
             {
                 return null;
@@ -140,12 +171,15 @@ namespace KantarPro.Desktop
                 .Take(100)
                 .ToList();
 
+            var kantarDosyalari = GetKantarDosyalariForIslemler(context, cikislar.Select(x => x.IslemId));
+
             ExitVehicles.Clear();
-            var rowBuilder = new DashboardRowBuilder(context);
+            var rowBuilder = new DashboardRowBuilder(0m);
             var finalExitRows = new System.Collections.Generic.List<Tuple<DateTime, VehicleMovementRow>>();
             foreach (var islem in cikislar)
             {
-                var dosya = GetKantarDosyasiForIslem(context, islem);
+                KantarDosyasi dosya;
+                kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                 var cikisSatiri = rowBuilder.TryBuildExitVehicleRow(islem, dosya);
                 if (cikisSatiri != null)
                 {
@@ -180,6 +214,12 @@ namespace KantarPro.Desktop
                     Kullanici = "Admin"
                 });
             }
+        }
+
+        private sealed class AcikDonusLookupRow
+        {
+            public int AracId { get; set; }
+            public string Plaka { get; set; }
         }
     }
 }

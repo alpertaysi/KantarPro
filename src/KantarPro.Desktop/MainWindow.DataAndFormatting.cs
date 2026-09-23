@@ -15,6 +15,7 @@ using KantarPro.Domain.Entities;
 using KantarPro.Infrastructure.Data;
 using System.Data.Entity;
 using Microsoft.Win32;
+using System.Collections.Generic;
 
 namespace KantarPro.Desktop
 {
@@ -849,6 +850,46 @@ namespace KantarPro.Desktop
                 .FirstOrDefault(x =>
                     x.IlkTartim.IslemId == islem.IslemId ||
                     (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == islem.IslemId));
+        }
+
+        private static Dictionary<int, KantarDosyasi> GetKantarDosyalariForIslemler(KantarDbContext context, IEnumerable<int> islemIds)
+        {
+            var idListesi = islemIds.Distinct().ToList();
+            var sonuc = new Dictionary<int, KantarDosyasi>();
+            if (idListesi.Count == 0)
+            {
+                return sonuc;
+            }
+
+            var istenenIdler = new HashSet<int>(idListesi);
+            var dosyalar = context.KantarDosyalari
+                .Include(x => x.IlkTartim)
+                .Include(x => x.IlkTartim.Islem)
+                .Include(x => x.KarsiTartim)
+                .Include(x => x.KarsiTartim.Islem)
+                .Where(x =>
+                    idListesi.Contains(x.IlkTartim.IslemId.Value) ||
+                    (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId.HasValue && idListesi.Contains(x.KarsiTartim.IslemId.Value)))
+                .OrderBy(x => x.KantarDosyasiId)
+                .ToList();
+
+            foreach (var dosya in dosyalar)
+            {
+                AddKantarDosyasiLookup(sonuc, istenenIdler, dosya.IlkTartim, dosya);
+                AddKantarDosyasiLookup(sonuc, istenenIdler, dosya.KarsiTartim, dosya);
+            }
+
+            return sonuc;
+        }
+
+        private static void AddKantarDosyasiLookup(Dictionary<int, KantarDosyasi> sonuc, HashSet<int> istenenIdler, Tartim tartim, KantarDosyasi dosya)
+        {
+            if (tartim == null || !tartim.IslemId.HasValue || !istenenIdler.Contains(tartim.IslemId.Value) || sonuc.ContainsKey(tartim.IslemId.Value))
+            {
+                return;
+            }
+
+            sonuc.Add(tartim.IslemId.Value, dosya);
         }
 
         private static string FormatUcretKalemi(Islem islem, string ucretKodu)

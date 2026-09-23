@@ -3,17 +3,16 @@ using System.Linq;
 using KantarPro.Application.Services;
 using KantarPro.Domain;
 using KantarPro.Domain.Entities;
-using KantarPro.Infrastructure.Data;
 
 namespace KantarPro.Desktop
 {
     internal sealed class DashboardRowBuilder
     {
-        private readonly KantarDbContext _context;
+        private readonly decimal _aktifBeklemeUcreti;
 
-        public DashboardRowBuilder(KantarDbContext context)
+        public DashboardRowBuilder(decimal aktifBeklemeUcreti)
         {
-            _context = context;
+            _aktifBeklemeUcreti = aktifBeklemeUcreti;
         }
 
         public VehicleMovementRow BuildEntryVehicleRow(Islem islem, KantarDosyasi dosya, DateTime listeHesapTarihi)
@@ -215,12 +214,7 @@ namespace KantarPro.Desktop
                 return kayitliBekleme;
             }
 
-            var aktifBekleme = _context.Ucretler
-                .Where(x => x.UcretKodu == KantarSabitleri.UcretKodu.Bekleme && x.AktifMi && x.Yil == hesapTarihi.Year)
-                .OrderByDescending(x => x.GecerlilikBaslangic)
-                .FirstOrDefault();
-
-            return kayitliBekleme + (beklemeGunSayisi * (aktifBekleme != null ? aktifBekleme.Tutar : 0m));
+            return kayitliBekleme + (beklemeGunSayisi * _aktifBeklemeUcreti);
         }
 
         private static decimal SumTahsilEdilmemisUcret(Islem islem, string ucretKodu)
