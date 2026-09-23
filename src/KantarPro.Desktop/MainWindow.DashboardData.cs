@@ -50,6 +50,7 @@ namespace KantarPro.Desktop
         private void LoadEntryVehicleRows(KantarDbContext context, DateTime listeHesapTarihi)
         {
             var girisler = context.Islemler
+                .AsNoTracking()
                 .Include(x => x.Arac)
                 .Include(x => x.Tartimlar)
                 .Include(x => x.Ucretler.Select(u => u.Ucret))
@@ -63,6 +64,7 @@ namespace KantarPro.Desktop
             if (girisler.Any(x => SahaZiyaretiServisi.HesaplaBeklemeGunSayisi(x.GirisTarihi, listeHesapTarihi) > 0))
             {
                 aktifBeklemeUcreti = context.Ucretler
+                    .AsNoTracking()
                     .Where(x => x.UcretKodu == KantarSabitleri.UcretKodu.Bekleme && x.AktifMi && x.Yil == listeHesapTarihi.Year)
                     .OrderByDescending(x => x.GecerlilikBaslangic)
                     .Select(x => (decimal?)x.Tutar)
@@ -82,6 +84,7 @@ namespace KantarPro.Desktop
         private void LoadPendingWeighingRows(KantarDbContext context)
         {
             var bekleyenKantarDosyalari = context.KantarDosyalari
+                .AsNoTracking()
                 .Include(x => x.Arac)
                 .Include(x => x.IlkTartim)
                 .Include(x => x.IlkTartim.Islem)
@@ -98,6 +101,7 @@ namespace KantarPro.Desktop
             var acikDonusler = aracIds.Count == 0
                 ? new List<AcikDonusLookupRow>()
                 : context.Islemler
+                    .AsNoTracking()
                     .Where(x =>
                         x.Durum == KantarSabitleri.IslemDurumu.Iceride &&
                         !x.SilindiMi &&
@@ -160,6 +164,7 @@ namespace KantarPro.Desktop
         private void LoadExitVehicleRows(KantarDbContext context)
         {
             var cikislar = context.Islemler
+                .AsNoTracking()
                 .Include(x => x.Arac)
                 .Include(x => x.Tartimlar)
                 .Include(x => x.Ucretler.Select(u => u.Ucret))
@@ -196,6 +201,7 @@ namespace KantarPro.Desktop
         private void LoadDailyTransactionRows(KantarDbContext context, DateTime bugun, DateTime yarin)
         {
             var gunluk = context.Islemler
+                .AsNoTracking()
                 .Include(x => x.Arac)
                 .Where(x => !x.SilindiMi && ((x.GirisTarihi >= bugun && x.GirisTarihi < yarin) || (x.CikisTarihi >= bugun && x.CikisTarihi < yarin)))
                 .OrderByDescending(x => x.GirisTarihi)

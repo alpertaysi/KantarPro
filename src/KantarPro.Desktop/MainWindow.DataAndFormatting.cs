@@ -180,6 +180,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var tahsilatlar = context.IslemUcretleri
+                        .AsNoTracking()
                         .Include(x => x.Ucret)
                         .Include(x => x.Islem.Arac)
                         .Include(x => x.Islem.Tartimlar)
@@ -202,6 +203,7 @@ namespace KantarPro.Desktop
                         .ToList();
 
                     var muafIslemler = context.Islemler
+                        .AsNoTracking()
                         .Include(x => x.Arac)
                         .Include(x => x.Tartimlar)
                         .Where(x =>
@@ -407,6 +409,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var dosya = context.KantarDosyalari
+                    .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
                     .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
@@ -446,6 +449,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var dosyalar = context.KantarDosyalari
+                    .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
                     .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
@@ -513,6 +517,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var tahsilatlar = context.IslemUcretleri
+                    .AsNoTracking()
                     .Include(x => x.Islem.Arac)
                     .Where(x => x.Islem.Arac.Plaka == normalized && x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
                     .ToList()
@@ -870,6 +875,7 @@ namespace KantarPro.Desktop
 
             var istenenIdler = new HashSet<int>(idListesi);
             var dosyalar = context.KantarDosyalari
+                .AsNoTracking()
                 .Include(x => x.IlkTartim)
                 .Include(x => x.IlkTartim.Islem)
                 .Include(x => x.KarsiTartim)
