@@ -15,6 +15,7 @@ using KantarPro.Domain.Entities;
 using KantarPro.Infrastructure.Data;
 using System.Data.Entity;
 using Microsoft.Win32;
+using System.Collections.Generic;
 
 namespace KantarPro.Desktop
 {
@@ -179,6 +180,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var tahsilatlar = context.IslemUcretleri
+                        .AsNoTracking()
                         .Include(x => x.Ucret)
                         .Include(x => x.Islem.Arac)
                         .Include(x => x.Islem.Tartimlar)
@@ -200,6 +202,24 @@ namespace KantarPro.Desktop
                         .ThenBy(x => x.Key.TahsilatNo)
                         .ToList();
 
+                    var muafIslemler = context.Islemler
+                        .AsNoTracking()
+                        .Include(x => x.Arac)
+                        .Include(x => x.Tartimlar)
+                        .Where(x =>
+                            x.MuafMi &&
+                            !x.SilindiMi &&
+                            x.CikisTarihi.HasValue &&
+                            x.CikisTarihi.Value >= baslangic &&
+                            x.CikisTarihi.Value < bitisExclusive)
+                        .OrderBy(x => x.CikisTarihi)
+                        .ToList();
+
+                    var raporIslemIds = tahsilatlar
+                        .Select(x => x.Key.IslemId)
+                        .Concat(muafIslemler.Select(x => x.IslemId));
+                    var kantarDosyalari = GetKantarDosyalariForIslemler(context, raporIslemIds);
+
                     DailyRevenueRows.Clear();
                     decimal girisToplam = 0m;
                     decimal tartimToplam = 0m;
@@ -210,7 +230,8 @@ namespace KantarPro.Desktop
                     foreach (var tahsilat in tahsilatlar)
                     {
                         var islem = tahsilat.First().Islem;
-                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        KantarDosyasi dosya;
+                        kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
                         var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
                         var girisCikis = SumFee(tahsilat, KantarSabitleri.UcretKodu.GirisCikis);
@@ -248,21 +269,10 @@ namespace KantarPro.Desktop
                         });
                     }
  
-                    var muafIslemler = context.Islemler
-                        .Include(x => x.Arac)
-                        .Include(x => x.Tartimlar)
-                        .Where(x =>
-                            x.MuafMi &&
-                            !x.SilindiMi &&
-                            x.CikisTarihi.HasValue &&
-                            x.CikisTarihi.Value >= baslangic &&
-                            x.CikisTarihi.Value < bitisExclusive)
-                        .OrderBy(x => x.CikisTarihi)
-                        .ToList();
- 
                     foreach (var islem in muafIslemler)
                     {
-                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        KantarDosyasi dosya;
+                        kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
                         var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
  
@@ -399,9 +409,9 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var dosya = context.KantarDosyalari
+                    .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
-                    .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
                     .Where(x => x.Arac.Plaka == normalized && x.Durum == KantarSabitleri.KantarDosyasiDurumu.KarsiTartimBekleniyor)
                     .ToList()
                     .FirstOrDefault(x =>
@@ -438,6 +448,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var dosyalar = context.KantarDosyalari
+                    .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.IlkTartim.Islem.Ucretler.Select(u => u.Ucret))
                     .Include(x => x.KarsiTartim.Islem.Ucretler.Select(u => u.Ucret))
@@ -505,7 +516,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var tahsilatlar = context.IslemUcretleri
-                    .Include(x => x.Islem.Arac)
+                    .AsNoTracking()
                     .Where(x => x.Islem.Arac.Plaka == normalized && x.TahsilEdildiMi && x.TahsilTarihi.HasValue)
                     .ToList()
                     .GroupBy(x => new
@@ -849,6 +860,47 @@ namespace KantarPro.Desktop
                 .FirstOrDefault(x =>
                     x.IlkTartim.IslemId == islem.IslemId ||
                     (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId == islem.IslemId));
+        }
+
+        private static Dictionary<int, KantarDosyasi> GetKantarDosyalariForIslemler(KantarDbContext context, IEnumerable<int> islemIds)
+        {
+            var idListesi = islemIds.Distinct().ToList();
+            var sonuc = new Dictionary<int, KantarDosyasi>();
+            if (idListesi.Count == 0)
+            {
+                return sonuc;
+            }
+
+            var istenenIdler = new HashSet<int>(idListesi);
+            var dosyalar = context.KantarDosyalari
+                .AsNoTracking()
+                .Include(x => x.IlkTartim)
+                .Include(x => x.IlkTartim.Islem)
+                .Include(x => x.KarsiTartim)
+                .Include(x => x.KarsiTartim.Islem)
+                .Where(x =>
+                    idListesi.Contains(x.IlkTartim.IslemId.Value) ||
+                    (x.KarsiTartimId.HasValue && x.KarsiTartim.IslemId.HasValue && idListesi.Contains(x.KarsiTartim.IslemId.Value)))
+                .OrderBy(x => x.KantarDosyasiId)
+                .ToList();
+
+            foreach (var dosya in dosyalar)
+            {
+                AddKantarDosyasiLookup(sonuc, istenenIdler, dosya.IlkTartim, dosya);
+                AddKantarDosyasiLookup(sonuc, istenenIdler, dosya.KarsiTartim, dosya);
+            }
+
+            return sonuc;
+        }
+
+        private static void AddKantarDosyasiLookup(Dictionary<int, KantarDosyasi> sonuc, HashSet<int> istenenIdler, Tartim tartim, KantarDosyasi dosya)
+        {
+            if (tartim == null || !tartim.IslemId.HasValue || !istenenIdler.Contains(tartim.IslemId.Value) || sonuc.ContainsKey(tartim.IslemId.Value))
+            {
+                return;
+            }
+
+            sonuc.Add(tartim.IslemId.Value, dosya);
         }
 
         private static string FormatUcretKalemi(Islem islem, string ucretKodu)

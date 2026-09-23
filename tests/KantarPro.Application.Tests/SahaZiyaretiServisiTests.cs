@@ -395,6 +395,7 @@ namespace KantarPro.Application.Tests
             Assert.AreEqual(1, kapanan);
             Assert.IsTrue(uow.LogListesi.Any(x => x.LogTipi == "KantarDosyasiSuresiDoldu"));
             Assert.AreEqual(KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu, uow.KantarDosyasiListesi.Single().Durum);
+            Assert.AreEqual(KantarSabitleri.BekleyenTartimDurumu.SuresiDoldu, uow.BekleyenTartimListesi.Single().Durum);
             StringAssert.Contains(uow.IslemListesi.Single().Notlar, "7 gun icinde ikinci tartima gelmedigi icin kesin cikisa alindi.");
         }
 

@@ -115,6 +115,7 @@ namespace KantarPro.Desktop
             using (var context = KantarDbContextFactory.Create())
             {
                 var islem = context.Islemler
+                    .AsNoTracking()
                     .Include(x => x.Arac)
                     .Include(x => x.Tartimlar)
                     .FirstOrDefault(x => x.IslemId == selected.IslemId && !x.SilindiMi);
@@ -125,6 +126,7 @@ namespace KantarPro.Desktop
                 }
 
                 var dosya = context.KantarDosyalari
+                    .AsNoTracking()
                     .Include(x => x.IlkTartim)
                     .Include(x => x.KarsiTartim)
                     .FirstOrDefault(x =>
@@ -153,6 +155,7 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var query = context.Islemler
+                        .AsNoTracking()
                         .Include(x => x.Arac)
                         .Include(x => x.Tartimlar)
                         .Include(x => x.Ucretler.Select(u => u.Ucret))

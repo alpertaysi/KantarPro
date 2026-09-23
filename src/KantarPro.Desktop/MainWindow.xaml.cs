@@ -157,6 +157,8 @@ namespace KantarPro.Desktop
                 using (var context = KantarDbContextFactory.Create())
                 {
                     var loglar = context.Loglar
+                        .AsNoTracking()
+                        .Include(l => l.Kullanici)
                         .Where(l => System.Data.Entity.DbFunctions.TruncateTime(l.Tarih) == selectedDate.Date)
                         .OrderByDescending(l => l.Tarih)
                         .ToList();

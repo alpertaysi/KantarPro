@@ -145,12 +145,24 @@ namespace KantarPro.Application.Services
                             !x.IlkTartim.Islem.SilindiMi)
                 .ToList();
 
+            var ilkTartimIds = kapanacaklar
+                .Select(x => x.IlkTartimId)
+                .Distinct()
+                .ToList();
+            var bekleyenByIlkTartimId = ilkTartimIds.Count == 0
+                ? new Dictionary<int, BekleyenTartim>()
+                : _unitOfWork.BekleyenTartimlar.Query()
+                    .Where(x => ilkTartimIds.Contains(x.IlkTartimId) &&
+                                x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor)
+                    .ToList()
+                    .GroupBy(x => x.IlkTartimId)
+                    .ToDictionary(x => x.Key, x => x.First());
+
             foreach (var dosya in kapanacaklar)
             {
                 dosya.Durum = KantarSabitleri.KantarDosyasiDurumu.SuresiDoldu;
-                var eskiBekleyen = _unitOfWork.BekleyenTartimlar.Query()
-                    .FirstOrDefault(x => x.IlkTartimId == dosya.IlkTartimId &&
-                                         x.Durum == KantarSabitleri.BekleyenTartimDurumu.Bekliyor);
+                BekleyenTartim eskiBekleyen;
+                bekleyenByIlkTartimId.TryGetValue(dosya.IlkTartimId, out eskiBekleyen);
                 if (eskiBekleyen != null)
                 {
                     eskiBekleyen.Durum = KantarSabitleri.BekleyenTartimDurumu.SuresiDoldu;
@@ -179,11 +191,15 @@ namespace KantarPro.Application.Services
         {
             var dosyalar = _unitOfWork.KantarDosyalari.Query().ToList();
             var bekleyenler = _unitOfWork.BekleyenTartimlar.Query().ToList();
+            var bekleyenByIlkTartimId = bekleyenler
+                .GroupBy(x => x.IlkTartimId)
+                .ToDictionary(x => x.Key, x => x.First());
             var eklenen = 0;
 
             foreach (var dosya in dosyalar)
             {
-                var eskiBekleyen = bekleyenler.FirstOrDefault(x => x.IlkTartimId == dosya.IlkTartimId);
+                BekleyenTartim eskiBekleyen;
+                bekleyenByIlkTartimId.TryGetValue(dosya.IlkTartimId, out eskiBekleyen);
                 if (eskiBekleyen == null && dosya.IlkTartim != null)
                 {
                     eskiBekleyen = new BekleyenTartim
@@ -204,6 +220,7 @@ namespace KantarPro.Application.Services
                     };
                     _unitOfWork.BekleyenTartimlar.Add(eskiBekleyen);
                     bekleyenler.Add(eskiBekleyen);
+                    bekleyenByIlkTartimId.Add(eskiBekleyen.IlkTartimId, eskiBekleyen);
                     eklenen++;
                 }
                 else if (eskiBekleyen != null)
