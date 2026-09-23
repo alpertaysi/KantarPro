@@ -376,7 +376,7 @@ namespace KantarPro.Desktop
                     "Bekleme: " + DashboardFormat.BosDeger(row.BeklemeUcreti) + Environment.NewLine +
                     "Toplam: " + DashboardFormat.BosDeger(row.Ucret) + Environment.NewLine +
                     "Tahsilat: " + DashboardFormat.BosDeger(row.Tahsilat) + Environment.NewLine +
-                    "Tahsilat No: " + DashboardFormat.BosDeger(GetIslemCikisNo(row.IslemId)) +
+                    "Tahsilat No: " + DashboardFormat.BosDeger(GetIslemTahsilatNo(row.IslemId)) +
                     GetPaymentHistoryText(row.Plaka);
             }
 
@@ -623,11 +623,6 @@ namespace KantarPro.Desktop
                 return "";
             }
 
-            if (!string.IsNullOrWhiteSpace(islem.CikisNo))
-            {
-                return islem.CikisNo;
-            }
-
             var tahsilatNo = islem.Ucretler
                 .Where(x => x.TahsilEdildiMi && !string.IsNullOrWhiteSpace(x.TahsilatNo))
                 .OrderByDescending(x => x.TahsilTarihi)
@@ -664,7 +659,7 @@ namespace KantarPro.Desktop
             }
         }
 
-        private static string GetIslemCikisNo(int islemId)
+        private static string GetIslemTahsilatNo(int islemId)
         {
             if (islemId <= 0)
             {
@@ -673,10 +668,13 @@ namespace KantarPro.Desktop
 
             using (var context = KantarDbContextFactory.Create())
             {
-                return context.Islemler
-                    .Where(x => x.IslemId == islemId)
-                    .Select(x => x.CikisNo)
-                    .FirstOrDefault() ?? "";
+                var tahsilat = context.IslemUcretleri
+                    .AsNoTracking()
+                    .Where(x => x.IslemId == islemId && x.TahsilEdildiMi)
+                    .OrderByDescending(x => x.TahsilTarihi)
+                    .FirstOrDefault();
+
+                return tahsilat == null ? "" : GetDisplayTahsilatNo(tahsilat);
             }
         }
 
@@ -1124,6 +1122,11 @@ namespace KantarPro.Desktop
                     "SET TahsilatNo = RIGHT(N'00000' + TahsilatNo, 5) " +
                     "WHERE TahsilatNo IS NOT NULL AND TahsilatNo <> N'' AND TahsilatNo NOT LIKE N'%[^0-9]%' AND LEN(TahsilatNo) < 5");
                 context.Database.ExecuteSqlCommand(
+                    "UPDATE I SET CikisNo = NULL " +
+                    "FROM dbo.Islemler I " +
+                    "WHERE I.Durum = N'Iceride' AND I.CikisTarihi IS NULL " +
+                    "AND NOT EXISTS (SELECT 1 FROM dbo.IslemUcretleri U WHERE U.IslemId = I.IslemId AND U.TahsilEdildiMi = 1)");
+                context.Database.ExecuteSqlCommand(
                     "DECLARE @SonIslemNo BIGINT; " +
                     "SELECT @SonIslemNo = ISNULL(MAX(Numara), 0) FROM (" +
                     "SELECT CASE WHEN CikisNo NOT LIKE N'%[^0-9]%' THEN CONVERT(BIGINT, CikisNo) END AS Numara FROM dbo.Islemler WHERE CikisNo IS NOT NULL AND CikisNo <> N'' " +
@@ -1131,7 +1134,8 @@ namespace KantarPro.Desktop
                     "SELECT CASE WHEN TahsilatNo NOT LIKE N'%[^0-9]%' THEN CONVERT(BIGINT, TahsilatNo) END FROM dbo.IslemUcretleri WHERE TahsilatNo IS NOT NULL AND TahsilatNo <> N'') AS Numaralar; " +
                     ";WITH NumarasizIslemler AS (" +
                     "SELECT IslemId, ROW_NUMBER() OVER (ORDER BY IslemId) AS Sira " +
-                    "FROM dbo.Islemler WHERE (CikisNo IS NULL OR CikisNo = N'') AND ISNULL(SilindiMi, 0) = 0) " +
+                    "FROM dbo.Islemler WHERE (CikisNo IS NULL OR CikisNo = N'') AND ISNULL(SilindiMi, 0) = 0 " +
+                    "AND (CikisTarihi IS NOT NULL OR EXISTS (SELECT 1 FROM dbo.IslemUcretleri U WHERE U.IslemId = dbo.Islemler.IslemId AND U.TahsilEdildiMi = 1))) " +
                     "UPDATE I SET CikisNo = CASE WHEN @SonIslemNo + N.Sira < 100000 " +
                     "THEN RIGHT(N'00000' + CONVERT(NVARCHAR(20), @SonIslemNo + N.Sira), 5) " +
                     "ELSE CONVERT(NVARCHAR(20), @SonIslemNo + N.Sira) END " +

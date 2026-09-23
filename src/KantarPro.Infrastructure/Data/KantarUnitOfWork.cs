@@ -54,7 +54,7 @@ namespace KantarPro.Infrastructure.Data
                         throw new InvalidOperationException("Bu plaka icin baska bir bilgisayarda zaten acik saha ziyareti kaydedildi.", ex);
                     }
 
-                    if (!IsNumberUniqueConstraint(ex) || !RegenerateAddedOperationNumbers())
+                    if (!IsNumberUniqueConstraint(ex) || !RegeneratePendingOperationNumbers())
                     {
                         throw;
                     }
@@ -67,14 +67,15 @@ namespace KantarPro.Infrastructure.Data
         private bool IsNumberUniqueConstraint(DbUpdateException ex)
         {
             var message = ex.ToString();
-            var islemEklendi = _context.ChangeTracker.Entries<Islem>().Any(x => x.State == EntityState.Added);
-            if (!islemEklendi)
-            {
-                return false;
-            }
+            var cikisNoBekleyenIslem = _context.ChangeTracker.Entries<Islem>().Any(x =>
+                (x.State == EntityState.Added || x.State == EntityState.Modified) &&
+                !string.IsNullOrWhiteSpace(x.Entity.CikisNo) &&
+                (x.State == EntityState.Added ||
+                 !string.Equals((string)x.OriginalValues["CikisNo"], x.Entity.CikisNo, StringComparison.Ordinal)));
+            var yeniIslem = _context.ChangeTracker.Entries<Islem>().Any(x => x.State == EntityState.Added);
 
-            return message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   message.IndexOf("UX_Islemler_IslemNo", StringComparison.OrdinalIgnoreCase) >= 0;
+            return (cikisNoBekleyenIslem && message.IndexOf("UX_Islemler_CikisNo", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                   (yeniIslem && message.IndexOf("UX_Islemler_IslemNo", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private bool IsActiveVehicleUniqueConstraint(DbUpdateException ex)
@@ -82,14 +83,15 @@ namespace KantarPro.Infrastructure.Data
             return ex.ToString().IndexOf("UX_Islemler_Iceride_Arac", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private bool RegenerateAddedOperationNumbers()
+        private bool RegeneratePendingOperationNumbers()
         {
-            var addedOperations = _context.ChangeTracker.Entries<Islem>()
-                .Where(x => x.State == EntityState.Added)
-                .Select(x => x.Entity)
+            var pendingOperationEntries = _context.ChangeTracker.Entries<Islem>()
+                .Where(x => x.State == EntityState.Added ||
+                            (x.State == EntityState.Modified &&
+                             !string.Equals((string)x.OriginalValues["CikisNo"], x.Entity.CikisNo, StringComparison.Ordinal)))
                 .ToList();
 
-            if (addedOperations.Count == 0)
+            if (pendingOperationEntries.Count == 0)
             {
                 return false;
             }
@@ -102,15 +104,24 @@ namespace KantarPro.Infrastructure.Data
                 .DefaultIfEmpty(0)
                 .Max();
 
-            foreach (var islem in addedOperations)
+            foreach (var entry in pendingOperationEntries)
             {
+                var islem = entry.Entity;
                 if (!string.IsNullOrWhiteSpace(islem.CikisNo))
                 {
+                    var eskiCikisNo = islem.CikisNo;
                     sonCikisNo++;
                     islem.CikisNo = sonCikisNo.ToString("00000");
+
+                    foreach (var ucret in islem.Ucretler.Where(x =>
+                        x.TahsilEdildiMi && string.Equals(x.TahsilatNo, eskiCikisNo, StringComparison.Ordinal)))
+                    {
+                        ucret.TahsilatNo = islem.CikisNo;
+                    }
                 }
 
-                if (!string.IsNullOrWhiteSpace(islem.IslemNo) &&
+                if (entry.State == EntityState.Added &&
+                    !string.IsNullOrWhiteSpace(islem.IslemNo) &&
                     _context.Set<Islem>().Any(x => x.IslemNo == islem.IslemNo))
                 {
                     islem.IslemNo = islem.IslemNo + "-" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();

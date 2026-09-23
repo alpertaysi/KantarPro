@@ -203,18 +203,18 @@ namespace KantarPro.Application.Tests
         }
 
         [TestMethod]
-        public void GirisKaydet_IslemNumarasiniIlkKayittaVerir()
+        public void GirisKaydet_TahsilatNumarasiVermez()
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
 
             var ziyaret = servis.GirisKaydet("16 INO 001", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 9, 0, 0));
 
-            Assert.AreEqual("00001", ziyaret.CikisNo);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(ziyaret.CikisNo));
         }
 
         [TestMethod]
-        public void GirisKaydet_IslemNumarasi99999danSonra100000Olur()
+        public void CikisYap_TahsilatNumarasi99999danSonra100000Olur()
         {
             var uow = new InMemoryUnitOfWork();
             var eskiArac = new Arac
@@ -238,22 +238,23 @@ namespace KantarPro.Application.Tests
             var servis = new SahaZiyaretiServisi(uow);
 
             var ziyaret = servis.GirisKaydet("16 INO 002", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 10, 0, 0));
+            servis.CikisYap(ziyaret.Arac.Plaka, false, null, 1, new DateTime(2026, 6, 10, 11, 0, 0));
 
             Assert.AreEqual("100000", ziyaret.CikisNo);
         }
 
         [TestMethod]
-        public void CikisYap_GiristeVerilenIslemNumarasiniTahsilataTasir()
+        public void CikisYap_NumaraUretipTahsilataTasir()
         {
             var uow = new InMemoryUnitOfWork();
             var servis = new SahaZiyaretiServisi(uow);
             var ziyaret = servis.GirisKaydet("16 INO 003", "Firma", KantarSabitleri.GelisTuru.Tartimsiz, false, null, 1, new DateTime(2026, 6, 10, 11, 0, 0));
-            var giristeVerilenNo = ziyaret.CikisNo;
+            Assert.IsTrue(string.IsNullOrWhiteSpace(ziyaret.CikisNo));
 
             servis.CikisYap(ziyaret.Arac.Plaka, false, null, 1, new DateTime(2026, 6, 10, 12, 0, 0));
 
-            Assert.AreEqual(giristeVerilenNo, ziyaret.CikisNo);
-            Assert.IsTrue(ziyaret.Ucretler.All(x => x.TahsilatNo == giristeVerilenNo));
+            Assert.AreEqual("00001", ziyaret.CikisNo);
+            Assert.IsTrue(ziyaret.Ucretler.All(x => x.TahsilatNo == ziyaret.CikisNo));
         }
 
         [TestMethod]

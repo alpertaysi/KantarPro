@@ -194,7 +194,7 @@ Temel tablolar:
 
 Onemli kolonlar:
 
-- `Islemler.CikisNo`: her cikis icin surekli artan 4 haneli cikis/tahsilat no.
+- `Islemler.CikisNo`: girişte boş bırakılır; çıkış ve tahsilat tamamlanırken üretilen, sürekli artan en az 5 haneli çıkış numarası.
 - `Islemler.MuafMi`, `Islemler.MuafiyetNedeni`: ucretten muaf araclar.
 - `Islemler.Notlar`: giris veya dolu-bos form aciklamalari.
 - `Tartimlar.KantarFisNo`: kantar fisi numarasi.

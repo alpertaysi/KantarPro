@@ -50,7 +50,6 @@ namespace KantarPro.Application.Services
                 Arac = arac,
                 AracId = arac.AracId,
                 IslemNo = UretIslemNo(tarih),
-                CikisNo = UretSiradakiCikisNo(),
                 GelisTuru = NormalizeGelisTuru(gelisTuru),
                 GirisTarihi = tarih,
                 Durum = KantarSabitleri.IslemDurumu.Iceride,
