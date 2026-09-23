@@ -201,6 +201,23 @@ namespace KantarPro.Desktop
                         .ThenBy(x => x.Key.TahsilatNo)
                         .ToList();
 
+                    var muafIslemler = context.Islemler
+                        .Include(x => x.Arac)
+                        .Include(x => x.Tartimlar)
+                        .Where(x =>
+                            x.MuafMi &&
+                            !x.SilindiMi &&
+                            x.CikisTarihi.HasValue &&
+                            x.CikisTarihi.Value >= baslangic &&
+                            x.CikisTarihi.Value < bitisExclusive)
+                        .OrderBy(x => x.CikisTarihi)
+                        .ToList();
+
+                    var raporIslemIds = tahsilatlar
+                        .Select(x => x.Key.IslemId)
+                        .Concat(muafIslemler.Select(x => x.IslemId));
+                    var kantarDosyalari = GetKantarDosyalariForIslemler(context, raporIslemIds);
+
                     DailyRevenueRows.Clear();
                     decimal girisToplam = 0m;
                     decimal tartimToplam = 0m;
@@ -211,7 +228,8 @@ namespace KantarPro.Desktop
                     foreach (var tahsilat in tahsilatlar)
                     {
                         var islem = tahsilat.First().Islem;
-                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        KantarDosyasi dosya;
+                        kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
                         var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
                         var girisCikis = SumFee(tahsilat, KantarSabitleri.UcretKodu.GirisCikis);
@@ -249,21 +267,10 @@ namespace KantarPro.Desktop
                         });
                     }
  
-                    var muafIslemler = context.Islemler
-                        .Include(x => x.Arac)
-                        .Include(x => x.Tartimlar)
-                        .Where(x =>
-                            x.MuafMi &&
-                            !x.SilindiMi &&
-                            x.CikisTarihi.HasValue &&
-                            x.CikisTarihi.Value >= baslangic &&
-                            x.CikisTarihi.Value < bitisExclusive)
-                        .OrderBy(x => x.CikisTarihi)
-                        .ToList();
- 
                     foreach (var islem in muafIslemler)
                     {
-                        var dosya = GetKantarDosyasiForIslem(context, islem);
+                        KantarDosyasi dosya;
+                        kantarDosyalari.TryGetValue(islem.IslemId, out dosya);
                         var ilkTartim = dosya != null ? dosya.IlkTartim : DashboardVisitInfo.GetIlkTartim(islem);
                         var ikinciTartim = DashboardVisitInfo.GetRevenueSecondWeighingForVisit(islem, dosya);
  
